@@ -1,0 +1,240 @@
+* {
+	font: 10pt sans-serif;
+	box-sizing: border-box;
+}
+body,div,svg,span {
+	margin:0;
+	padding:0;
+}
+.center {
+	text-align:center;
+}
+table, td {
+	border-spacing: 0px;
+}
+td {
+	padding:2px;
+}
+td.thead, .bold{
+	font-weight:bold;
+}
+td.thead {
+	background-color:#EEEEEE;
+}
+.left {
+	float:left;
+}
+.right {
+	float:right;
+}
+.inline{
+	display:inline-block;
+}
+.smaTitle {
+	font-size:12pt
+}
+.medTitle {
+	font-size: 14pt;
+}
+.larTitle {
+	font-size:24pt;
+}
+.cf:before,.cf:after{
+	content:"";
+	display: table;
+}
+.cf:after {
+	clear:both;
+}
+
+.gameBox {
+	margin:0px auto;
+	width:802px;
+	border:1px solid #EEEEEE;
+}
+
+.boxScore {
+	height: 70px;
+	width: 800px;
+}
+.mTLCont {
+	height: 60px;
+	width: 315px;
+}
+.mainTeamLabel {
+	width:240px;
+	margin:5px;
+	border-bottom:
+	5px solid transparent;
+}
+.mainScore {
+	width:55px;
+	margin:5px;
+}
+
+.chart {
+	/*background-color: #EEEEEE;*/
+}
+
+.axis text, .lineKey text, .linePointKey text {
+  font: 10pt sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+	fill: none;
+	stroke-width: 1.5px;
+}
+
+.scoreLine {
+	stroke-linecap: square;
+	fill: none;
+	stroke-width:2px;
+	shape-rendering: cripsEdges;
+}
+
+svg {
+	display:block;
+}
+
+.teamStats {
+	width: 800px;
+	border-bottom: 2px #DDDDDD solid;
+	overflow:none;
+}
+.teamStat, .teamStatFill {
+	width: 400px;
+	float: left;
+	border-top: 2px #DDDDDD solid;
+	overflow:none;
+}
+.teamStat, .teamStatMin {
+	cursor:pointer;
+}
+.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov {
+	background-color: #ebf3ff;
+}
+.teamStat.active, .teamStatMin.active {
+	background-color: #d6e7ff;
+}
+.tSLabel {
+	padding:0px 5px;
+	width:200px;
+	height:39px;
+	text-align:right;
+}
+.tLeft {
+	text-align:left;
+}
+.tRight {
+	text-align:right;
+}
+.teamStatSVG {
+	height:39px;
+	background-color:transparent;
+	width:200px;
+}
+.tSLabelCont {
+	width:140px;
+}
+.tSDataCont {
+	height:39px;
+	width:50px
+}
+.tsDataLabel {
+	width:50px;
+	height:18px;
+	line-height:20px;
+}
+.replayArrow {
+	d: M0,0 a10,10 0 1,0 10,10 h3 l-4,-4 l-4,4 h3 a8,8 0 1,1 -8,-8 z;
+	fill: pink;
+}
+.replayText {
+	text-anchor:middle;
+	dy:.35em;
+	dx:-.1em;
+	font-size:7pt;
+}
+
+.moLine {
+	stroke: #CCC;
+}
+
+.playerStatsT {
+	width: 100%;
+}
+
+.showDispCont {
+	overflow:hidden;
+}
+
+.showDispCheck {
+	display:none;
+}
+
+.showDispLabel {
+	padding: 5px;
+	width:100%;
+	text-align:center;
+	display:block;
+	color:#AAA;
+	font-weight:bold;
+	cursor: pointer;
+}
+.showDispLabel:hover {
+	background-color: #ebf3ff;
+}
+.arrowSvg {
+	margin:0px 10px;
+}
+.svgLink {
+	fill:#AAA;
+	font-weight:100;
+}
+.svgLinkActive {
+	fill:#000;
+	font-weight:900;
+}
+.svgLinkBox {
+	fill:transparent;
+	cursor:pointer;
+}
+.svgLinkBoxActive {
+	cursor:default;
+}
+.bSCont {
+	float:left;
+	width:170px;
+}
+.bSTable {
+	margin:10px auto 0px auto;
+	min-width:170px;
+}
+input[type=radio].pp {
+	display:none;
+}
+label.ppl {
+	border: solid 2px #4B83FF;
+	background-color: #EEE;
+	color: #444;
+	padding: 5px;
+	font-size: 11pt;
+	display:inline-block;
+	cursor: pointer;
+}
+input[type=radio].pp:checked + label.ppl {
+	background-color: #FFF;
+	color: #000;
+	font-weight: bold;
+	cursor: default;
+}
+div.opLoc {
+	margin-bottom:10px
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+<div class="gameBox" id="cmb1">
+	<div class="boxScore cmb1"></div>
+	<div class="opLoc">
+		<input type="radio" name="ppcmb1" class="pp cmb1" id="ppcmb1r" value="r" checked />
+		<label class="ppl" for="ppcmb1r">
+			Raw data
+		</label>
+		<input type="radio" name="ppcmb1" class="pp cmb1" id="ppcmb1p" value="p" />
+		<label class="ppl" for="ppcmb1p">
+			Per Possession
+		</label>
+	</div>
+	<div id="ttfcmb1" class="showDispCont">
+		This is my personal list of things to fix <br>
+		<ul>
+			<li>Secondary minimizes over axis</li>
+			<li>Replay (IE9)</li>
+			<li>Hover line label IE9</li>
+			<li>Player graph stat alphabetical</li>
+			<li>Runs, Breakaways, second chances</li>
+		</ul>
+	</div>
+</div>
+<script src="./d3.v3.min.js"></script>
+<script src="loadGraph.js"></script>
+</body>
+</html>
