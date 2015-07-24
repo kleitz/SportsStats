@@ -21,13 +21,61 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 graphVars.stat10Pad = 5;
 graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
-
+loadGames();
 createShowDisp("cmb1","ttf","things to fix",true); //delete this
 
-d3.selectAll("div.gameBox")
-	.forEach(function(d){
-		loadSport(d[0].id);
-	});
+function loadGames(){
+	d3.selectAll("div.gameBox.notLoaded")
+		.forEach(function(d){
+			insertGameInput(d[0]);
+			if (d[0].id.length != 0)
+				//d3.select(d[0])
+				loadSport(d[0].id);
+			else {
+				if (location.hash.length) {
+					d[0].id = "cmb"+location.hash.substring(1);
+					loadSport(d[0].id);
+				}
+			}
+		});
+}
+function insertGameInput(div) {
+	if (d3.select(div).select("div.gameInputCont")[0][0]==null) {
+		gameInput = d3.select(div)
+			.append("div")
+			.classed("gameInputCont",true)
+			.append("input")
+			.attr("type","text")
+			.attr("placeholder","Input ESPN game URL (play-by-play required for compatibility)")
+			.classed("gameInput",true);
+		gameInput[0][0]
+			.addEventListener("keydown", function(e){
+				if (gameInput.attr("disabled") == "disabled") {
+					return;
+				}
+				if (e.keyCode == 13) {
+					var id = getReq("gameId","?"+this.value.split('?')[1]);
+					if (typeof id !== "undefined" && id.isInteger()) {
+					if (div.id.length > 0)
+						d3.selectAll("."+div.id).remove();
+					d3.select(div)
+						.attr("id","cmb" + id);
+					gameInput.attr("disabled","disabled");
+					location.hash = "#"+id;
+					this.value = "";
+					loadGames();
+					} else {
+						this.value = "Please try again";
+					}
+				}
+			});
+	}
+}
+function getReq(name,string){
+	var obj = (string)?string:location.search;
+   if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(obj))
+	  return decodeURIComponent(name[1]);
+}
 
 //load data for that particular sport
 function loadSport (gId) {
@@ -115,6 +163,7 @@ function addTeamStats(gId) {
 	var teamStatTable = d3.select("div#"+gId)
 		.append("div")
 		.classed("teamStatsMin",true)
+		.classed(gId,true)
 		.classed("showDispCont",true)
 		.attr("id","teamStatsMin"+gId)
 		.append("table")
@@ -333,7 +382,11 @@ function getPlayTime(gId,pId,direction) {
 
 //load and set game data
 function loadGame (gId) {
-	d3.json("DukeWiscNew.json",function(error,game) {
+	d3.json("parsepbpoo.php?gameId=" + gId.substring(3),function(error,game) {
+		d3.select("div#"+gId)
+			.classed("loaded",true)
+			.select(".gameInput")
+			.attr("disabled",null);
 		if (error) {
 			console.error(error);
 			d3.select(".chart."+gId)
@@ -348,18 +401,46 @@ function loadGame (gId) {
 		}
 		games[gId] = game;
 		
-		d3.selectAll("input.pp."+gId)
-			.on("click",function(){return graphAll(gId, games[gId].lastPType, 0);});
-		
+		displayTitleScore(gId);
+		addSplitButtons(gId);
 		setMainGraph(gId);
 		addTeamStats(gId);
-		displayTitleScore(gId);
 		addPlayerStats(gId);
 		addSplitGraph(gId);
 		countPlays(gId);
 		plotScore(gId);
 		graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
 	});
+}
+
+function addSplitButtons(gId) {
+	var opLoc = d3.select("div#"+gId)
+		.append("div")
+		.classed("opLoc "+gId,true);
+	opLoc.append("input")
+		.attr("type","radio")
+		.attr("name","pp"+gId)
+		.classed("pp "+gId,true)
+		.attr("id","pp"+gId+"r")
+		.attr("checked","checked")
+		.attr("value","r");
+	opLoc.append("label")
+		.classed("ppl",true)
+		.attr("for","pp"+gId+"r")
+		.text("Raw data");
+	opLoc.append("input")
+		.attr("type","radio")
+		.attr("name","pp"+gId)
+		.classed("pp "+gId,true)
+		.attr("id","pp"+gId+"p")
+		.attr("value","p");
+	opLoc.append("label")
+		.classed("ppl",true)
+		.attr("for","pp"+gId+"p")
+		.text("Per Possession");
+	
+	d3.selectAll("input.pp."+gId)
+		.on("click",function(){return graphAll(gId, games[gId].lastPType, 0);});
 }
 
 function graphAll(gId,pType,time) {
@@ -413,6 +494,7 @@ function setMainGraph(gId) {
 		.attr("width", graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.histGraphHeight + margin.histTop + margin.histBottom)
 		.attr("id","histChart"+gId)
+		.classed(gId,true)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.histTop + ")");
 	
@@ -421,6 +503,7 @@ function setMainGraph(gId) {
 		.attr("width", graphVars.lineGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.lineGraphHeight + margin.top + margin.bottom)
 		.attr("id","chart"+gId)
+		.classed(gId,true)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 }
@@ -429,6 +512,7 @@ function setMainGraph(gId) {
 function addSplitGraph(gId) {
 	var splitGraphCont = d3.select("div#"+gId)
 		.append("div")
+		.classed(gId,true)
 		.attr("id","splitGraphCont"+gId);
 	splitGraphCont.append("div")
 		.append("label")
@@ -460,9 +544,13 @@ function addSplitGraph(gId) {
 
 //display headline score and teams
 function displayTitleScore(gId) {
+	var bS = d3.select("div#"+gId)
+		.append("div")
+		.classed("boxScore",true)
+		.classed(gId,true);
 	aH.forEach(function(team,teamI) {
 		//main container
-		var mTLCont = d3.select(".boxScore."+gId)
+		var mTLCont = bS
 			.append("div")
 			.classed("left",(teamI%2==0))
 			.classed("right",(teamI%2==1))
@@ -471,17 +559,24 @@ function displayTitleScore(gId) {
 		mTLCont.append("div")
 			.classed("left tRight",(teamI%2==0))
 			.classed("right tLeft",(teamI%2==1))
-			.classed("mainTeamLabel larTitle cmb1 "+team.l, true)
+			.classed("mainTeamLabel",true)
 			.style("border-color","#"+games[gId][team.s].primary)
+			.append("div")
+			.classed("larTitle "+gId+" "+team.l, true)
+			.classed("bottomText",true)
 			.text(games[gId][team.s].teamName);
 		//score
 		mTLCont.append("div")
 			.classed("left tRight",(teamI%2==1))
 			.classed("right tLeft",(teamI%2==0))
-			.classed("mainScore larTitle cmb1 "+team.l,true)
+			.classed("mainScore",true)
+			.append("div")
+			.classed("larTitle "+gId+" "+team.l,true)
+			.classed("bottomText",true)
+			.classed("fullWidth",true)
 			.text(games[gId][team.s+"Score"]);
 	});
-	var bSTable = d3.select(".boxScore."+gId)
+	var bSTable = bS
 		.append("div")
 		.classed("bSCont",true)
 		.append("table")
@@ -528,6 +623,7 @@ function addPlayerStats(gId) {
 	var playerStatsSvg = d3.select("div#"+gId)
 		.append("div")
 		.attr("id","playerStatsGraph"+gId)
+		.classed(gId,true)
 		.append("svg")
 		.attr("width", graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.histGraphHeight + margin.bottom + margin.top);
@@ -553,6 +649,7 @@ function addPlayerStats(gId) {
 	playerStatsTable = d3.select("div#"+gId)
 		.append("div")
 		.classed("playerStats",true)
+		.classed(gId,true)
 		.attr("id","playerStats"+gId)
 		.append("table")
 		.classed("playerStatsT",true);
@@ -665,7 +762,8 @@ function createShowDisp(gId,obId,title,hidden,secId) {
 		}
 		var showDisplayBox = d3.select("div#"+gId)
 			.insert("div","#"+obId+gId)
-			.classed("showDispBox",true);
+			.classed("showDispBox",true)
+			.classed(gId,true);
 		var sdCheck = showDisplayBox.append("input")
 			.attr("type","checkbox")
 			.classed("showDispCheck",true)

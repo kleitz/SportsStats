@@ -1,14 +1,22 @@
 <?php
 //header('Content-Type: text/xml');
 /*echo '<?xml version="1.0" encoding="UTF8"?>';*/
-//error_reporting(E_ALL);
 include_once('classes/simple_html_dom.php');
 include_once('classes/game.php');
+include_once('classes/dbvars.php');
+
+$dbcon = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+$gameId = $_GET['gameId'];
+
+$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId='.$gameId);
+
+//error_reporting(E_ALL);
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597322'); //Ken TAM
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400788981'); //Wis Duke
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400546902'); //Neb Bay + Tech + team foul
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597403'); //SC TAMU
-$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597413'); //ARK TAMU
+//$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597413'); //ARK TAMU
 
 $playTable = $html->find('table.mod-data', 0);
 $game = array();
@@ -32,6 +40,7 @@ $venue->city = trim($location[1]);
 $venue->state = trim($location[2]);
 $game->venue = $venue;
 
+
 foreach($playTable->nodes as $a) {
 	if ($a->tag == "thead") {
 		foreach($a->nodes as $b) {
@@ -41,13 +50,17 @@ foreach($playTable->nodes as $a) {
 					if (!($c_label == "TIME" || $c_label == "SCORE")) {
 						if (!isset($game->a)) {
 							$away = new Team();
-							$away->teamName = $c_label;
+							$away->teamName = ucwords(strtolower($c_label));
+							$away->short = $html->find('td.team',1)->nodes[0]->innertext;
 							$game->a = $away;
+							getTeamData($game->a,$dbcon,"a");
 						}
 						else if (!isset($game->h)) {
 							$home = new Team();
-							$home->teamName = $c_label;
+							$home->teamName = ucwords(strtolower($c_label));
+							$home->short = $html->find('td.team',2)->nodes[0]->innertext;
 							$game->h = $home;
+							getTeamData($game->h,$dbcon,"h");
 						}
 					}
 				}
@@ -56,6 +69,32 @@ foreach($playTable->nodes as $a) {
 	}
 	else if ($a->tag == "tr") {
 		$a_nodes = $a->nodes;
+		//echo $a_nodes[3]->innertext . "\n";
+		//echo strpos(strtolower($a_nodes[3]->innertext),'jump ball');
+		//echo "\n";
+		if ((sizeof($plays)==0 || strpos(strtolower(end($plays)->getPlayText()), strtolower('end of ')) !== false) && (strpos(strtolower($a_nodes[1]->innertext),'jump ball') === false && strpos(strtolower($a_nodes[3]->innertext),'jump ball') === false)) {
+			$play = new Play();
+			//{"id":0,"a":0,"e":"h","h":0,"m":null,"p":"j","q":1,"s":"h","t":2400,"x":1}
+			$play->t = 1200;
+			$play->id = $playid;
+			$playid++;
+			$play->p = "j";
+			if (sizeof($plays)==0) {
+				$play->a = 0;
+				$play->h = 0;
+				$play->s = "n";
+				$play->e = "n";
+			} else {
+				$play->a = end($plays)->a;
+				$play->h = end($plays)->h;
+				$play->s = "n";
+				$play->e = end($plays)->e;
+			}
+			$play->x = 1;
+			$period++;
+			$play->q = $period;
+			array_push($plays,$play);
+		}
 		$play = new Play();
 		$timeExp = explode(':',$a_nodes[0]->innertext);
 		$play->t = intval($timeExp[0])*60+intval($timeExp[1]);
@@ -304,6 +343,29 @@ function getPlayShort($play, $plays) {
 	$play->s = $possession;
 	$play->x = $possessionNew;
 	return $play;
+}
+
+
+function getTeamData($team,$dbcon,$index) {
+	$query = 'SELECT * FROM CMB_TEAMS WHERE TEAM_NAME = "'.$team->teamName.'" OR ABBR_NAME = "'.$team->short.'"';
+	$data = mysqli_query($dbcon, $query);
+	if ($data) {
+		if (mysqli_num_rows($data)==1) {
+			$row = mysqli_fetch_array($data);
+			$team->primary = $row['PRIMARY_COLOR'];
+			$team->secondary = $row['SECONDARY_COLOR'];
+			$team->id = $row['ID'];
+			$team->teamName = $row['TEAM_NAME'];
+			$team->short = $row['ABBR_NAME'];
+			return;
+		}
+	}
+	$secondary = array("h"=>"FF00FF","a"=>"6FFF00");
+	//$primary = array("h"=>"000000","a"=>"888888");
+	$primary = array("h"=>"993CF3","a"=>"4D4DFF");
+	$team->primary = $primary[$index];
+	$team->secondary = $secondary[$index];
+	$team->id = 0;
 }
 ?>
 

@@ -39,6 +39,9 @@ td.thead {
 .larTitle {
 	font-size:24pt;
 }
+.fullWidth {
+	width:100%;
+}
 .cf:before,.cf:after{
 	content:"";
 	display: table;
@@ -54,22 +57,30 @@ td.thead {
 }
 
 .boxScore {
-	height: 70px;
+	height: 90px;
 	width: 800px;
 }
 .mTLCont {
-	height: 60px;
+	height: 80px;
 	width: 315px;
 }
 .mainTeamLabel {
 	width:240px;
+	height:80px;
 	margin:5px;
 	border-bottom:
 	5px solid transparent;
+	position:relative;
 }
 .mainScore {
+	position:relative;
 	width:55px;
-	margin:5px;
+	height:80px;
+	margin:5px,5px,10px;
+}
+.bottomText {
+	position:absolute;
+	bottom:0px;
 }
 
 .chart {
@@ -214,7 +225,7 @@ svg {
 	width:170px;
 }
 .bSTable {
-	margin:10px auto 0px auto;
+	margin:20px auto 0px auto;
 	min-width:170px;
 }
 input[type=radio].pp {
@@ -228,6 +239,7 @@ label.ppl {
 	font-size: 11pt;
 	display:inline-block;
 	cursor: pointer;
+	margin:0px 5px;
 }
 input[type=radio].pp:checked + label.ppl {
 	background-color: #FFF;
@@ -237,4 +249,12 @@ input[type=radio].pp:checked + label.ppl {
 }
 div.opLoc {
 	margin-bottom:10px
+}
+div.gameInputCont {
+	padding:10px;
+}
+input.gameInput {
+	border: solid 2px #4B83FF;
+	padding:10px;
+	width:100%;
 }
