@@ -55,7 +55,7 @@ function insertGameInput(div) {
 				}
 				if (e.keyCode == 13) {
 					var id = getReq("gameId","?"+this.value.split('?')[1]);
-					if (typeof id !== "undefined" && id.isInteger()) {
+					if (typeof id !== "undefined" && isNormalInteger(id)) {
 					if (div.id.length > 0)
 						d3.selectAll("."+div.id).remove();
 					d3.select(div)
@@ -75,6 +75,10 @@ function getReq(name,string){
 	var obj = (string)?string:location.search;
    if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(obj))
 	  return decodeURIComponent(name[1]);
+}
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
 }
 
 //load data for that particular sport
