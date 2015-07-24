@@ -7,9 +7,10 @@ include_once('classes/dbvars.php');
 
 $dbcon = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-$gameId = $_GET['gameId'];
+preg_match('/[0-9]+/',$_GET['gameId'],$gameId);
+preg_match('/[a-zA-Z]+/',$_GET['gameId'],$sportId);
 
-$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId='.$gameId);
+$html = file_get_html("http://espn.go.com/$sportId[0]/playbyplay?gameId=$gameId[0]&period=0");
 
 //error_reporting(E_ALL);
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597322'); //Ken TAM
@@ -133,7 +134,9 @@ foreach($playTable->nodes as $a) {
 			$lastPlay = end($plays);
 			$play->a = $lastPlay->a;
 			$play->h = $lastPlay->h;
-			if (strpos(strtolower($play->getPlayText()), strtolower('end of ')) !== false) {
+			if (strpos(strtolower($play->getPlayText()), strtolower('end of ')) !== false ||
+					strpos(strtolower($play->getPlayText()), strtolower('end game')) !== false ||
+					strpos(strtolower($play->getPlayText()), strtolower('end half')) !== false) {
 				$boxScoreElem = new BoxScore();
 				$boxScoreElem->period = $period;
 				$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
@@ -331,7 +334,7 @@ function getPlayShort($play, $plays) {
 		$play->e = (end($plays)->s)?end($plays)->s:end($plays)->e;
 	}
 	else {
-		$playString .= 'x';
+		$playString .= $playTextLower;
 	}
 	$play->p = $playString;
 	if ($player1 != "") {
@@ -367,5 +370,6 @@ function getTeamData($team,$dbcon,$index) {
 	$team->secondary = $secondary[$index];
 	$team->id = 0;
 }
+mysqli_close($dbcon);
 ?>
 

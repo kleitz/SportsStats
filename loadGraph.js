@@ -3,7 +3,7 @@ var sports = {};
 var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom: 8},
 	graphVars = {
 		dispTime : 500,
-		graphTime : 2000,
+		graphTime : 1000,
 		replayTimes : [5,15,30],
 		lineGraphHeight: 400 - margin.top - margin.bottom,
 		lineGraphWidth: 800 - margin.right - margin.left,
@@ -33,7 +33,7 @@ function loadGames(){
 				loadSport(d[0].id);
 			else {
 				if (location.hash.length) {
-					d[0].id = "cmb"+location.hash.substring(1);
+					d[0].id = location.hash.substring(1);
 					loadSport(d[0].id);
 				}
 			}
@@ -46,7 +46,7 @@ function insertGameInput(div) {
 			.classed("gameInputCont",true)
 			.append("input")
 			.attr("type","text")
-			.attr("placeholder","Input ESPN game URL (play-by-play required for compatibility)")
+			.attr("placeholder","Input ESPN box score URL (play-by-play required for compatibility)")
 			.classed("gameInput",true);
 		gameInput[0][0]
 			.addEventListener("keydown", function(e){
@@ -55,15 +55,18 @@ function insertGameInput(div) {
 				}
 				if (e.keyCode == 13) {
 					var id = getReq("gameId","?"+this.value.split('?')[1]);
-					if (typeof id !== "undefined" && isNormalInteger(id)) {
-					if (div.id.length > 0)
-						d3.selectAll("."+div.id).remove();
-					d3.select(div)
-						.attr("id","cmb" + id);
-					gameInput.attr("disabled","disabled");
-					location.hash = "#"+id;
-					this.value = "";
-					loadGames();
+					var sport = this.value.match(/\/[a-zA-Z-]+\//g)[0];
+					sport = sport.substring(1,sport.length-1);
+					if (typeof id !== "undefined" && isNormalInteger(id) && sport == "ncb") {
+						if (div.id.length > 0)
+							d3.selectAll("."+div.id).remove();
+						d3.select(div)
+							.attr("id",sport + id);
+						gameInput.attr("disabled","disabled");
+						console.log("#"+sport+id);
+						location.hash = "#"+sport+id;
+						this.value = "";
+						loadGames();
 					} else {
 						this.value = "Please try again";
 					}
@@ -310,14 +313,14 @@ function graphTeamStats(gId) {
 			d3.select("#svg_"+gId+"_"+p)
 				.select("g")
 				.select(".statBar."+team.l)
-				.transition().duration(graphVars.graphTime/2)
+				.transition().duration(graphVars.dispTime)
 				.attr("x",0)
 				.attr("width", teamStatData[team.s+"valTot"] / teamStatData.max * graphVars.teamStatWidth);
 			//create secondary box
 			d3.select("#svg_"+gId+"_"+p)
 				.select("g")
 				.select(".statBarSec."+team.l)
-				.transition().duration(graphVars.graphTime/2)
+				.transition().duration(graphVars.dispTime)
 				.attr("y",1+((1+graphVars.teamStatHeight)*teamI)+2)
 				.attr("height",graphVars.teamStatHeight-4)
 				.attr("x",function(d,i){ 
@@ -386,7 +389,7 @@ function getPlayTime(gId,pId,direction) {
 
 //load and set game data
 function loadGame (gId) {
-	d3.json("parsepbpoo.php?gameId=" + gId.substring(3),function(error,game) {
+	d3.json("parsepbpoo.php?gameId=" + gId,function(error,game) {
 		d3.select("div#"+gId)
 			.classed("loaded",true)
 			.select(".gameInput")
@@ -568,6 +571,7 @@ function displayTitleScore(gId) {
 			.append("div")
 			.classed("larTitle "+gId+" "+team.l, true)
 			.classed("bottomText",true)
+			.classed("fullWidth",true)
 			.text(games[gId][team.s].teamName);
 		//score
 		mTLCont.append("div")
@@ -578,6 +582,7 @@ function displayTitleScore(gId) {
 			.classed("larTitle "+gId+" "+team.l,true)
 			.classed("bottomText",true)
 			.classed("fullWidth",true)
+			.classed("scoreNum",true)
 			.text(games[gId][team.s+"Score"]);
 	});
 	var bSTable = bS
@@ -1154,8 +1159,8 @@ function plotLine(gId) {
 function switchScoreDiff(gId,ob) {
 	box = d3.select(ob);
 	if(!box.classed("svgLinkBoxActive")){
-		var links = [box.attr("id")[box.attr("id").length-5],
-				(box.attr("id")[box.attr("id").length-5]=="D")?"S":"D"];
+		var links = [box.attr("id")[box.attr("id").length-gId.length-1],
+				(box.attr("id")[box.attr("id").length-gId.length-1]=="D")?"S":"D"];
 		links.forEach(function(link,linkI){
 			d3.select("#scoreDiff"+link+gId).classed("svgLinkActive",!linkI);
 			d3.select("#scoreDiffBox"+link+gId).classed("svgLinkBoxActive",!linkI);
@@ -1188,7 +1193,7 @@ function displayClip(gId,time) {
 		.attr("width",0)
 		.transition().duration(time)
 		.ease("linear")
-		.attr("width",width);
+		.attr("width",width+1);
 }
 
 //plot histogram, points, point keys

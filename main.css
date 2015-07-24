@@ -62,21 +62,22 @@ td.thead {
 }
 .mTLCont {
 	height: 80px;
-	width: 315px;
+	width: 305px;
 }
 .mainTeamLabel {
 	width:240px;
 	height:80px;
-	margin:5px;
 	border-bottom:
 	5px solid transparent;
 	position:relative;
 }
 .mainScore {
 	position:relative;
-	width:55px;
+	width:65px;
 	height:80px;
-	margin:5px,5px,10px;
+}
+.scoreNum {
+	padding:5px;
 }
 .bottomText {
 	position:absolute;
@@ -222,10 +223,10 @@ svg {
 }
 .bSCont {
 	float:left;
-	width:170px;
+	width:190px;
 }
 .bSTable {
-	margin:20px auto 0px auto;
+	margin:30px auto 0px auto;
 	min-width:170px;
 }
 input[type=radio].pp {
