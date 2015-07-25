@@ -21,6 +21,12 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 graphVars.stat10Pad = 5;
 graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
+d3.select(window).on("hashchange",function(){
+	d3.selectAll("."+d3.select("div.gameBox").attr("id")).remove()
+	d3.select("div.gameBox").
+		attr("id",location.hash.substring(1));
+	loadGames();
+});
 loadGames();
 createShowDisp("cmb1","ttf","things to fix",true); //delete this
 
@@ -389,25 +395,35 @@ function getPlayTime(gId,pId,direction) {
 
 //load and set game data
 function loadGame (gId) {
-	d3.json("parsepbpoo.php?gameId=" + gId,function(error,game) {
-		d3.select("div#"+gId)
-			.classed("loaded",true)
-			.select(".gameInput")
-			.attr("disabled",null);
-		if (error) {
-			console.error(error);
-			d3.select(".chart."+gId)
-				.append("text")
-				.text("Error loading game data")
-				.attr("y",20);
-			return;
-		}
-		game.totTime = 0;
-		for (var boxI=0; boxI<game.boxScore.length; boxI++) {
-			game.totTime += game.boxScore[boxI].t;
-		}
-		games[gId] = game;
+	if (typeof games[gId] === "undefined") {
+		console.log("Loading...");
+		d3.json("parsepbpoo.php?gameId=" + gId,function(error,game) {
+			d3.select("div#"+gId)
+				.classed("loaded",true)
+				.select(".gameInput")
+				.attr("disabled",null);
+			if (error) {
+				console.error(error);
+				d3.select(".chart."+gId)
+					.append("text")
+					.text("Error loading game data")
+					.attr("y",20);
+				return;
+			}
+			game.totTime = 0;
+			for (var boxI=0; boxI<game.boxScore.length; boxI++) {
+				game.totTime += game.boxScore[boxI].t;
+			}
+			games[gId] = game;
 		
+			dispGame()
+		});
+	}
+	else {
+		console.log("Already loaded!");
+		dispGame();
+	}
+	function dispGame() {
 		displayTitleScore(gId);
 		addSplitButtons(gId);
 		setMainGraph(gId);
@@ -417,7 +433,7 @@ function loadGame (gId) {
 		countPlays(gId);
 		plotScore(gId);
 		graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
-	});
+	}
 }
 
 function addSplitButtons(gId) {
