@@ -19,6 +19,7 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 	width = graphVars.lineGraphWidth,
 	height = graphVars.lineGraphHeight,
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
+	nameSuffixes = ['sr','jr','ii','iii','iv','v','vi','vii'];
 graphVars.stat10Pad = 5;
 graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
 d3.select(window).on("hashchange",function(){
@@ -28,7 +29,6 @@ d3.select(window).on("hashchange",function(){
 	loadGames();
 });
 loadGames();
-createShowDisp("cmb1","ttf","things to fix",true); //delete this
 
 function loadGames(){
 	d3.selectAll("div.gameBox.notLoaded")
@@ -396,7 +396,6 @@ function getPlayTime(gId,pId,direction) {
 //load and set game data
 function loadGame (gId) {
 	if (typeof games[gId] === "undefined") {
-		console.log("Loading...");
 		d3.json("parsepbpoo.php?gameId=" + gId,function(error,game) {
 			d3.select("div#"+gId)
 				.classed("loaded",true)
@@ -420,7 +419,6 @@ function loadGame (gId) {
 		});
 	}
 	else {
-		console.log("Already loaded!");
 		dispGame();
 	}
 	function dispGame() {
@@ -1469,6 +1467,7 @@ function plotHist(gId, pType, dispTime) {
 		.enter()
 		.append("circle")
 		.attr("class","point " + gId)
+		.attr("id",function(p){return "playpoint-"+p.id;})
 		.attr("cx",function(p) {return games[gId].x(p.t);})
 		.attr("cy",function(p) {
 				if (games[gId].scoreDiff) {
@@ -1517,6 +1516,78 @@ function plotHist(gId, pType, dispTime) {
 		.style("stroke-width","2px")
 		.each("end",function(){
 			d3.select(this).classed("transWaiting",false);
+		});
+	
+	//Point links - voronoi
+	var voronoiData = [];
+	games[gId].chart.selectAll("path.vorPath").remove();
+	games[gId].chart.selectAll(".vorClip").remove();
+	histData.forEach(function(p){
+		var x = games[gId].x(p.t);
+		var y = ((games[gId].scoreDiff)?
+					((p.e != "n")?
+						games[gId].y(p.a-p.h):
+						games[gId].y(0)
+					):
+					((p.e != "n")?
+						games[gId].y(p[p.e]):
+						games[gId].y((p.a+p.h)/2)))
+		if (voronoiData.length == 0) {
+			voronoiData.push([x,y]);
+		} else {
+			for(var $vdI=voronoiData.length-1;$vdI>=0;$vdI--) {
+				if (voronoiData[$vdI][0] == x ||
+						voronoiData[$vdI][1] == y) {
+					if (voronoiData[$vdI][0] == x &&
+							voronoiData[$vdI][1] == y) {
+						voronoiData[$vdI][0] -= 3;
+						voronoiData[$vdI][1] -= 3;
+						voronoiData.push([x+3,y+3]);
+						break;
+					}
+					else {
+						continue;
+					}
+				}
+				else {
+					voronoiData.push([x,y]);
+					break;
+				}
+			}
+		}
+	});
+	games[gId].chart.selectAll("clipPath")
+		.data(voronoiData)
+		.enter().append("svg:clipPath")
+		.attr("id", function(d, i) { return "clip-"+i;})
+		.classed("vorClip",true)
+		.append("svg:circle")
+		.attr('cx', function(d) { return d[0]; })
+		.attr('cy', function(d) { return d[1]; })
+		.attr('r', 10)
+		.style('fill','black');
+	games[gId].chart.selectAll("path.vorPath")
+		.data(d3.geom.voronoi(voronoiData))
+		.enter().append("svg:path")
+		.classed("vorPath",true)
+		.attr("d", function(d) { return "M" + d.join(",") + "Z"; })
+		.attr("id", function(d,i) { 
+			return ; })
+		.attr("clip-path", function(d,i) { return "url(#clip-"+i+")"; })
+		.style("fill", function(d,i){return ("hsl("+(i / (voronoiData.length-1) * 360)+",100%,50%)");})
+		//.style("stroke", "#000")
+		.style('fill-opacity', 0)
+		.on('mouseover',function(d,i){
+			games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+				.transition()
+				.duration(graphVars.dispTime/2)
+				.attr('r',10);
+		})
+		.on('mouseout',function(d,i){
+			games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+				.transition()
+				.duration(graphVars.dispTime/2)
+				.attr('r',3);
 		});
 	
 	//Points Key
@@ -1843,7 +1914,12 @@ function plotHist(gId, pType, dispTime) {
 			.attr("dx",2)
 			.text(function(p){
 				var nameAr = p.name.split(' ');
-				var name = nameAr[0][0] + ". " + nameAr.pop().substring(0,4)+".";
+				var surname = nameAr.pop().substring(0,4);
+				if (nameAr.length > 1 && 
+						nameSuffixes.indexOf(surname.toLowerCase()) > -1) {
+					surname = nameAr.pop().substring(0,4);
+				}
+				var name = nameAr[0][0] + ". " +surname+".";
 				return name;});
 		playerLabel
 			.transition()

@@ -338,10 +338,10 @@ function getPlayShort($play, $plays) {
 	}
 	$play->p = $playString;
 	if ($player1 != "") {
-		$play->m = $player1;
+		$play->m = preg_replace('/\.$/','',$player1);
 	}
 	if ($player2 != "") {
-		$play->o = $player2;
+		$play->o = preg_replace('/\.$/','',$player2);
 	}
 	$play->s = $possession;
 	$play->x = $possessionNew;

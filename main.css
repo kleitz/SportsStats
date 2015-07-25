@@ -51,7 +51,7 @@ td.thead {
 }
 
 .gameBox {
-	margin:0px auto;
+	margin:0px auto 10px;
 	width:802px;
 	border:1px solid #EEEEEE;
 }
@@ -82,6 +82,9 @@ td.thead {
 .bottomText {
 	position:absolute;
 	bottom:0px;
+}
+.vorPath {
+	cursor:pointer;
 }
 
 .chart {
