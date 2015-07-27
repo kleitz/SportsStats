@@ -157,5 +157,129 @@
 			"a":"TOP",
 			"l2":"Possession"
 		}
+	},
+	"pt":{
+		"1":{
+			"1": {
+				"f": "free throw"
+			},
+			"2": {
+				"false": "missed",
+				"m": "made"
+			},
+			"order": "m21"
+		},
+		"2":{
+			"0": {
+				"2": "2-pt"
+			},
+			"1": {
+				"j": "jump shot",
+				"t": "tip in",
+				"d": "dunk",
+				"l": "layup"
+			},
+			"2": {
+				"false": "missed",
+				"m": "made"
+			},
+			"3": {
+				"a": "assist by",
+				"data": "o"
+			},
+			"order": "m2013"
+		},
+		"3":{
+			"0": {
+				"3": "3-pt"
+			},
+			"1": {
+				"j": "jump shot",
+				"t": "tip in",
+				"d": "dunk",
+				"l": "layup"
+			},
+			"2": {
+				"false": "missed",
+				"m": "made"
+			},
+			"3": {
+				"a": "assist by",
+				"data": "o"
+			},
+			"order": "m2013"
+		},
+		"r":{
+			"0": {
+				"r": "rebound"
+			},
+			"1": {
+				"o": "offensive",
+				"d": "defensive"
+			},
+			"order": "m10"
+		},
+		"b":{
+			"0": {
+				"b": "Block by"
+			},
+			"order": "0m"
+		},
+		"t":{
+			"0": {
+				"t": "Turnover"
+			},
+			"1": {
+				"s": "stolen by",
+				"data": "o"
+			},
+			"order": "0m1"
+		},
+		"s":{
+			"0": {
+				"s": "Ball stolen by"
+			},
+			"order": "0m"
+		},
+		"f":{
+			"0": {
+				"f": "foul"
+			},
+			"2": {
+				"s": "shooting"
+			},
+			"1": {
+				"xt": "personal",
+				"1": "1st",
+				"2": "2nd",
+				"3": "3rd",
+				"4": "4th",
+				"5": "5th"
+			},
+			"order": "m201"
+		},
+		"o":{
+			"0": {
+				"o": "time out"
+			},
+			"order": "e0"
+		},
+		"j":{
+			"0": {
+				"j": "Jump ball won by"
+			},
+			"order": "0m"
+		},
+		"e":{
+			"0": {
+				"e": "End of"
+			},
+			"1": {
+				"1": "half",
+				"2": "half",
+				"3": "overtime"
+			},
+			"order": "01"
+		}
 	}
 }

@@ -152,8 +152,8 @@ foreach($playTable->nodes as $a) {
 				array_push($boxScore,$boxScoreElem);
 			}
 		}
-		$play = getPlayShort($play, $plays);
 		$play->q = $period;
+		$play = getPlayShort($play, $plays);
 		$play->id = $playid;
 		++$playid;
 		array_push($plays,$play);
@@ -313,6 +313,9 @@ function getPlayShort($play, $plays) {
 		$playNum = sizeof($plays)-1;
 		if ($plays[$playNum]->p[0] == 't') {
 			$plays[$playNum]->x = 0;
+			//$plays[$playNum]->x = 1;
+			$plays[$playNum]->p .= 's';
+			$plays[$playNum]->o = str_replace(' Steal.','', $play->getPlayText());
 		}
 		$playString .= 's';
 		$player1 = str_replace(' Steal.','', $play->getPlayText());
@@ -329,6 +332,7 @@ function getPlayShort($play, $plays) {
 		$possession = ($play->e == 'a') ? 'a' : 'h';
 	} else if (strpos($playTextLower, 'end') !== false) {
 		$playString .= 'e';
+		$playString .= ($play->q < 4)?$play->q:3;
 		$possessionNew = 1;
 		$possession = end($plays)->s;
 		$play->e = (end($plays)->s)?end($plays)->s:end($plays)->e;

@@ -262,3 +262,8 @@ input.gameInput {
 	padding:10px;
 	width:100%;
 }
+.playLabelBox {
+	stroke: #4B83FF;
+	stroke-width: 2px;
+	fill: #FFFFFF;
+}
