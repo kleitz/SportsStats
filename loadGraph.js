@@ -587,10 +587,22 @@ function displayTitleScore(gId) {
 			.classed("bottomText",true)
 			.classed("fullWidth",true)
 			.text(games[gId][team.s].teamName);
-		//score
-		mTLCont.append("div")
-			.classed("left tRight",(teamI%2==1))
-			.classed("right tLeft",(teamI%2==0))
+	});
+	var bSCont = bS
+		.append("div")
+		.classed("bSCont",true);
+	bSCont.append("div")
+		.classed("bSDateLoc",true)
+		.classed("fullWidth center",true)
+		.html(games[gId].gameDate+"<br>"+games[gId].venue.venueName+", "+games[gId].venue.city+", "+games[gId].venue.state);
+	var bSLower = bSCont
+		.append("div")
+		.classed("fullWidth",true);
+	//score
+	aH.forEach(function(team,teamI){
+		bSLower.append("div")
+			.classed("left tLeft",(teamI%2==0))
+			.classed("right tRight",(teamI%2==1))
 			.classed("mainScore",true)
 			.append("div")
 			.classed("larTitle "+gId+" "+team.l,true)
@@ -598,10 +610,8 @@ function displayTitleScore(gId) {
 			.classed("fullWidth",true)
 			.classed("scoreNum",true)
 			.text(games[gId][team.s+"Score"]);
-	});
-	var bSTable = bS
-		.append("div")
-		.classed("bSCont",true)
+	})
+	var bSTable = bSLower
 		.append("table")
 		.classed("bSTable",true);
 	aH.unshift({s:"period"});
@@ -1440,6 +1450,7 @@ function plotHist(gId, pType, dispTime) {
 	graphPoint
 		.transition().duration(graphVars.dispTime)
 		.delay(0)
+		.attr("r",3)
 		.style("fill",function(p) {
 				if (p.e != "n") {
 					return (!prim || primRegExp.test(p.p[primPos]) || prim=="pos") ? "#"+games[gId][p.e].primary : "#"+games[gId][p.e].secondary;
