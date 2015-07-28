@@ -704,7 +704,7 @@ function addPlayByPlay(gId) {
 			.classed("center",true);
 	}
 	
-	createShowDisp(gId,"pbpCont","full play-by-play",false);
+	createShowDisp(gId,"pbpCont","full play-by-play",true);
 }
 
 function getDispTime(gId,p) {
