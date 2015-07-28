@@ -1,3 +1,4 @@
+/*bright blue: d6e7ff*/
 * {
 	font: 10pt sans-serif;
 	box-sizing: border-box;
@@ -11,8 +12,10 @@ body,div,svg,span {
 }
 table, td {
 	border-spacing: 0px;
+	border-collapse: collapse;
 }
 td {
+	font: inherit;
 	padding:2px;
 }
 td.thead, .bold{
@@ -239,8 +242,8 @@ input[type=radio].pp {
 	display:none;
 }
 label.ppl {
-	border: solid 2px #4B83FF;
-	background-color: #EEE;
+	border: solid 2px #d6e7ff;
+	background-color: #F9F9F9;
 	color: #444;
 	padding: 5px;
 	font-size: 11pt;
@@ -248,8 +251,11 @@ label.ppl {
 	cursor: pointer;
 	margin:0px 5px;
 }
+label.ppl:hover{
+	background-color: #ebf3ff;
+}
 input[type=radio].pp:checked + label.ppl {
-	background-color: #FFF;
+	background-color: #d6e7ff;
 	color: #000;
 	font-weight: bold;
 	cursor: default;
@@ -261,12 +267,18 @@ div.gameInputCont {
 	padding:10px;
 }
 input.gameInput {
-	border: solid 2px #4B83FF;
+	border: solid 2px #d6e7ff;
 	padding:10px;
 	width:100%;
 }
 .playLabelBox {
-	stroke: #4B83FF;
+	stroke: #d6e7ff;
 	stroke-width: 2px;
 	fill: #FFFFFF;
+}
+td.pbp {
+	border: solid 1px #d6e7ff;
+}
+td.pbpHead {
+	background-color: #d6e7ff;
 }

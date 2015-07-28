@@ -152,6 +152,10 @@ foreach($playTable->nodes as $a) {
 				array_push($boxScore,$boxScoreElem);
 			}
 		}
+		if ($playid==1 &&
+				$plays[0]->e == "n") {
+			$plays[0]->e = $play->e;
+		}
 		$play->q = $period;
 		$play = getPlayShort($play, $plays);
 		$play->id = $playid;

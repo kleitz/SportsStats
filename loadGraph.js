@@ -1,6 +1,10 @@
 var games = {};
 var sports = {};
 var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom: 8},
+	loaderVars = {
+		num : 3,
+		width : 10,
+		pad : 40}
 	graphVars = {
 		dispTime : 500,
 		graphTime : 1000,
@@ -35,7 +39,6 @@ function loadGames(){
 		.forEach(function(d){
 			insertGameInput(d[0]);
 			if (d[0].id.length != 0)
-				//d3.select(d[0])
 				loadSport(d[0].id);
 			else {
 				if (location.hash.length) {
@@ -92,6 +95,7 @@ function isNormalInteger(str) {
 
 //load data for that particular sport
 function loadSport (gId) {
+	addLoader(gId);
 	if (typeof sports[gId.substring(0,3)] !== "undefined") {
 		loadGame(gId);
 	} else {
@@ -105,6 +109,74 @@ function loadSport (gId) {
 			loadGame(gId);
 		});
 	}
+}
+
+function addLoader(gId) {
+	var loaderSvg = d3.select("#"+gId)
+		.attr("loading",1)
+		.append("div")
+		.classed("loadingCont "+gId,true)
+		.append("svg")
+		.attr("width",graphVars.histGraphWidth + margin.left + margin.right)
+		.attr("height",graphVars.histGraphHeight)
+		.attr("id","loadingSvg");
+	loaderContainer = loaderSvg.append("g")
+		.attr("transform","translate(" + ((graphVars.histGraphWidth + margin.left + margin.right)/2) + "," + (graphVars.histGraphHeight/2) + ")");
+	for(var rI = 0; rI<loaderVars.num; rI++){
+		var rect = loaderContainer.append("g")
+			.attr("transform","translate("+(-1*(loaderVars.width * loaderVars.num + loaderVars.pad * (loaderVars.num-1))/2+rI*(loaderVars.width+loaderVars.pad))+",0)")
+			.append("rect")
+			.classed("loadingRect",true)
+			.attr("x",-loaderVars.width/2)
+			.attr("y",-loaderVars.width/2)
+			.attr("height",loaderVars.width)
+			.attr("width",loaderVars.width)
+			.style("fill","#AAAAAA");
+	}
+	loaderSvg.selectAll("rect.loadingRect")
+		.transition()
+		.duration(graphVars.dispTime)
+		.delay(function(d,i) {return graphVars.dispTime/loaderVars.num/2*i})
+		.each(dispLoading);
+	function dispLoading() {
+		var item = d3.select(this);
+		(function repeat() {
+			item = item.transition()
+				.attr("y",-loaderVars.width*3/2)
+				.attr("height",loaderVars.width*3)
+				.transition()
+				.attr("y",-loaderVars.width/2)
+				.attr("height",loaderVars.width)
+				.transition()
+				.attrTween("transform",rotTween)
+				.styleTween("fill",colorTween)
+			if (d3.select("#"+gId).attr('loading') == 1) {
+				item.each("end",repeat);
+			}
+			console.log('hi');
+		})();
+	}
+	function rotTween() {
+		var i = d3.interpolate(0, 360);
+		return function(t) {
+			return "rotate(" + i(t) + ")";
+		};
+	}
+	function colorTween() {
+		var i = d3.interpolate(0, 360);
+		return function(t) {
+			var sat = (i(t)>180)?360-i(t):i(t);
+			sat = sat / 180 * 80;
+			return "hsl(" + (i(t)+120) + ","+sat+"%,67%)";
+		};
+	}
+}
+
+function stopLoader(gId) {
+	d3.select("#"+gId)
+		.attr("loading",0)
+		.select("div.loadingCont."+gId)
+		.remove();
 }
 
 //add statistic fields
@@ -422,12 +494,14 @@ function loadGame (gId) {
 		dispGame();
 	}
 	function dispGame() {
+		stopLoader(gId);
 		displayTitleScore(gId);
 		addSplitButtons(gId);
 		setMainGraph(gId);
 		addTeamStats(gId);
 		addPlayerStats(gId);
 		addSplitGraph(gId);
+		addPlayByPlay(gId);
 		countPlays(gId);
 		plotScore(gId);
 		graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
@@ -561,6 +635,128 @@ function addSplitGraph(gId) {
 	games[gId].splitGraph.append("g")
 		.attr("class", "y axis");
 	createShowDisp(gId,"splitGraphCont",sports[gId.substring(0,3)].split.title.toLowerCase(),false);
+}
+
+function addPlayByPlay(gId) {
+	var pbpCont = d3.select("div#"+gId)
+		.append("div")
+		.classed(gId,true)
+		.attr("id","pbpCont"+gId)
+		.append("table")
+		.classed("fullWidth",true);
+	games[gId].plays.forEach(function(p,pI){
+		if (pI==0) {
+			pbpHead();
+		}
+		var bold = (!isNaN(p.p[0]) && p.p[2] == "m");
+		var tr = pbpCont.append("tr")
+			.classed("bold",bold);
+		tr.append("td")
+			.text(getDispTime(gId,p))
+			.classed("pbp",true);
+		if (p.p[0] == 'e' || p.e == 'n') {
+			tr.append("td")
+				.text(getPlayText(gId,p))
+				.attr("colspan",3)
+				.classed("center",true)
+				.classed("pbp",true);
+			if (p.p[0] == 'e' && pI!=games[gId].plays.length-1) {
+				pbpHead();
+			}
+		} else {
+		tr.append("td")
+			.text(function(){if(p.e==aH[0].s){return getPlayText(gId,p)}})
+			.classed("pbp",true);
+		tr.append("td")
+			.text(p[aH[0].s]+"-"+p[aH[1].s])
+			.classed("pbp",true)
+			.classed("center",true);
+		tr.append("td")
+			.text(function(){if(p.e==aH[1].s){return getPlayText(gId,p)}})
+			.classed("pbp",true);
+		}
+	});
+	
+	function pbpHead() {
+		var tr = pbpCont.append("tr")
+			.classed("bold",true);
+		tr.append("td")
+			.text("Time")
+			.style("width","70px")
+			.classed("pbp",true)
+			.classed("pbpHead",true)
+			.classed("center",true);
+		tr.append("td")
+			.text(games[gId][aH[0].s].teamName)
+			.classed("pbp",true)
+			.classed("pbpHead",true)
+			.classed("center",true);
+		tr.append("td")
+			.text("Score")
+			.style("width","60px")
+			.classed("pbp",true)
+			.classed("pbpHead",true)
+			.classed("center",true);
+		tr.append("td")
+			.text(games[gId][aH[1].s].teamName)
+			.classed("pbp",true)
+			.classed("pbpHead",true)
+			.classed("center",true);
+	}
+	
+	createShowDisp(gId,"pbpCont","full play-by-play",false);
+}
+
+function getDispTime(gId,p) {
+	var dispTime = "";
+	if (p.p[0] == 'e') {
+		return "0:00"+" "+games[gId].boxScore[p.q-1].l;
+	}
+	t = getMinutes(gId,p.t);
+	dispTime += Math.trunc(t.t/60) + ":";
+	dispTime += (t.t%60 < 10)? "0"+(t.t%60):t.t%60;
+	return dispTime+" "+games[gId].boxScore[t.p].l;
+}
+
+function getPlayText(gId,play) {
+	var sport = gId.substring(0,3);
+	var playText = sports[sport].pt[play.p[0]];
+	var playAr = [];
+	for(var oI = 0; oI < playText.order.length; oI++) {
+		if (isNaN(playText.order[oI])) {
+			if (playText.order[oI] == "e" ||
+					play[playText.order[oI]] == null) {
+				if (play.e == "n") {
+					playAr.push("Media");
+				} else {
+					playAr.push(games[gId][play.e].teamName);
+				}
+			} else {
+				playAr.push(play[playText.order[oI]]);
+			}
+		} else {
+			if (play.p.length > +playText.order[oI]) {
+				playAr.push( playText[playText.order[oI]][ 
+					play.p[playText.order[oI]] 
+				]);
+			} else if (playText[playText.order[oI]]["false"]){
+				playAr.push(
+					playText[playText.order[oI]]["false"]
+				);
+			}
+			if (playText[playText.order[oI]]["data"]) {
+				playAr.push(play[playText[playText.order[oI]]["data"]]);
+			}
+			if (playText[playText.order[oI]]["xt"]) {
+				playAr.push(playText[playText.order[oI]]["xt"]);
+			}
+		}
+	}
+	if (play == games[gId].plays[games[gId].plays.length-1]) {
+		playAr.pop();
+		playAr.push("game.");
+	}
+	return playAr.join(" ");
 }
 
 //display headline score and teams
@@ -1599,38 +1795,7 @@ function plotHist(gId, pType, dispTime) {
 				.duration(graphVars.dispTime/4)
 				.attr('r',10)
 				.attr('stroke-width',"6px");
-			var playText = sports[sport].pt[histData[i].p[0]];
-			var playAr = [];
-			for(var oI = 0; oI < playText.order.length; oI++) {
-				if (isNaN(playText.order[oI])) {
-					if (playText.order[oI] == "e" ||
-							histData[i][playText.order[oI]] == null) {
-						if (histData[i].e == "n") {
-							playAr.push("Media");
-						} else {
-							playAr.push(games[gId][histData[i].e].teamName);
-						}
-					} else {
-						playAr.push(histData[i][playText.order[oI]]);
-					}
-				} else {
-					if (histData[i].p.length > +playText.order[oI]) {
-						playAr.push( playText[playText.order[oI]][ 
-							histData[i].p[playText.order[oI]] 
-						]);
-					} else if (playText[playText.order[oI]]["false"]){
-						playAr.push(
-							playText[playText.order[oI]]["false"]
-						);
-					}
-					if (playText[playText.order[oI]]["data"]) {
-						playAr.push(histData[i][playText[playText.order[oI]]["data"]]);
-					}
-					if (playText[playText.order[oI]]["xt"]) {
-						playAr.push(playText[playText.order[oI]]["xt"]);
-					}
-				}
-			}
+			var playText = getPlayText(gId,histData[i]);
 			var labelCont = games[gId].chart.append("g")
 				.attr("id","pointLabel-"+histData[i].id);
 			var labelBox = labelCont.append("rect")
@@ -1638,7 +1803,7 @@ function plotHist(gId, pType, dispTime) {
 				.classed("playLabelBox",true);
 			var labelText = labelCont.append("text")
 				.attr("alignment-baseline","middle")
-				.text(playAr.join(" "))
+				.text(playText)
 				.attr("dy",labelBox.node().getBBox().height/2+1)
 				.attr("dx",5);
 			labelBox
