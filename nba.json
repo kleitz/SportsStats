@@ -1,20 +1,20 @@
 {
-	"l":"Men's College Basketball",
-	"a":"NCB",
-	"s":300,
+	"l":"NBA",
+	"a":"NBA",
+	"s":360,
 	"q":{
-		"n":2,
-		"t":1200,
-		"o":300,
-		"l":"half",
+		"n":4,
+		"t":720,
+		"o":360,
+		"l":"quarter",
 		"a":"A"
 	},
 	"split":{
 		"title":"Shot clock breakdown",
 		"type":"play",
 		"rangeMin":0,
-		"rangeMax":35,
-		"bins":7
+		"rangeMax":24,
+		"bins":6
 	},
 	"p":[
 		"pt",
@@ -124,12 +124,16 @@
 			"a":"TNO"
 		},
 		"s":{
-			"c":"s",
+			"c":"t",
 			"mp":0,
-			"pp":0,
+			"pp":2,
+			"p":"s",
 			"l":"Steal",
 			"a":"S",
-			"dpp":true
+			"ns":true,
+			"dpp":true,
+			"p2":true,
+			"ot":true
 		},
 		"pf":{
 			"c":"f",
@@ -189,7 +193,11 @@
 				"a": "assist by",
 				"data": "o"
 			},
-			"order": "m2013"
+			"d": {
+				"data2": "-ft",
+				"data2ns": true
+			},
+			"order": "m2d013"
 		},
 		"3":{
 			"0": {
@@ -209,7 +217,11 @@
 				"a": "assist by",
 				"data": "o"
 			},
-			"order": "m2013"
+			"d": {
+				"data2": "-ft",
+				"data2ns": true
+			},
+			"order": "m2d013"
 		},
 		"r":{
 			"0": {
@@ -232,16 +244,16 @@
 				"t": "Turnover"
 			},
 			"1": {
+				"p": "bad pass",
+				"t": "traveling",
+				"l": "lost ball",
+				"u": "turnover"
+			},
+			"2": {
 				"s": "stolen by",
 				"data": "o"
 			},
-			"order": "0m1"
-		},
-		"s":{
-			"0": {
-				"s": "Ball stolen by"
-			},
-			"order": "0m"
+			"order": "m12"
 		},
 		"f":{
 			"0": {
@@ -272,6 +284,12 @@
 			},
 			"order": "0m"
 		},
+		"i":{
+			"0": {
+				"i": "Inbound"
+			},
+			"order": "0m"
+		},
 		"e":{
 			"0": {
 				"e": "End of"
@@ -282,6 +300,18 @@
 				"3": "overtime"
 			},
 			"order": "01"
+		},
+		"u":{
+			"0": {
+				"u": "subbed for"
+			},
+			"order": "m0o"
+		},
+		"k":{
+			"0": {
+				"k": "Kicked ball"
+			},
+			"order": "0m"
 		}
 	}
 }

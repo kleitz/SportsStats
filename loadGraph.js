@@ -23,7 +23,17 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 	width = graphVars.lineGraphWidth,
 	height = graphVars.lineGraphHeight,
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
-	nameSuffixes = ['sr','jr','ii','iii','iv','v','vi','vii'];
+function oppAH(team, skip) {
+	if (skip) {
+		return team;
+	}
+	if (typeof team == 'object') {
+		return (team == aH[0])?aH[1]:aH[0];
+	} else {
+		return (team == aH[0].s)?aH[1].s:aH[0].s;
+	}
+}
+nameSuffixes = ['sr','jr','ii','iii','iv','v','vi','vii'];
 graphVars.stat10Pad = 5;
 graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
 d3.select(window).on("hashchange",function(){
@@ -72,7 +82,6 @@ function insertGameInput(div) {
 						d3.select(div)
 							.attr("id",sport + id);
 						gameInput.attr("disabled","disabled");
-						console.log("#"+sport+id);
 						location.hash = "#"+sport+id;
 						this.value = "";
 						loadGames();
@@ -91,6 +100,43 @@ function getReq(name,string){
 function isNormalInteger(str) {
     var n = ~~Number(str);
     return String(n) === str && n >= 0;
+}
+function hexToRgb(hex) {
+	var pattern = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
+	var result = pattern.exec(hex);
+	if (result) {
+		result = [
+			parseInt(result[1], 16),
+			parseInt(result[2], 16),
+			parseInt(result[3], 16)
+		];
+		return result;
+	}
+	else return false;
+}
+function colorTest(gId) {
+	var colors = {};
+	aH.forEach(function (team,teamI) {
+		colors[team.s] = hexToRgb(games[gId][team.s].primary);
+		if (!colors[team.s]) {
+			return;
+		}
+	});
+	var difTot = 0;
+	for (var rgbI=0; rgbI<colors[aH[0].s].length; rgbI++) {
+		difTot += Math.abs(colors[aH[0].s][rgbI]-colors[aH[1].s][rgbI]);
+	}
+	if (difTot < 150) {
+		var tempColor = games[gId]['h'].secondary;
+		var tempColorRgb = hexToRgb(tempColor);
+		if (tempColorRgb) {
+			if (tempColorRgb.reduce(function(a,b){return a+b;}) > 612) {
+				tempColor = "CCCCCC";
+			}
+		}
+		games[gId]['h'].secondary = games[gId]['h'].primary;
+		games[gId]['h'].primary = tempColor;
+	}
 }
 
 //load data for that particular sport
@@ -153,7 +199,6 @@ function addLoader(gId) {
 			if (d3.select("#"+gId).attr('loading') == 1) {
 				item.each("end",repeat);
 			}
-			console.log('hi');
 		})();
 	}
 	function rotTween() {
@@ -323,9 +368,9 @@ function graphTeamStats(gId) {
 			teamStatData[team.s] = games[gId].plays.filter(
 				function(d){
 					if(sPO[p].c=="pos") {
-						return d.x && d.e == team.s;
+						return d.x && d.e == oppAH(team.s,!sPO[p].ot);
 					} else {
-						return rE.test(d.p[sPO[p].mp]) && d.e==team.s;
+						return rE.test(d.p[sPO[p].mp]) && d.e == oppAH(team.s,!sPO[p].ot);
 					}
 				}
 			);
@@ -333,7 +378,7 @@ function graphTeamStats(gId) {
 			teamStatData[team.s+"val"] = [];
 			teamStatData[team.s+"PS"].push(teamStatData[team.s].filter(
 				function(d){ 
-					return !sPO[p].p || d.p[sPO[p].pp] == sPO[p].p || sPO[p].ns;
+					return !sPO[p].p || d.p[sPO[p].pp] == sPO[p].p;
 				}
 			));
 			teamStatData[team.s+"PS"].push(teamStatData[team.s].filter(
@@ -345,8 +390,7 @@ function graphTeamStats(gId) {
 				if (sPO[p].sum) {
 					var primTot = 0;
 					teamStatData[team.s+"PS"][psi].forEach(function(play) {
-						if (play.p[sPO[p].pp] == sPO[p].p)
-							primTot += +play.p[sPO[p].mp];
+						primTot += +play.p[sPO[p].mp];
 					});
 					teamStatData[team.s+"val"][psi] = primTot;
 				} else if (p=="top") {
@@ -495,6 +539,7 @@ function loadGame (gId) {
 	}
 	function dispGame() {
 		stopLoader(gId);
+		colorTest(gId);
 		displayTitleScore(gId);
 		addSplitButtons(gId);
 		setMainGraph(gId);
@@ -555,7 +600,7 @@ function countPlays(gId){
 	var split = sports[gId.substring(0,3)].split;
 	aH.forEach(function(team,teamI){
 		games[gId]["plays"+team.s] = d3.layout.histogram()
-			.bins(games[gId].totTime/300)
+			.bins(games[gId].totTime/sports[gId.substring(0,3)].s)
 			.range([0,games[gId].totTime])
 			.value(function(p){return p.t;})(games[gId].plays.filter(function(p){
 				return p.x && p.s == team.s;
@@ -621,12 +666,13 @@ function addSplitGraph(gId) {
 		.attr("transform", "translate(" + margin.left + "," + margin.histTop + ")");
 	games[gId].splitX = d3.scale.linear()
 		.range([1, graphVars.histGraphWidth])
-		.domain([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.rangeMax]);
+		.domain([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.bins]);
 	games[gId].splitXAxis = d3.svg.axis()
 		.scale(games[gId].splitX)
 		.orient("bottom")
+		.ticks(sports[gId.substring(0,3)].split.bins+1)
 		.tickFormat(function(d){
-			return sports[gId.substring(0,3)].split.rangeMax - d;
+			return sports[gId.substring(0,3)].split.rangeMax - d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
 		});
 	games[gId].splitGraph.append("g")
 		.attr("class", "x axis")
@@ -725,7 +771,9 @@ function getPlayText(gId,play) {
 	for(var oI = 0; oI < playText.order.length; oI++) {
 		if (isNaN(playText.order[oI])) {
 			if (playText.order[oI] == "e" ||
-					play[playText.order[oI]] == null) {
+					((playText.order[oI] == "m" ||
+					playText.order[oI] == "o") &&
+					play[playText.order[oI]] == null)) {
 				if (play.e == "n") {
 					playAr.push("Media");
 				} else {
@@ -733,6 +781,16 @@ function getPlayText(gId,play) {
 				}
 			} else {
 				playAr.push(play[playText.order[oI]]);
+			}
+			if (playText[playText.order[oI]] &&
+					play[playText.order[oI]] != null) {
+				if (playText[playText.order[oI]].data2) {
+					if (playText[playText.order[oI]].data2ns) {
+						playAr[playAr.length-1] += playText[playText.order[oI]].data2;
+					} else {
+						playAr.push(playText[playText.order[oI]].data2);
+					}
+				}
 			}
 		} else {
 			if (play.p.length > +playText.order[oI]) {
@@ -1093,7 +1151,7 @@ function plotScore(gId) {
 		.domain([games[gId].totTime,0]);
 	games[gId].xAxisScale = d3.scale.linear()
 		.range([0, width])
-		.domain([games[gId].totTime/60,0]);
+		.domain([games[gId].totTime/sports[gId.substring(0,3)].s,0]);
 
 	games[gId].y = d3.scale.linear()
 		.range([height, 0])
@@ -1184,7 +1242,7 @@ function plotScore(gId) {
 		.scale(games[gId].xAxisScale)
 		.orient("bottom")
 		.tickFormat(function(d,i) { 
-			var perTime = getMinutes(gId,d*60);
+			var perTime = getMinutes(gId,d*sports[gId.substring(0,3)].s);
 			if(games[gId].boxScore[perTime.p].t == perTime.t) {
 				return games[gId].boxScore[perTime.p].l;
 			} else {
@@ -1436,6 +1494,7 @@ function plotHist(gId, pType, dispTime) {
 	var add = sports[sport].po[pType].add;
 	var defPosP = sports[sport].po[pType].dpp;
 	var defPosS = sports[sport].po[pType].dps;
+	var otherTeam = sports[sport].po[pType].ot;
 	
 	prim = typeof prim !== 'undefined' ?  prim : comp;
 	var player = (sports[gId.substring(0,3)].po[pType].p2)?"o":"m";
@@ -1479,14 +1538,14 @@ function plotHist(gId, pType, dispTime) {
 	var histTeam = {}
 	aH.forEach(function(team,teamI){
 		histTeam[team.s] = d3.layout.histogram()
-			.bins(games[gId].totTime/300)
+			.bins(games[gId].totTime/sports[gId.substring(0,3)].s)
 			.range([0,games[gId].totTime])
-			.value(function(p){return p.t;})(histData.filter(function(p) { return p.e == team.s; }))
+			.value(function(p){return p.t;})(histData.filter(function(p) { return p.e == oppAH(team.s,!otherTeam); }))
 	});
 	function reduceData(data,gIndex,teamS,gType,func,isSec) {
 		var dataAr = [];
 		if (isSec || defPosP || defPosS) {
-			if (noSec) {
+			if (noSec && isSec) {
 				return 0;
 			}
 			if (!isSec  && (defPosP || defPosS)) {
@@ -1817,7 +1876,6 @@ function plotHist(gId, pType, dispTime) {
 			var labelContY = voronoiData[i][1] + 45*((voronoiData[i][1] > 45)?-1:1);
 			labelCont
 				.attr("transform", "translate(" + labelContX + "," + labelContY + ")");
-			//console.log(playAr.join(" "));
 		})
 		.on('mouseout',function(d,i){
 			games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
@@ -1974,7 +2032,7 @@ function plotHist(gId, pType, dispTime) {
 		splitTeam[team.s] = d3.layout.histogram()
 			.bins(sports[gId.substring(0,3)].split.bins)
 			.range([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.rangeMax])
-			.value(function(p){return getPlayTime(gId,p.id);})(histData.filter(function(p) { return p.e == team.s; }))
+			.value(function(p){return getPlayTime(gId,p.id);})(histData.filter(function(p) { return p.e == oppAH(team.s,!otherTeam); }))
 	});
 	var yMax = Math.max(
 			d3.max(splitTeam[aH[0].s], function(d,i) {
@@ -1994,8 +2052,8 @@ function plotHist(gId, pType, dispTime) {
 		  .enter()
 			.append('rect')
 			.attr("class","splitBar "+team.s)
-			.attr("x",function(d,i){return games[gId].splitX(d.dx*i + d.dx/2*(teamI))+1;})
-			.attr("width",function(d) {return games[gId].splitX(d.dx/2)-2})
+			.attr("x",function(d,i){return games[gId].splitX(i + (teamI/2))+1;})
+			.attr("width",function(d) {return games[gId].splitX(1/2)-2})
 			.attr("y",function(d) {return graphVars.histGraphHeight;})
 			.attr("height", 0)
 			.style("shape-rendering", "crispEdges")
@@ -2016,8 +2074,8 @@ function plotHist(gId, pType, dispTime) {
 		  .enter()
 			.append('rect')
 			.attr("class","splitBarSec "+team.s)
-			.attr("x",function(d,i){return games[gId].splitX(d.dx*i + d.dx/2*(teamI))+3;})
-			.attr("width",function(d) {return games[gId].splitX(d.dx/2)-6})
+			.attr("x",function(d,i){return games[gId].splitX(i + (teamI/2))+3;})
+			.attr("width",function(d) {return games[gId].splitX(1/2)-6})
 			.attr("y",function(d) {return graphVars.histGraphHeight;})
 			.attr("height", 0)
 			.style("shape-rendering", "crispEdges")
@@ -2047,7 +2105,7 @@ function plotHist(gId, pType, dispTime) {
 		playerStats[team.s] = [];
 		var plStatOrder = {};
 		histData.forEach(function(p){
-			if (p.e == team.s && p[player] != null && pType != "to" && pType != "top") {
+			if (p.e == oppAH(team.s,!otherTeam) && p[player] != null && pType != "to" && pType != "top") {
 				if (typeof plStatOrder[p[player]] === "undefined") {
 					plStatOrder[p[player]] = playerStats[team.s].length;
 					playerStats[team.s].push({});
