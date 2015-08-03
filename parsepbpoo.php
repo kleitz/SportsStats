@@ -207,6 +207,33 @@ foreach($playTable->nodes as $a) {
 		selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h));
 		$play->id = $playid;
 		++$playid;
+		
+		//Fix ESPN data issues
+		if ($play->a < end($plays)->a) {
+			if (end($plays)->p[2] != 'm') {
+				end($plays)->a = $plays[sizeof($plays)-2]->a;
+			} else {
+				$play->a = end($plays)->a;
+			}
+		}
+		if ($play->h < end($plays)->h) {
+			if (end($plays)->p[2] != 'm') {
+				end($plays)->h = $plays[sizeof($plays)-2]->h;
+			} else {
+				$play->h = end($plays)->h;
+			}
+		}
+		if ($play->a > end($plays)->a) {
+			if ($play->p[2] != 'm') {
+				$play->a = end($plays)->a;
+			}
+		}
+		if ($play->h > end($plays)->h) {
+			if ($play->p[2] != 'm') {
+				$play->h = end($plays)->h;
+			}
+		}
+		
 		array_push($plays,$play);
 	}
 }
