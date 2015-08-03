@@ -1839,6 +1839,7 @@ function plotHist(gId, pType, dispTime) {
 	games[gId].chart.selectAll("path.vorPath")
 		.data(d3.geom.voronoi(voronoiData))
 		.enter().append("svg:path")
+		.classed("vorPath",true)
 		.attr("d", function(d) { return "M" + d.join(",") + "Z"; })
 		.attr("id", function(d,i) { 
 			return gId+"-playvorpath-"+histData[i].id ; })
