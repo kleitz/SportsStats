@@ -1564,7 +1564,7 @@ function plotHist(gId, pType, dispTime) {
 				d.forEach(function(p) {
 					tempVal += +p.p[mPos];
 				});
-			} else if (comp=="pos") {
+			} else if (comp=="pos" && (gType!="split" || sports[sport].split.top)) {
 				d.forEach(function(p) {
 					tempVal += getPlayTime(gId,p.id);
 				});
@@ -1830,59 +1830,60 @@ function plotHist(gId, pType, dispTime) {
 	games[gId].chart.selectAll("clipPath")
 		.data(voronoiData)
 		.enter().append("svg:clipPath")
-		.attr("id", function(d, i) { return "clip-"+i;})
+		.attr("id", function(d, i) { return gId+"-playvorclip-"+i;})
 		.classed("vorClip",true)
 		.append("svg:circle")
 		.attr('cx', function(d) { return d[0]; })
 		.attr('cy', function(d) { return d[1]; })
-		.attr('r', 10)
-		.style('fill','black');
+		.attr('r', 10);
 	games[gId].chart.selectAll("path.vorPath")
 		.data(d3.geom.voronoi(voronoiData))
 		.enter().append("svg:path")
-		.classed("vorPath",true)
 		.attr("d", function(d) { return "M" + d.join(",") + "Z"; })
 		.attr("id", function(d,i) { 
-			return ; })
-		.attr("clip-path", function(d,i) { return "url(#clip-"+i+")"; })
+			return gId+"-playvorpath-"+histData[i].id ; })
+		.attr("clip-path", function(d,i) { return "url(#"+gId+"-playvorclip-"+i+")"; })
 		.style("fill", function(d,i){return ("hsl("+(i / (voronoiData.length-1) * 720)+",100%,50%)");})
-		//.style("stroke", "#000")
 		.style('fill-opacity', 0)
 		.on('mouseover',function(d,i){
-			games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
-				.transition()
-				.duration(graphVars.dispTime/4)
-				.attr('r',10)
-				.attr('stroke-width',"6px");
-			var playText = getPlayText(gId,histData[i]);
-			var labelCont = games[gId].chart.append("g")
-				.attr("id","pointLabel-"+histData[i].id);
-			var labelBox = labelCont.append("rect")
-				.attr("height",30)
-				.classed("playLabelBox",true);
-			var labelText = labelCont.append("text")
-				.attr("alignment-baseline","middle")
-				.text(playText)
-				.attr("dy",labelBox.node().getBBox().height/2+1)
-				.attr("dx",5);
-			labelBox
-				.attr("width",labelText.node().getBBox().width+10);
-			var labelContX = (voronoiData[i][0]-labelText.node().getBBox().width/2-10);
-			if (labelContX + labelText.node().getBBox().width > graphVars.lineGraphWidth) {
-				labelContX = graphVars.lineGraphWidth - labelText.node().getBBox().width;
-			} else if (labelContX < 0) {
-				labelContX = 0;
+			var graphPoint = games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+			if (!graphPoint.classed("transWaiting")){
+				graphPoint.transition()
+					.duration(graphVars.dispTime/4)
+					.attr('r',10)
+					.attr('stroke-width',"6px");
+				var playText = getPlayText(gId,histData[i]);
+				var labelCont = games[gId].chart.append("g")
+					.attr("id","pointLabel-"+histData[i].id);
+				var labelBox = labelCont.append("rect")
+					.attr("height",30)
+					.classed("playLabelBox",true);
+				var labelText = labelCont.append("text")
+					.attr("alignment-baseline","middle")
+					.text(playText)
+					.attr("dy",labelBox.node().getBBox().height/2+1)
+					.attr("dx",5);
+				labelBox
+					.attr("width",labelText.node().getBBox().width+10);
+				var labelContX = (voronoiData[i][0]-labelText.node().getBBox().width/2-10);
+				if (labelContX + labelText.node().getBBox().width > graphVars.lineGraphWidth) {
+					labelContX = graphVars.lineGraphWidth - labelText.node().getBBox().width;
+				} else if (labelContX < 0) {
+					labelContX = 0;
+				}
+				var labelContY = voronoiData[i][1] + 45*((voronoiData[i][1] > 45)?-1:1);
+				labelCont
+					.attr("transform", "translate(" + labelContX + "," + labelContY + ")");
 			}
-			var labelContY = voronoiData[i][1] + 45*((voronoiData[i][1] > 45)?-1:1);
-			labelCont
-				.attr("transform", "translate(" + labelContX + "," + labelContY + ")");
 		})
 		.on('mouseout',function(d,i){
-			games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
-				.transition()
-				.duration(graphVars.dispTime/4)
-				.attr('r',3)
-				.attr('stroke-width',"2px");
+			var graphPoint = games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+			if (!graphPoint.classed("transWaiting")){
+				graphPoint.transition()
+					.duration(graphVars.dispTime/4)
+					.attr('r',3)
+					.attr('stroke-width',"2px");
+			}
 			games[gId].chart.select("g#pointLabel-"+histData[i].id)
 				.remove();
 		});

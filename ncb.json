@@ -14,7 +14,8 @@
 		"type":"play",
 		"rangeMin":0,
 		"rangeMax":35,
-		"bins":7
+		"bins":7,
+		"top":false
 	},
 	"p":[
 		"pt",
