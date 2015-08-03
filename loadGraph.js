@@ -1842,7 +1842,11 @@ function plotHist(gId, pType, dispTime) {
 		.data(d3.geom.voronoi(voronoiData))
 		.enter().append("svg:path")
 		.classed("vorPath",true)
-		.attr("d", function(d) { return "M" + d.join(",") + "Z"; })
+		.attr("d", function(d,i) { 
+			if (typeof d == "undefined") {
+				return "M3000,3000L3001,3001Z";
+			}
+			return "M" + d.join(",") + "Z"; })
 		.attr("id", function(d,i) { 
 			return gId+"-playvorpath-"+histData[i].id ; })
 		.attr("clip-path", function(d,i) { return "url(#"+gId+"-playvorclip-"+i+")"; })
