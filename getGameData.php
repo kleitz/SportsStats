@@ -88,31 +88,35 @@ $venue->state = trim($location[2]);
 $game->venue = $venue;
 
 
-foreach($playTable->nodes as $a) {
-	if ($a->tag == "thead") {
-		foreach($a->nodes as $b) {
-			foreach($b->nodes as $c) {
-				if ($c->tag == "th") {
-					$c_label = str_replace('</b>','',$c->innertext);
-					if (!($c_label == "TIME" || $c_label == "SCORE")) {
-						if (!isset($game->a)) {
-							$away = new Team();
-							$away->teamName = ucwords(strtolower($c_label));
-							$away->short = $html->find('td.team',1)->nodes[0]->innertext;
-							$game->a = $away;
-							getTeamData($game->a,$dbcon,"a",$sportVars[$sportId]);
-						}
-						else if (!isset($game->h)) {
-							$home = new Team();
-							$home->teamName = ucwords(strtolower($c_label));
-							$home->short = $html->find('td.team',2)->nodes[0]->innertext;
-							$game->h = $home;
-							getTeamData($game->h,$dbcon,"h",$sportVars[$sportId]);
-						}
+$teamBox = $html->find('div.team');
+foreach($teamBox as $tb) {
+	$teamInfo = $tb->find('div.team-info',0);
+	foreach($teamInfo->nodes as $h) {
+		if ($h->tag == "h3") {
+			forEach($h->nodes as $a) {
+				if ($a->tag == "a") {
+					$teamName = $a->innertext;
+					if (preg_match("/^(\w+ )?away( \w+)?$/",$tb->class)) {
+						$away = new Team();
+						$away->teamName = ucwords(strtolower($teamName));
+						$game->a = $away;
+						getTeamData($game->a,$dbcon,"a",$sportVars[$sportId]);
+					}
+					else if (preg_match("/^(\w+ )?home( \w+)?$/",$tb->class)) {
+						$home = new Team();
+						$home->teamName = ucwords(strtolower($teamName));
+						$game->h = $home;
+						getTeamData($game->h,$dbcon,"h",$sportVars[$sportId]);
 					}
 				}
 			}
 		}
+	}
+}
+
+foreach($playTable->nodes as $a) {
+	if ($a->tag == "thead") {
+		//skip
 	}
 	else if ($a->tag == "tr") {
 		$a_nodes = $a->nodes;

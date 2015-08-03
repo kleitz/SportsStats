@@ -148,7 +148,9 @@ function loadSport (gId) {
 		d3.json(gId.substring(0,3)+".json",function(error,data) {
 			if (error) {
 				console.error(error);
-				d3.select(".chart."+gId).append("text").text("Error loading sport data").attr("y",20);
+				d3.select("input.gameInput")
+					.attr("value","This sport is not supported");
+				stopLoader(gId);
 				return;
 			}
 			sports[gId.substring(0,3)] = data;
