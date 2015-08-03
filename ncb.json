@@ -283,6 +283,18 @@
 				"3": "overtime"
 			},
 			"order": "01"
+		},
+		"k":{
+			"0": {
+				"k": "Kicked ball"
+			},
+			"order": "0m"
+		},
+		"g":{
+			"0": {
+				"g": "Goaltending"
+			},
+			"order": "0m"
 		}
 	}
 }

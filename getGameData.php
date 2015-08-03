@@ -35,6 +35,15 @@ $sportVars = array(
 		'startPlay' => 'jump ball',
 		'startPlayShort' => 'i',
 		'regPeriods' => 4
+	),
+	'ncf' => array(
+		'id' => 'ncf',
+		'maxTextTime' => '15:00',
+		'otTextTime' => '0:00',
+		'maxTime' => 900,
+		'startPlay' => 'coin toss',
+		'startPlayShort' => 'c',
+		'regPeriods' => 4
 	)
 );
 
@@ -210,14 +219,14 @@ foreach($playTable->nodes as $a) {
 		
 		//Fix ESPN data issues
 		if ($play->a < end($plays)->a) {
-			if (end($plays)->p[2] != 'm') {
+			if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
 				end($plays)->a = $plays[sizeof($plays)-2]->a;
 			} else {
 				$play->a = end($plays)->a;
 			}
 		}
 		if ($play->h < end($plays)->h) {
-			if (end($plays)->p[2] != 'm') {
+			if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
 				end($plays)->h = $plays[sizeof($plays)-2]->h;
 			} else {
 				$play->h = end($plays)->h;

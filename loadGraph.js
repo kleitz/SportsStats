@@ -76,7 +76,7 @@ function insertGameInput(div) {
 					var id = getReq("gameId","?"+this.value.split('?')[1]);
 					var sport = this.value.match(/\/[a-zA-Z-]+\//g)[0];
 					sport = sport.substring(1,sport.length-1);
-					if (typeof id !== "undefined" && isNormalInteger(id) && sport == "ncb") {
+					if (typeof id !== "undefined" && isNormalInteger(id)) {
 						if (div.id.length > 0)
 							d3.selectAll("."+div.id).remove();
 						d3.select(div)

@@ -313,6 +313,12 @@
 				"k": "Kicked ball"
 			},
 			"order": "0m"
+		},
+		"g":{
+			"0": {
+				"g": "Goaltending"
+			},
+			"order": "0m"
 		}
 	}
 }
