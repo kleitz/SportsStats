@@ -5,9 +5,30 @@
 <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 <body>
+<div class="footer fullWidth">
+	Compatibility: NCAA Men's Basketball, NBA
+</div>
 <div class="gameBox notLoaded" id="">
 </div>
 <script src="./d3.v3.min.js"></script>
 <script src="loadGraph.js"></script>
+<div id="footer" class="footer">
+	Contact /u/quacainia with issues. List of currently known bugs:
+	<div id="bugListfooter" class="footerList showDispCont">
+	<ul>
+		<li>Loading teams too quickly (or clicking back/forward too fast) will cause errors.</li>
+		<li>Sometimes switching the stat being displayed too quickly causes hiccoughs</li>
+		<li>[data] some NBA plays last longer than 24s?</li>
+		<li>If you hover a play before the replay has played then it will mess things up</li>
+		<li>Score errors in NBA data lead to crooked lines on the graph</li>
+		<li>Secondary box for graphs minimizes over x-axis</li>
+		<li>Replay (IE9)</li>
+		<li>Hover line label IE9</li>
+		<li>Some plays don't display text, unknown issues with Voronoi mapping</li>
+	</ul>
+	</div>
+	<script>createShowDisp('footer','bugList','bug list',true);</script>
+	There are also currently many features I would like to add, but after getting NBA games usable, my biggest goal will be adding football (especially NCAA).
+</div>
 </body>
 </html>

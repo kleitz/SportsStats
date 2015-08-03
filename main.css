@@ -282,3 +282,16 @@ td.pbp {
 td.pbpHead {
 	background-color: #d6e7ff;
 }
+div.footer {
+	color: #AAAAAA;
+	text-align:center;
+	font-size:10pt;
+	padding:5px 0px;
+	margin:0px auto;
+	width:800px;
+}
+div.footerList {
+	width:400px;
+	margin:0px auto;
+	text-align:left;
+}
