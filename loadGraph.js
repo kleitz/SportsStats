@@ -512,7 +512,7 @@ function getPlayTime(gId,pId,direction) {
 //load and set game data
 function loadGame (gId) {
 	if (typeof games[gId] === "undefined") {
-		d3.json("parsepbpoo.php?gameId=" + gId,function(error,game) {
+		d3.json("getGameData.php?gameId=" + gId,function(error,game) {
 			d3.select("div#"+gId)
 				.classed("loaded",true)
 				.select(".gameInput")
