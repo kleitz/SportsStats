@@ -25,7 +25,8 @@ $sportVars = array(
 		'maxTime' => 1200,
 		'startPlay' => 'jump ball',
 		'startPlayShort' => 'j',
-		'regPeriods' => 2
+		'regPeriods' => 2,
+		'sport' => 'basketball'
 	),
 	'nba' => array(
 		'id' => 'nba',
@@ -34,22 +35,22 @@ $sportVars = array(
 		'maxTime' => 720,
 		'startPlay' => 'jump ball',
 		'startPlayShort' => 'i',
-		'regPeriods' => 4
+		'regPeriods' => 4,
+		'sport' => 'basketball'
 	),
 	'ncf' => array(
 		'id' => 'ncf',
 		'maxTextTime' => '15:00',
 		'otTextTime' => '0:00',
 		'maxTime' => 900,
-		'startPlay' => 'coin toss',
-		'startPlayShort' => 'c',
-		'regPeriods' => 4
+		'regPeriods' => 4,
+		'sport' => 'football'
 	)
 );
 
 if(preg_match('/^[a-zA-Z]{3}[0-9]+$/',$gId) && 
 	$sportVars[$sportId] != null) {
-	$recordHit = "INSERT INTO HITS (GID) VALUE ('$gId')";
+	$recordHit = "INSERT INTO SPORTS_HITS (GID) VALUE ('$gId')";
 	mysqli_query($dbcon, $recordHit);
 } else {
 	$game->error = "Invalid ID";
@@ -114,6 +115,73 @@ foreach($teamBox as $tb) {
 	}
 }
 
+//getting short id for football first column
+//There are 4 separate versions of the shortened team name per play-by-play page
+// - game best performers [don't need]
+// - yardline for down column
+// - yardline for play column
+// - score [can assume 'away' is column 3, and 'home' 4]
+if ($sportVars[$sportId]['sport'] == 'football') {
+	$homeRegex = '(u?c?';
+	for ($i=0;$i<strlen($game->h->teamName);$i++) {
+		if ($game->h->teamName[$i] == ' ') {
+			$homeRegex .= '(of)?';
+		} else {
+			$homeRegex .= $game->h->teamName[$i];
+			if ($i != 0) {
+				$homeRegex .= '?';
+			}
+		}
+	}
+	$homeRegex .= 'u?c?)';
+	$awayRegex = '(u?c?';
+	for ($i=0;$i<strlen($game->a->teamName);$i++) {
+		if ($game->h->teamName[$i] == ' ') {
+			$awayRegex .= '(of)?';
+		} else {
+			$awayRegex .= $game->a->teamName[$i];
+			if ($i != 0) {
+				$awayRegex .= '?';
+			}
+		}
+	}
+	$awayRegex .= 'u?c?)';
+	$teamShorts = array();
+	foreach($playTable->nodes as $a) {
+		if ($a->tag == 'tr') {
+			$a_nodes = $a->nodes;
+			if (preg_match('/at '.$awayRegex.' [0-9]+$/i',$a_nodes[0]->innertext,$ashort)) {
+				if (isset($teamShorts['a']) &&
+						$ashort[1]!=$teamShorts['a']) {
+					$teamShorts['a2'] = $ashort[1];
+				} else if (!isset($teamShorts['a'])) {
+					$teamShorts['a'] = $ashort[1];
+				}
+			}
+			if (preg_match('/at '.$homeRegex.' [0-9]+$/i',$a_nodes[0]->innertext,$hshort)) {
+				if (isset($teamShorts['h']) &&
+						$hshort[1]!=$teamShorts['h']) {
+					$teamShorts['h2'] = $hshort[1];
+				} else if (!isset($teamShorts['h'])) {
+					$teamShorts['h'] = $hshort[1];
+				}
+			}
+			if (isset($teamShorts['h']) && isset($teamShorts['a'])) {
+				if($teamShorts['h'] == $teamShorts['a']) {
+					if (isset($teamShorts['h2'])) {
+						$teamShorts['h'] = $teamShorts['h2'];
+					} else {
+						$teamShorts['a'] = $teamShorts['a2'];
+					}
+				}
+				break;
+			}
+		}
+	}
+	$game->a->setShorts(1,$teamShorts['a']);
+	$game->h->setShorts(1,$teamShorts['h']);
+}
+
 foreach($playTable->nodes as $a) {
 	if ($a->tag == "thead") {
 		//skip
@@ -127,31 +195,30 @@ foreach($playTable->nodes as $a) {
 				}
 			}
 		}
-		//echo $a_nodes[3]->innertext . "\n";
-		//echo strpos(strtolower($a_nodes[3]->innertext),'jump ball');
-		//echo "\n";
-		if ((sizeof($plays)==0 || strpos(strtolower(end($plays)->getPlayText()), strtolower('end of ')) !== false) && (strpos(strtolower($a_nodes[1]->innertext),$sportVars[$sportId]['startPlay']) === false && strpos(strtolower($a_nodes[3]->innertext),$sportVars[$sportId]['startPlay']) === false)) {
-			$play = new Play();
-			//{"id":0,"a":0,"e":"h","h":0,"m":null,"p":"j","q":1,"s":"h","t":2400,"x":1}
-			$play->t = $sportVars[$sportId]['maxTime'];
-			$play->id = $playid;
-			$playid++;
-			$play->p = $sportVars[$sportId]['startPlayShort'];
-			if (sizeof($plays)==0) {
-				$play->a = 0;
-				$play->h = 0;
-				$play->s = "n";
-				$play->e = "n";
-			} else {
-				$play->a = end($plays)->a;
-				$play->h = end($plays)->h;
-				$play->s = "n";
-				$play->e = end($plays)->e;
+		if (isset($sportVars[$sportId]['startPlay'])) {
+			if ((sizeof($plays)==0 || strpos(strtolower(end($plays)->getPlayText()), strtolower('end of ')) !== false) && (strpos(strtolower($a_nodes[1]->innertext),$sportVars[$sportId]['startPlay']) === false && strpos(strtolower($a_nodes[3]->innertext),$sportVars[$sportId]['startPlay']) === false)) {
+				$play = new Play();
+				//{"id":0,"a":0,"e":"h","h":0,"m":null,"p":"j","q":1,"s":"h","t":2400,"x":1}
+				$play->t = $sportVars[$sportId]['maxTime'];
+				$play->id = $playid;
+				$playid++;
+				$play->p = $sportVars[$sportId]['startPlayShort'];
+				if (sizeof($plays)==0) {
+					$play->a = 0;
+					$play->h = 0;
+					$play->s = "n";
+					$play->e = "n";
+				} else {
+					$play->a = end($plays)->a;
+					$play->h = end($plays)->h;
+					$play->s = "n";
+					$play->e = end($plays)->e;
+				}
+				$play->x = 1;
+				$period++;
+				$play->q = $period;
+				array_push($plays,$play);
 			}
-			$play->x = 1;
-			$period++;
-			$play->q = $period;
-			array_push($plays,$play);
 		}
 		$play = new Play();
 		$timeExp = explode(':',$a_nodes[0]->innertext);
@@ -163,14 +230,25 @@ foreach($playTable->nodes as $a) {
 			} else if ($lastPlay->p[0] == 'e') {
 				$period++;
 			}
-			if ($a_nodes[1]->innertext == '&nbsp;') {
-				$play->e = 'h'; //home
-				$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[3]->innertext)));
+			
+			
+			
+			//set plays//
+			if ($sportVars[$sportId]['sport'] == 'basketball') {
+				if ($a_nodes[1]->innertext == '&nbsp;') {
+					$play->e = 'h'; //home
+					$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[3]->innertext)));
+				}
+				else {
+					$play->e = 'a'; //away
+					$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[1]->innertext)));
+				}
 			}
-			else {
-				$play->e = 'a'; //away
-				$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[1]->innertext)));
+			else if ($sportVars[$sportId]['sport'] == 'football') {
+				$play->setPlayText($a_nodes[0]->innertext."|".$a_nodes[1]->innertext);
 			}
+			
+			
 			$play_scores = explode('-', $a_nodes[2]->innertext);
 			$play->a = intval($play_scores[0]);
 			$play->h = intval($play_scores[1]);
@@ -217,9 +295,9 @@ foreach($playTable->nodes as $a) {
 			//$plays[0]->e = $play->e;
 		}
 		$play->q = $period;
-		selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h));
 		$play->id = $playid;
 		++$playid;
+		selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h));
 		
 		//Fix ESPN data issues
 		if ($play->a < end($plays)->a) {

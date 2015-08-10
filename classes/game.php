@@ -94,6 +94,7 @@ class Play {
 	public $e;	//Team performing play
 	public $h;	//Home Score
 	public $m;	//player
+				// n third player
 				// o second player
 	public $p; 	//play
 	public $q;	//Period with a backwards p
@@ -127,6 +128,15 @@ class Team {
 	public $primary;
 	public $secondary;
 	public $rank;
+	private $shorts = array();
+	
+	
+	public function getShorts() {
+		return $this->shorts;
+	}
+	public function setShorts($id,$short) {
+		$this->shorts[$id] = $short;
+	}
 	
 	public function isSetTeam() {
 		return isset($id)
