@@ -2,6 +2,7 @@
 	"l":"Men's College Basketball",
 	"a":"NCB",
 	"s":300,
+	"pos":"s",
 	"q":{
 		"n":2,
 		"t":1200,
@@ -105,7 +106,7 @@
 			"pp":3,
 			"p":"a",
 			"l":"Assist",
-			"p2":true,
+			"player":1,
 			"ns":true,
 			"a":"A"
 		},
@@ -115,6 +116,7 @@
 			"pp":0,
 			"l":"Block",
 			"a":"B",
+			"ns":true,
 			"dpp":true
 		},
 		"tno":{
@@ -122,7 +124,8 @@
 			"mp":0,
 			"pp":0,
 			"l":"Turnover",
-			"a":"TNO"
+			"a":"TNO",
+			"ns":true
 		},
 		"s":{
 			"c":"s",
@@ -130,6 +133,7 @@
 			"pp":0,
 			"l":"Steal",
 			"a":"S",
+			"ns":true,
 			"dpp":true
 		},
 		"pf":{
@@ -151,7 +155,8 @@
 			"a":"TO",
 			"pl":"Team",
 			"fs":true,
-			"sl":"Media"
+			"sl":"Media",
+			"ns":true
 		},
 		"top":{
 			"c":"pos",

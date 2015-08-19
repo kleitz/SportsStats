@@ -2,6 +2,7 @@
 	"l":"NBA",
 	"a":"NBA",
 	"s":360,
+	"pos":"s",
 	"q":{
 		"n":4,
 		"t":720,
@@ -115,6 +116,7 @@
 			"pp":0,
 			"l":"Block",
 			"a":"B",
+			"ns":true,
 			"dpp":true
 		},
 		"tno":{
@@ -122,7 +124,8 @@
 			"mp":0,
 			"pp":0,
 			"l":"Turnover",
-			"a":"TNO"
+			"a":"TNO",
+			"ns":true
 		},
 		"s":{
 			"c":"t",
@@ -155,7 +158,8 @@
 			"a":"TO",
 			"pl":"Team",
 			"fs":true,
-			"sl":"Media"
+			"sl":"Media",
+			"ns":true
 		},
 		"top":{
 			"c":"pos",
@@ -195,8 +199,8 @@
 				"data": "o"
 			},
 			"d": {
-				"data2": "-ft",
-				"data2ns": true
+				"xt": "-ft",
+				"xtns": true
 			},
 			"order": "m2d013"
 		},
@@ -219,8 +223,8 @@
 				"data": "o"
 			},
 			"d": {
-				"data2": "-ft",
-				"data2ns": true
+				"xt": "-ft",
+				"xtns": true
 			},
 			"order": "m2d013"
 		},

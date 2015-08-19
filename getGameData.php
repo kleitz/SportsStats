@@ -75,6 +75,7 @@ $boxScore = array();
 $playid = 0;
 $period = 0;
 $lastBoxScorePlay = 0;
+$FBPos = array("new"=>false);
 
 $timeLocation = $html->find('div.game-time-location', 0);
 $timeLocationNodes = $timeLocation->nodes;
@@ -184,7 +185,14 @@ if ($sportVars[$sportId]['sport'] == 'football') {
 
 foreach($playTable->nodes as $a) {
 	if ($a->tag == "thead") {
-		//skip
+		if ($sportVars[$sportId]['sport'] == 'football' &&
+				$a->nodes[0]->class == 'team-color-strip') {
+			$FBPos['e'] = (preg_match('/'.$game->h->teamName.'/i',$a->nodes[0]->nodes[0]->innertext)) ? 'h':'a';
+			preg_match('/(\d+:\d\d)/i',$a->nodes[0]->nodes[0]->innertext,$time);
+			$time = explode(":",$time[1]);
+			$FBPos['t'] = intval($time[0])*60+intval($time[1]);
+			$FBPos['new'] = true;
+		}
 	}
 	else if ($a->tag == "tr") {
 		$a_nodes = $a->nodes;
@@ -200,7 +208,7 @@ foreach($playTable->nodes as $a) {
 				$play = new Play();
 				//{"id":0,"a":0,"e":"h","h":0,"m":null,"p":"j","q":1,"s":"h","t":2400,"x":1}
 				$play->t = $sportVars[$sportId]['maxTime'];
-				$play->id = $playid;
+				$play->id = sizeof($plays);
 				$playid++;
 				$play->p = $sportVars[$sportId]['startPlayShort'];
 				if (sizeof($plays)==0) {
@@ -221,8 +229,19 @@ foreach($playTable->nodes as $a) {
 			}
 		}
 		$play = new Play();
-		$timeExp = explode(':',$a_nodes[0]->innertext);
-		$play->t = intval($timeExp[0])*60+intval($timeExp[1]);
+		if ($sportVars[$sportId]['sport'] == 'basketball') {
+			$timeExp = explode(':',$a_nodes[0]->innertext);
+			$play->t = intval($timeExp[0])*60+intval($timeExp[1]);
+		} else if ($sportVars[$sportId]['sport'] == 'football') {
+			$play->x = ($FBPos['new'])?1:0;
+			if ($FBPos['new']) {
+				$FBPos['new'] = false;
+				$play->t = $FBPos['t'];
+				$play->e = $FBPos['e'];
+			} else {
+				$play->e = end($plays)->e;
+			}
+		}
 		if (count($a_nodes) == 4) {
 			$lastPlay = end($plays);
 			if (sizeof($plays) == 0) {
@@ -243,19 +262,28 @@ foreach($playTable->nodes as $a) {
 					$play->e = 'a'; //away
 					$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[1]->innertext)));
 				}
+				$play_scores = explode('-', $a_nodes[2]->innertext);
+				$play->a = intval($play_scores[0]);
+				$play->h = intval($play_scores[1]);
+				if (strpos(strtolower($play->getPlayText()), strtolower('Deadball Team Rebound')) !== false ||
+						strpos(strtolower($play->getPlayText()), strtolower('Foul on '.$game->h->teamName)) === 0 ||
+						strpos(strtolower($play->getPlayText()), strtolower('Foul on '.$game->a->teamName)) === 0) {
+					continue;
+				}
 			}
 			else if ($sportVars[$sportId]['sport'] == 'football') {
 				$play->setPlayText($a_nodes[0]->innertext."|".$a_nodes[1]->innertext);
-			}
-			
-			
-			$play_scores = explode('-', $a_nodes[2]->innertext);
-			$play->a = intval($play_scores[0]);
-			$play->h = intval($play_scores[1]);
-			if (strpos(strtolower($play->getPlayText()), strtolower('Deadball Team Rebound')) !== false ||
-					strpos(strtolower($play->getPlayText()), strtolower('Foul on '.$game->h->teamName)) === 0 ||
-					strpos(strtolower($play->getPlayText()), strtolower('Foul on '.$game->a->teamName)) === 0) {
-				continue;
+				if (preg_match('/\d+/',$a_nodes[2]->innertext,$aScore) &&
+						preg_match('/\d+/',$a_nodes[3]->innertext,$hScore)) {
+					$play->a = intval($aScore[0]);
+					$play->h = intval($hScore[0]);
+				} else if (sizeof($plays)==0) {
+					$play->a = 0;
+					$play->h = 0;
+				} else {
+					$play->a = end($plays)->a;
+					$play->h = end($plays)->h;
+				}
 			}
 		}
 		else {
@@ -267,65 +295,106 @@ foreach($playTable->nodes as $a) {
 				$playTeam = 'a'; //away
 			}
 			$play->e = $playTeam;
-			$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[1]->innertext)));
+			if ($sportVars[$sportId]['sport'] == 'basketball') {
+				$play->setPlayText(str_replace('<b>', '', str_replace('</b>', '', $a_nodes[1]->innertext)));
+			}
 			$lastPlay = end($plays);
 			$play->a = $lastPlay->a;
 			$play->h = $lastPlay->h;
-			if (strpos(strtolower($play->getPlayText()), strtolower('end of ')) !== false ||
-					strpos(strtolower($play->getPlayText()), strtolower('end game')) !== false ||
-					strpos(strtolower($play->getPlayText()), strtolower('end half')) !== false) {
-				$boxScoreElem = new BoxScore();
-				$boxScoreElem->period = $period;
-				$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
-				$lastBoxScorePlay = sizeof($plays)+1;
-				$lastABoxScore = 0;
-				$lastHBoxScore = 0;
-				foreach ($boxScore as $bse) {
-					$lastABoxScore += $bse->a;
-					$lastHBoxScore += $bse->h;
-				}
-				$boxScoreElem->a = $play->a - $lastABoxScore;
-				$boxScoreElem->h = $play->h - $lastHBoxScore;
-				array_push($boxScore,$boxScoreElem);
-			}
 		}
+		
+		if (strpos(strtolower($play->getPlayText()), strtolower('end of ')) !== false ||
+				strpos(strtolower($play->getPlayText()), strtolower('end game')) !== false ||
+				strpos(strtolower($play->getPlayText()), strtolower('end half')) !== false) {
+			$boxScoreElem = new BoxScore();
+			$boxScoreElem->period = $period;
+			$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
+			$lastBoxScorePlay = sizeof($plays)+1;
+			$lastABoxScore = 0;
+			$lastHBoxScore = 0;
+			foreach ($boxScore as $bse) {
+				$lastABoxScore += $bse->a;
+				$lastHBoxScore += $bse->h;
+			}
+			$boxScoreElem->a = $play->a - $lastABoxScore;
+			$boxScoreElem->h = $play->h - $lastHBoxScore;
+			array_push($boxScore,$boxScoreElem);
+		}
+		
 		//If there's no play to start the half/quarter. choose play team.
 		if ($playid==1 &&
 				$plays[0]->e == "n") {
 			//$plays[0]->e = $play->e;
 		}
 		$play->q = $period;
-		$play->id = $playid;
+		$play->id = sizeof($plays);
 		++$playid;
 		selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h));
 		
 		//Fix ESPN data issues
-		if ($play->a < end($plays)->a) {
-			if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
-				end($plays)->a = $plays[sizeof($plays)-2]->a;
-			} else {
-				$play->a = end($plays)->a;
+		if ($sportVars[$sportId]['sport'] == 'basketball') {
+			if ($play->a < end($plays)->a) {
+				if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
+					end($plays)->a = $plays[sizeof($plays)-2]->a;
+				} else {
+					$play->a = end($plays)->a;
+				}
+			}
+			if ($play->h < end($plays)->h) {
+				if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
+					end($plays)->h = $plays[sizeof($plays)-2]->h;
+				} else {
+					$play->h = end($plays)->h;
+				}
+			}
+			if ($play->a > end($plays)->a) {
+				if ($play->p[2] != 'm') {
+					$play->a = end($plays)->a;
+				}
+			}
+			if ($play->h > end($plays)->h) {
+				if ($play->p[2] != 'm') {
+					$play->h = end($plays)->h;
+				}
 			}
 		}
-		if ($play->h < end($plays)->h) {
-			if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
-				end($plays)->h = $plays[sizeof($plays)-2]->h;
-			} else {
-				$play->h = end($plays)->h;
-			}
-		}
-		if ($play->a > end($plays)->a) {
-			if ($play->p[2] != 'm') {
-				$play->a = end($plays)->a;
-			}
-		}
-		if ($play->h > end($plays)->h) {
-			if ($play->p[2] != 'm') {
-				$play->h = end($plays)->h;
-			}
-		}
-		
 		array_push($plays,$play);
+		
+		
+		//add following play
+		//Extra point
+		if ($sportVars[$sportId]['sport'] == 'football' &&
+				preg_match('/(td|touchdown)/i',$play->getPlayText())) {
+			preg_match('/\((.+)( kick)\)/i',$play->getPlayText(),$xp);
+			$play2 = new Play();
+			$play2->x = 0;
+			$play2->t = $play->t;
+			$play2->q = $period;
+			$play2->id = sizeof($plays);
+			++$playid;
+			
+			$play2->m = array($xp[1]);
+			$play2->c = '1';
+			$play2->p = 'x';
+			$play2->e = $play->e;
+			if (preg_match('/kick/i',$xp[2])) {
+				$play2->p .= 'g';
+				$play2->a = $play->a;
+				$play2->h = $play->h;
+			} else {
+				$play2->p .= 'm';
+			}
+			$newScore = ($play->e == 'a')? $play->a : $play->h;
+			$playOld = $plays[sizeof($plays)-2];
+			$oldScore = ($playOld->e == 'a')? $playOld->a : $playOld->h;
+			$scoreDiff = $newScore - $oldScore - 6;
+			if ($play->e == 'a') {
+				$play->a -= $scoreDiff;
+			} else {
+				$play->h -= $scoreDiff;
+			}
+			array_push($plays,$play2);
+		}
 	}
 }
 for($boxI = 0; $boxI<sizeof($boxScore); $boxI++) {
@@ -340,6 +409,38 @@ for($boxI = 0; $boxI<sizeof($boxScore); $boxI++) {
 	}
 }
 $game->boxScore = $boxScore;
+if ($sportVars[$sportId]['sport'] == 'football') {
+	foreach($plays as $pi=>$play) {
+		if ($play->t != null ||
+				$pi == sizeof($plays)-1) {
+			$p2i = $pi-1;
+			$skipPI = ($pi == sizeof($plays)-1)?0:1;
+			while ($p2i >= 0 && $plays[$p2i]->t == null) {
+				$p2i--;
+			}
+			if ($p2i<0) {
+				continue;
+			}
+			$originalTime = $play->t;
+			if ($originalTime == 900 ||
+					$originalTime == null) {
+				$originalTime = 0;
+			}
+			$timePlays = $pi-$p2i;
+			if ($plays[$pi-1]->p[0] == 'x') {
+				$skipPI++;
+				$timePlays--;
+			}
+			$tDiff = ($plays[$p2i]->t-$originalTime)/($timePlays);
+			for ($p3i = $pi-$p2i-1;$p3i>=$skipPI;$p3i--) {
+				$plays[$pi-$p3i]->t = $originalTime+intval(round($tDiff*$p3i));
+			}
+			if ($plays[$pi-1]->p[0] == 'x') {
+				$plays[$pi-1]->t = $plays[$pi-2]->t;
+			}
+		}
+	}
+}
 foreach($plays as $play) {
 	for($i=$play->q; 
 	$i<sizeof($game->boxScore); 

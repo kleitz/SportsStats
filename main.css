@@ -1,6 +1,6 @@
 /*bright blue: d6e7ff*/
 * {
-	font: 10pt sans-serif;
+	font: 12px sans-serif;
 	box-sizing: border-box;
 }
 body,div,svg,span {
@@ -34,13 +34,13 @@ td.thead {
 	display:inline-block;
 }
 .smaTitle {
-	font-size:12pt
+	font-size:14px;
 }
 .medTitle {
-	font-size: 14pt;
+	font-size: 17px;
 }
 .larTitle {
-	font-size:24pt;
+	font-size:30px;
 }
 .fullWidth {
 	width:100%;
@@ -95,7 +95,7 @@ td.thead {
 }
 
 .axis text, .lineKey text, .linePointKey text {
-  font: 10pt sans-serif;
+  font: 12px sans-serif;
 }
 
 .axis path,
@@ -178,7 +178,7 @@ svg {
 	text-anchor:middle;
 	dy:.35em;
 	dx:-.1em;
-	font-size:7pt;
+	font-size:9px;
 }
 
 .moLine {
@@ -246,7 +246,7 @@ label.ppl {
 	background-color: #F9F9F9;
 	color: #444;
 	padding: 5px;
-	font-size: 11pt;
+	font-size: 12px;
 	display:inline-block;
 	cursor: pointer;
 	margin:0px 5px;
@@ -285,7 +285,7 @@ td.pbpHead {
 div.footer {
 	color: #AAAAAA;
 	text-align:center;
-	font-size:10pt;
+	font-size:12px;
 	padding:5px 0px;
 	margin:0px auto;
 	width:800px;

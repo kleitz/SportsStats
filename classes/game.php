@@ -98,7 +98,7 @@ class Play {
 				// o second player
 	public $p; 	//play
 	public $q;	//Period with a backwards p
-	public $s;	//possession
+	//public $s;	//possession
 	public $t;	//Time
 	public $x;  //change of possession
 	

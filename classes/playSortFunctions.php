@@ -179,11 +179,14 @@ function getPlayShortNcb($theSportVars, $play, $plays, $teams) {
 		$playString .= $playTextLower;
 	}
 	$play->p = $playString;
-	if ($player1 != "") {
-		$play->m = preg_replace('/\.$/','',$player1);
-	}
+	$play->m = array();
 	if ($player2 != "") {
-		$play->o = preg_replace('/\.$/','',$player2);
+		array_unshift($play->m,ucwords(preg_replace('/\.$/','',trim($player2))));
+	}
+	if ($player1 != "") {
+		array_unshift($play->m,ucwords(preg_replace('/\.$/','',trim($player1))));
+	} else if (sizeof($play->m) > 0) {
+		array_unshift($play->m, '');
 	}
 	$play->s = $possession;
 	$play->x = $possessionNew;
@@ -414,11 +417,14 @@ function getPlayShortNba($theSportVars, $play, $plays, $teams) {
 		$playString .= $playTextLower;
 	}
 	$play->p = $playString;
-	if ($player1 != "") {
-		$play->m = ucwords(preg_replace('/\.$/','',trim($player1)));
-	}
+	$play->m = array();
 	if ($player2 != "") {
-		$play->o = ucwords(preg_replace('/\.$/','',trim($player2)));
+		array_unshift($play->m,ucwords(preg_replace('/\.$/','',trim($player2))));
+	}
+	if ($player1 != "") {
+		array_unshift($play->m,ucwords(preg_replace('/\.$/','',trim($player1))));
+	} else if (sizeof($play->m) > 0) {
+		array_unshift($play->m, '');
 	}
 	$play->s = $possession;
 	$play->x = $possessionNew;
@@ -451,6 +457,7 @@ field goal
 // - one point safety (oregon ksu 2013?)
 // - regular safety, checking terms and men
 // - missed extra point
+// - Score by defensive team (including punts) Change XP too
 
 // too many coin flips!
 function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
@@ -465,7 +472,7 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	$reVars = array(
 		'a'=>'(<a[a-zA-Z0-9:\-_\/\.\"= ]+>)?',
 		'aC'=>'(<\/a>)?',
-		'name'=>'([a-zA-Z\-\'\. ]+)'
+		'name'=>'([A-Z][a-zA-Z\-\'\. ]*)'
 	);
 	//get yards ball moved
 	//g - yards Gained
@@ -510,32 +517,36 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	}
 	
 	//c - sCore - getting convoluted now?
-	if (preg_match('/ (touchdown|td|fg|field goal|safety|kick\))/',$playTextLower,$score)) {
-		$points = '';
+	if (preg_match('/ (touchdown|td|fg|field goal|safety|kick\))/',$playTextLower,$score) ||
+			preg_match('/^<b>.*<\/b>$/',$playTextLower)) {
 		if (preg_match('/(touchdown|td)/',$score[1])) {
-			$points .= '6'; 
+			$play->c .= '6'; 
 		} else if (preg_match('/(fg|field goal)/',$score[1])) {
-			$points .= '3';
 			if (preg_match('/ (fg|field goal) good/',$playTextLower)) {
-				$points .= 'g';
-			} else {
-				$points .= 'm';
+				$play->c .= '3';
 			}
 		} else if (preg_match('/safety/',$score[1])) {
-			$points .= '2';
-		} else if (preg_match('/kick\)/',$score[1])) {
-			$points .= '1';
-			preg_match('/\('.$reVars['name'].' kick\)/',$playTextLower,$kicker);
+			$play->c .= '2';
+		} else if (preg_match('/kick\)/',$score[1]) &&
+				preg_match('/\('.$reVars['name'].' kick\)/',$playTextLower,$kicker)) {
+			$play->c .= '1';
 			$play->m = $kicker[1];
+		} else {
+			$play->c .= '6';
 		}
-		$play->c = $points;
 	}
 	
 	//Get play
 	if (strpos($playTextLower, 'coin toss') !== false) {
 		//0 - c - coin toss
 		$playString .= "c";
-		//now figure out what team it belongs to
+		$play->t = $theSportVars['maxTime'];
+		$play->x = 1;
+		if (strpos($playTextLower, strtolower($teams[0]->teamName)) !== false) {
+			$play->e = 'a';
+		} else if (strpos($playTextLower, strtolower($teams[0]->teamName)) !== false) {
+			$play->e = 'h';
+		}
 	} else if (strpos($playTextLower, ' pass ') !== false && 
 			strpos($playTextLower, 'defensive pass interference') === false) {
 		//0 - p - pass
@@ -598,14 +609,16 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 		if ($kp[0] == 'on-side kick') {
 			$playString .= 'o';
 		}
-		if (preg_match('/ touchback/',$playTextLower,$p1)) {
+		if (preg_match('/ touchback/',$playTextLower)) {
 			$playString .= 't';
+		} else if (preg_match('/ fair catch/',$playTextLower)) {
+			$playString .= 'f';
 		}
-		preg_match('/'.$reVars['a'].$reVars['name'].$reVars['aC'].' kickoff/',$play->getPlayText(),$p1);
+		preg_match('/'.$reVars['a'].$reVars['name'].$reVars['aC'].' (kickoff|punt|on-side kick)/',$play->getPlayText(),$p1);
 		$player1 = $p1[2];
-		preg_match('/'.$reVars['a'].$reVars['name'].$reVars['aC'].' return/',$play->getPlayText(),$p2);
+		preg_match('/(fair catch by|,) '.$reVars['a'].$reVars['name'].$reVars['aC'].' (return|at)/',$play->getPlayText(),$p2);
 		if (sizeof($p2)>0) {
-			$player2 = $p2[2];
+			$player2 = $p2[3];
 		}
 	} else if (preg_match(' (fg|field goal) ',$playTextLower,$kp)) {
 		//0 - f - field goal
@@ -629,34 +642,6 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	} else if (strpos($playTextLower, ' penalty') !== false) {
 		//0 - n - peNalty
 		$playString .= 'n';
-		/*$numFouls = 1;
-		$player1 = preg_split('/( shooting | personal | offensive | loose ball )/', $playTextLower);
-		$player1 = $player1[0];
-		foreach($plays as $p) {
-			if (substr($p->p,0,1) == 'f' &&
-					$player1 == $p->m) {
-				$numFouls++;
-			}
-		}
-		$playString .= $numFouls;
-		if (strpos($playTextLower, 'technical foul') !== false) {
-			$playString .= 't';
-		} else if (strpos($playTextLower, 'charge') !== false) {
-			$playString .= 'c';
-		} else if (strpos($playTextLower, 'lose') !== false) {
-			$playString .= 'c';
-		} else if (strpos($playTextLower, 'block') !== false) {
-			$playString .= 'b';
-		} else {
-			$playString .= 'f';
-		}
-		if (strpos($playTextLower, ' draws ') !== false) {
-			$player2 = explode('(',$playTextLower);
-			$player2 = explode(' draws ',$player2[1]);
-			$player2 = $player2[0];
-		}
-		$possessionNew = 1;
-		$possession = ($play->e == 'a') ? 'h' : 'a';*/
 	} else if (strpos($playTextLower, 'timeout') !== false) {
 		//0 - o - timeout
 		$playString .= 'o';
@@ -671,7 +656,6 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 		//1 - # - period number
 		$playString .= 'e';
 		$playString .= ($play->q <= $theSportVars['regPeriods']+1) ? $play->q : $theSportVars['regPeriods']+1;
-		$possessionNew = 1;
 		$possession = end($plays)->s;
 		$play->e = (end($plays)->s)?end($plays)->s:end($plays)->e;
 	}
@@ -696,7 +680,5 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	} else if (sizeof($play->m) > 0) {
 		array_unshift($play->m, '');
 	}
-	$play->s = $possession;
-	$play->x = $possessionNew;
 }
 ?>
