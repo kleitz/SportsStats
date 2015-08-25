@@ -377,6 +377,7 @@ foreach($playTable->nodes as $a) {
 			$play2->c = '1';
 			$play2->p = 'x';
 			$play2->e = $play->e;
+			$play2->d = $play->d;
 			if (preg_match('/kick/i',$xp[2])) {
 				$play2->p .= 'g';
 				$play2->a = $play->a;

@@ -16,6 +16,7 @@
 		"rangeMin":0,
 		"rangeMax":35,
 		"bins":7,
+		"reverse":true,
 		"top":false
 	},
 	"p":[

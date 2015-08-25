@@ -1,0 +1,216 @@
+{
+	"l":"College Football",
+	"a":"NCF",
+	"s":300,
+	"pd":true,
+	"pos":"e",
+	"q":{
+		"n":2,
+		"t":1200,
+		"o":300,
+		"l":"half",
+		"a":"A"
+	},
+	"split":{
+		"title":"Down breakdown",
+		"type":"down",
+		"rangeMin":0,
+		"rangeMax":4,
+		"bins":4
+	},
+	"p":[
+		"pt",
+		"r",
+		"p",
+		"py",
+		"c",
+		"i",
+		"s",
+		"tno",
+		"to",
+		"top"
+	],
+	"po":{
+		"pt":{
+			"c":"[0-9]+",
+			"dv":"c",
+			"l":"Point",
+			"a":"P",
+			"ns":true,
+			"sum":true
+		},
+		"r":{
+			"c":"r",
+			"mp":0,
+			"pp":0,
+			"l":"Run",
+			"a":"R",
+			"pv":"g",
+			"pvp":0,
+			"ns":true,
+			"sum":true
+		},
+		"p":{
+			"c":"p",
+			"mp":0,
+			"p":"c",
+			"pp":1,
+			"l":"Pass",
+			"a":"P",
+			"pl":"Complete",
+			"sl":"Incomplete",
+			"add":true
+		},
+		"py":{
+			"c":"p",
+			"mp":0,
+			"p":"c",
+			"pp":1,
+			"l":"Pass Yard",
+			"a":"PY",
+			"pv":"g",
+			"pvp":0,
+			"ns":true,
+			"sum":true
+		},
+		"c":{
+			"c":"p|r",
+			"mp":0,
+			"p":1,
+			"pd":"d",
+			"l":"Conversion",
+			"a":"P",
+			"pl":"First",
+			"sl":"Failed",
+			"add":true,
+			"np":true
+		},
+		"i":{
+			"c":"p",
+			"mp":0,
+			"pp":1,
+			"p":"n",
+			"l":"Thrown Interception",
+			"a":"I",
+			"ns":true
+		},
+		"s":{
+			"c":"r",
+			"mp":0,
+			"pp":1,
+			"p":"s",
+			"l":"Sack",
+			"a":"S",
+			"ns":true,
+			"dpp":true
+		},
+		"tno":{
+			"c":"t",
+			"mp":0,
+			"pp":0,
+			"l":"Turnover",
+			"a":"TNO"
+		},
+		"to":{
+			"c":"o",
+			"mp":0,
+			"pp":0,
+			"l":"Time Out",
+			"a":"TO",
+			"pl":"Team",
+			"fs":true,
+			"sl":"Media"
+		},
+		"top":{
+			"c":"pos",
+			"l":"Time of Possession",
+			"ls":true,
+			"a":"TOP",
+			"l2":"Possession"
+		}
+	},
+	"pt":{
+		"c":{
+			"0": {
+				"c":"Coin toss won by"
+			},
+			"order": "0e"
+		},
+		"k":{
+			"0": {
+				"k": "Kickoff by"
+			},
+			"order": "0m"
+		},
+		"r":{
+			"0": {
+				"r": "run"
+			},
+			"g": {
+				"xt":"yard"
+			},
+			"order": "mg0"
+		},
+		"p":{
+			"0": {
+				"p": "pass to"
+			},
+			"g": {
+				"xt":"yard"
+			},
+			"order": "mg0m"
+		},
+		"x":{
+			"0": {
+				"x": "extra point"
+			},
+			"1" : {
+				"g": "good",
+				"m": "missed"
+			},
+			"order": "m01"
+		},
+		"n":{
+			"0": {
+				"n": "Penalty"
+			},
+			"order": "0"
+		},
+		"u":{
+			"0": {
+				"u": "punt"
+			},
+			"g": {
+				"xt":"yard"
+			},
+			"order": "m0mg"
+		},
+		"o":{
+			"0": {
+				"o": "time out"
+			},
+			"order": "e0"
+		},
+		"f":{
+			"0": {
+				"f": "field goal"
+			},
+			"1" : {
+				"g": "good",
+				"m": "missed"
+			},
+			"order": "m01"
+		},
+		"e":{
+			"0": {
+				"e": "End of"
+			},
+			"1": {
+				"1": "half",
+				"2": "half",
+				"3": "overtime"
+			},
+			"order": "01"
+		}
+	}
+}

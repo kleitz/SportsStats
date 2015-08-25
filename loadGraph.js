@@ -468,7 +468,7 @@ function rawOrPPNum(num,gId,teamS,args) {
 				plays = games[gId]["playsTot"+teamS];
 			}
 		}
-		var value = num/plays;
+		var value = (plays>0)?num/plays:0;
 		return value;
 	} else {
 		return num;
@@ -511,7 +511,8 @@ function getNextPos(gId,pId,direction) {
 //load and set game data
 function loadGame (gId) {
 	if (!isDef(games[gId])) {
-		d3.json("getGameData.php?gameId=" + gId,function(error,game) {
+		d3.json("getGameData.php?gameId=" + gId
+				,function(error,game) {
 			d3.select("div#"+gId)
 				.classed("loaded",true)
 				.select(".gameInput")
@@ -672,7 +673,11 @@ function addSplitGraph(gId) {
 		.orient("bottom")
 		.ticks(sports[gId.substring(0,3)].split.bins+1)
 		.tickFormat(function(d){
-			return sports[gId.substring(0,3)].split.rangeMax - d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
+			if (sports[gId.substring(0,3)].split.reverse) {
+				return sports[gId.substring(0,3)].split.rangeMax - d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
+			} else {
+				return d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
+			}
 		});
 	games[gId].splitGraph.append("g")
 		.attr("class", "x axis")
@@ -978,12 +983,11 @@ function addPlayerStats(gId) {
 								&& player == games[gId].plays[play.id].m[(sPO[p].player)?sPO[p].player:0]);
 					});
 					var primRegExp,totPrims;
-					if(sPO[p].p || sPO[p].dv) {
-						primRegExp = new RegExp(sPO[p].p,"i");
+					if(sPO[p].p || sPO[p].dv || sPO[p].pv) {
 						totPrims = totPlays.filter(function(play){
 							return isData(gId,play.id,p,true);
 						});
-					}
+					}	
 					playerRow.append("td").text(function(){
 						var text = "";
 						if (sPO[p].p && !sPO[p].ns	) {
@@ -991,7 +995,7 @@ function addPlayerStats(gId) {
 						}
 						if (sPO[p].sum) {
 							var sum = 0;
-							totPrims.forEach(function(prim){
+							totPlays.forEach(function(prim){
 								sum += +prim.p[sPO[p].mp];
 							});
 							text = sum;
@@ -1435,7 +1439,9 @@ function isData(gId,pId,pType,isPrim) {
 	var mPos = sports[sport].po[pType].mp;
 	var prim = sports[sport].po[pType].p;
 	var primPos = sports[sport].po[pType].pp;
+	var primDat = sports[sport].po[pType].pd;
 	var noSec = sports[sport].po[pType].ns;
+	var nP = sports[sport].po[pType].np;
 	prim = (!isDef(prim)) ? comp : prim;
 	var compRegExp = new RegExp(comp,"i");
 	var primRegExp = new RegExp(prim,"i");
@@ -1450,9 +1456,15 @@ function isData(gId,pId,pType,isPrim) {
 			mainBool = (isDef(play[dv]));
 		}
 	}
+	if (isDef(primDat)) {
+		dv = primDat;
+	}
 	if ((isPrim || noSec || prim==comp) && mainBool) {
 		var secBool;
-		if (isDef(primPos)) {
+		if (nP) {
+			var nextPlay = games[gId].plays[pId+1];
+			secBool = primRegExp.test(nextPlay[dv]);
+		} else if (isDef(primPos)) {
 			secBool = primRegExp.test(play[dv][primPos]);
 		} else {
 			secBool = (isDef(play[dv]));
@@ -1472,25 +1484,24 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var primSum = sports[sport].po[pType].sum;
 	var primPos = sports[sport].po[pType].pp;
 	var mPos = sports[sport].po[pType].mp;
+	var primVal = sports[sport].po[pType].pv;
+	var primValPos = sports[sport].po[pType].pvp;
 	var noSec = sports[sport].po[pType].ns;
 	var playDir = sports[sport].pd;
 	var splitTime = sports[sport].s;
 	var dataValue = (sports[sport].po[pType].dv)?sports[sport].po[pType].dv:'p';
 	var dataAr = [];
 	if (isSec || defPosP || defPosS) {
-		if (noSec && isSec) {
-			return 0;
-		}
-		if (!isSec  && (defPosP || defPosS)) {
-			priData = data.filter(function(p){return comp=="pos" || p[dataValue][primPos] == prim;});
-			dataAr.push(priData);
-		}
-		secData = data.filter(function(p){return comp!="pos" && p[dataValue][primPos] != prim;});
+		var secData = data.filter(function(p){return !(isData(gId,p.id,pType,isSec))});
 		dataAr.push(secData);
 	} else {
 		dataAr.push(data);
 	}
 	var value = 0;
+	if (isDef(primVal)) {
+		dataValue = primVal;
+		mPos = primValPos;
+	}
 	dataAr.forEach(function(d,i){
 		var tempVal = 0;
 		if (primSum) {
@@ -1549,8 +1560,12 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	if (isDef(func)) {
 		value = func(value);
 	}
-	value = (value<0)?0:value;
+	//value = (value<0)?0:value;
 	return value;
+}
+
+function negZero(a) {
+	return (a>0)?a:0;
 }
 
 //switch score diff on click
@@ -1662,10 +1677,19 @@ function plotHist(gId, pType, dispTime) {
 		.domain([games[gId].totTime,0]);
 	var histY = d3.scale.linear()
 		.range([0, graphVars.histGraphHeight])
-		.domain([0, Math.max(
-			d3.max(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
-			d3.max(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");})
-		)]);
+		.domain([
+			Math.min(
+				d3.min(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
+				d3.min(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");}))
+			, 
+			Math.max(
+				d3.max(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
+				d3.max(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");}))
+		]);
+	games[gId].histChart.select('g.x.axis')
+		.transition().duration(graphVars.dispTime)
+		.attr("transform","translate(0,"
+				+(graphVars.histGraphHeight-histY(0))+")");
 	
 	//display bars
 	aH.forEach(function(team,teamI) {
@@ -1686,10 +1710,10 @@ function plotHist(gId, pType, dispTime) {
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(histTeam[team.s].length-i); } )
 			.attr("y",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(d);});
+				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d));});
 			})
 			.attr("height",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",histY);
+				return reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(Math.abs(d)) - histY(0);});
 			});
 		
 		var textFields = games[gId].histChart.selectAll('text.p.'+team.s)
@@ -1707,7 +1731,7 @@ function plotHist(gId, pType, dispTime) {
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(histTeam[team.s].length-i); } )
 			.attr("y",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(d)});
+				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d))});
 			})
 			.text(function(d,i) {
 				return reduceData(gId,pType,d,i,team.s,"time");
@@ -1756,10 +1780,10 @@ function plotHist(gId, pType, dispTime) {
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(histTeam[team.s].length-i); } )
 			.attr("y",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(d)+2});
+				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d))+2;});
 			})
 			.attr("height",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(d)-2;},true);
+				return negZero(reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(d)-2;},true));
 			});
 	});
 
@@ -2112,8 +2136,23 @@ function plotHist(gId, pType, dispTime) {
 		splitTeam[team.s] = d3.layout.histogram()
 			.bins(sports[gId.substring(0,3)].split.bins)
 			.range([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.rangeMax])
-			.value(function(p){return getPlayTime(gId,p.id);})(histData.filter(function(p) { return p.e == oppAH(team.s,!otherTeam); }))
+			.value(function(p){
+				if (sports[gId.substring(0,3)].split.type == 'play') {
+					return getPlayTime(gId,p.id);
+				} else if (sports[gId.substring(0,3)].split.type == 'down') {
+					return p.d-.1;
+				}
+			})
+			(histData.filter(function(p) { return p.e == oppAH(team.s,!otherTeam); }))
 	});
+	var yMin = Math.min(0,
+			d3.min(splitTeam[aH[0].s], function(d,i) {
+				return reduceData(gId,pType,d,i,aH[0].s,"split");
+			}),
+			d3.min(splitTeam[aH[1].s], function(d,i) {
+				return reduceData(gId,pType,d,i,aH[1].s,"split");
+			})
+		);
 	var yMax = Math.max(
 			d3.max(splitTeam[aH[0].s], function(d,i) {
 				return reduceData(gId,pType,d,i,aH[0].s,"split");
@@ -2124,7 +2163,11 @@ function plotHist(gId, pType, dispTime) {
 		);
 	var splitY = d3.scale.linear()
 		.range([graphVars.histGraphHeight,0])
-		.domain([0,yMax]);
+		.domain([yMin,yMax]);
+	games[gId].splitGraph.select('g.x.axis')
+		.transition().duration(graphVars.dispTime)
+		.attr("transform","translate(0,"
+				+(splitY(0))+")");
 	aH.forEach(function(team,teamI){
 		var splitBars = games[gId].splitGraph.selectAll('rect.splitBar.'+team.s)
 			.data(splitTeam[team.s]);
@@ -2142,10 +2185,10 @@ function plotHist(gId, pType, dispTime) {
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(i); } )
 			.attr("y",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"split",splitY);
+				return reduceData(gId,pType,d,i,team.s,"split",function(d) {return splitY(negZero(d));});
 			})
 			.attr("height",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"split",function(d){return graphVars.histGraphHeight-splitY(d)});
+				return reduceData(gId,pType,d,i,team.s,"split",function(d){return splitY(0)-splitY(Math.abs(d))});
 			});
 		
 		var splitBarsSec = games[gId].splitGraph.selectAll('rect.splitBarSec.'+team.s)
@@ -2163,11 +2206,10 @@ function plotHist(gId, pType, dispTime) {
 		splitBarsSec
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(i); } )
-			.attr("y",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"split",function(d){return splitY(d)+2});
+			.attr("y",function(d,i) {return reduceData(gId,pType,d,i,team.s,"split",function(d) {return splitY(negZero(d))+2;});
 			})
 			.attr("height",function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"split",function(d){return graphVars.histGraphHeight-splitY(d)-2},true);
+				return negZero(reduceData(gId,pType,d,i,team.s,"split",function(d){return graphVars.histGraphHeight-splitY(d)-2},true));
 			});
 	});
 	games[gId].splitYAxis = d3.svg.axis()
@@ -2181,6 +2223,7 @@ function plotHist(gId, pType, dispTime) {
 	//player graph
 	var playerStats = {}
 	playerStats.max = 0;
+	playerStats.min = 0;
 	aH.forEach(function(team,teamI){
 		playerStats[team.s] = [];
 		var plStatOrder = {};
@@ -2198,27 +2241,14 @@ function plotHist(gId, pType, dispTime) {
 			}
 		});
 		playerStats[team.s].sort(function (a, b) {
-			if(primSum){
-				return b.plays.reduce(function(a2,b2){
-						var a2val = (a2[dataValue]) ? (!isDef(mPos)?+a2[dataValue]:+a2[dataValue][mPos]) : a2.x;
-						return {x:a2val + ((typeof mPos == 'undefined')?+b2[dataValue]:+b2[dataValue][mPos])};
-					}).x 
-					- a.plays.reduce(function(a2,b2){
-						var a2val = (a2[dataValue]) ? ((typeof mPos == 'undefined')?+a2[dataValue]:+a2[dataValue][mPos]) : a2.x;
-						return {x:a2val + ((typeof mPos == 'undefined')?+b2[dataValue]:+b2[dataValue][mPos])};
-					}).x;
-			}
-			return b.plays.length - a.plays.length;
+			return reduceData(gId, pType, b.plays, null, team.s)
+					- reduceData(gId, pType, a.plays, null, team.s);
 		});
 		if (playerStats[team.s].length > 0) {
-			if(primSum){
-				var tot =  playerStats[team.s][0].plays.reduce(function(a2,b2){
-						var a2val = (a2.p) ? ((typeof mPos == 'undefined')?+a2[dataValue]:+a2[dataValue][mPos]) : a2.x;
-						return {x:a2val + ((typeof mPos == 'undefined')?+b2[dataValue]:+b2[dataValue][mPos])};
-					}).x;
-				playerStats.max = (playerStats.max > tot) ? playerStats.max : tot;
-			}
-			playerStats.max = (playerStats.max > playerStats[team.s][0].plays.length) ? playerStats.max : playerStats[team.s][0].plays.length;
+			var maxTemp = reduceData(gId, pType, playerStats[team.s][0].plays, null, team.s);
+			var minTemp = reduceData(gId, pType, playerStats[team.s][playerStats[team.s].length-1].plays, null, team.s);
+			playerStats.max = (maxTemp > playerStats.max) ? maxTemp : playerStats.max;
+			playerStats.min = (minTemp < playerStats.min) ? minTemp : playerStats.min;
 		}
 		if (add) {
 			playerStats[team.s].sort(function (a, b) {
@@ -2236,7 +2266,7 @@ function plotHist(gId, pType, dispTime) {
 	});
 	var playerY = d3.scale.linear()
 		.range([0,graphVars.histGraphHeight])
-		.domain([playerStats.max,0]);
+		.domain([playerStats.max,playerStats.min]);
 	aH.forEach(function(team,teamI){
 		var playerBars = games[gId].playerStatsGraph.selectAll("rect.playerBar."+team.l)
 			.data(playerStats[team.s],function(p) {return p.name;});
@@ -2259,10 +2289,10 @@ function plotHist(gId, pType, dispTime) {
 				return ((graphVars.stat10Width+graphVars.stat10Pad)*pI + (margin.right+margin.left)/2) * Math.pow(-1,!teamI) - graphVars.stat10Width*!teamI;
 			})
 			.attr("y",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,playerY);
+				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(negZero(d));});
 			})
 			.attr("height",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return graphVars.histGraphHeight-playerY(d)});
+				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(0)-playerY(Math.abs(d))});
 			});
 		playerBars
 			.exit()
@@ -2342,7 +2372,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(d)+2});
 			})
 			.attr("height",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return graphVars.histGraphHeight-playerY(d)-2},true);
+				return negZero(reduceData(gId,pType,d.plays,i,team.s,false,function(d){return graphVars.histGraphHeight-playerY(d)-2},true));
 			});
 		playerSecBars
 			.exit()

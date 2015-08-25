@@ -458,6 +458,7 @@ field goal
 // - regular safety, checking terms and men
 // - missed extra point
 // - Score by defensive team (including punts) Change XP too
+// - Graphing negative yards
 
 // too many coin flips!
 function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
@@ -583,7 +584,7 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 		//0 - s - sack
 		//m - passer
 		//o - tackler
-		$playString .= "r";
+		$playString .= "rs";
 		preg_match('/'.$reVars['a'].$reVars['name'].$reVars['aC'].' sacked by '.$reVars['a'].$reVars['name'].$reVars['aC'].'/',$play->getPlayText(),$players);
 		$player1 = $players[2];
 		$player2 = $players[5];
