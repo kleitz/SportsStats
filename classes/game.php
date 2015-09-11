@@ -129,6 +129,7 @@ class Team {
 	public $secondary;
 	public $rank;
 	private $shorts = array();
+	private $espnID;
 	
 	
 	public function getShorts() {
@@ -136,6 +137,13 @@ class Team {
 	}
 	public function setShorts($id,$short) {
 		$this->shorts[$id] = $short;
+	}
+	
+	public function getESPNID() {
+		return $this->espnID;
+	}
+	public function setESPNID($id) {
+		$this->espnID = $id;
 	}
 	
 	public function isSetTeam() {

@@ -447,7 +447,7 @@ function graphTeamStats(gId) {
 
 //raw or per pos
 function rawOrPPNum(num,gId,teamS,args) {
-	if (d3.select('input[name="pp'+gId+'"]:checked').node().value == "p") {
+	if (d3.select('input[name="pp'+gId+'"]:checked').node().value == "s") {
 		var plays;
 		if (!isDef(args)) {
 			plays = games[gId]["playsTot"+teamS];
@@ -568,16 +568,18 @@ function addSplitButtons(gId) {
 		.classed("ppl",true)
 		.attr("for","pp"+gId+"r")
 		.text("Raw data");
-	opLoc.append("input")
-		.attr("type","radio")
-		.attr("name","pp"+gId)
-		.classed("pp "+gId,true)
-		.attr("id","pp"+gId+"p")
-		.attr("value","p");
-	opLoc.append("label")
-		.classed("ppl",true)
-		.attr("for","pp"+gId+"p")
-		.text("Per Possession");
+	sports[gId.substring(0,3)].ave.forEach(function(ave){
+		opLoc.append("input")
+			.attr("type","radio")
+			.attr("name","pp"+gId)
+			.classed("pp "+gId,true)
+			.attr("id","pp"+gId+ave.i)
+			.attr("value",ave.i);
+		opLoc.append("label")
+			.classed("ppl",true)
+			.attr("for","pp"+gId+ave.i)
+			.text("Per "+ave.l);
+	});
 	
 	d3.selectAll("input.pp."+gId)
 		.on("click",function(){return graphAll(gId, games[gId].lastPType, 0);});
@@ -1441,7 +1443,7 @@ function isData(gId,pId,pType,isPrim) {
 	var primPos = sports[sport].po[pType].pp;
 	var primDat = sports[sport].po[pType].pd;
 	var noSec = sports[sport].po[pType].ns;
-	var nP = sports[sport].po[pType].np;
+	var nextPlay = sports[sport].po[pType].np;
 	prim = (!isDef(prim)) ? comp : prim;
 	var compRegExp = new RegExp(comp,"i");
 	var primRegExp = new RegExp(prim,"i");
@@ -1461,9 +1463,9 @@ function isData(gId,pId,pType,isPrim) {
 	}
 	if ((isPrim || noSec || prim==comp) && mainBool) {
 		var secBool;
-		if (nP) {
-			var nextPlay = games[gId].plays[pId+1];
-			secBool = primRegExp.test(nextPlay[dv]);
+		if (nextPlay) {
+			var nP = games[gId].plays[pId+1];
+			secBool = primRegExp.test(nP[dv]);
 		} else if (isDef(primPos)) {
 			secBool = primRegExp.test(play[dv][primPos]);
 		} else {
@@ -1479,7 +1481,7 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var sport = gId.substring(0,3);
 	var comp = sports[sport].po[pType].c;
 	var prim = sports[sport].po[pType].p;
-	var defPosP = sports[sport].po[pType].dpp;
+	var defPosP = sports[sport].po[pType].dpp; //primary is defense, mainly for per possession calculation
 	var defPosS = sports[sport].po[pType].dps;
 	var primSum = sports[sport].po[pType].sum;
 	var primPos = sports[sport].po[pType].pp;
@@ -1491,7 +1493,7 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var splitTime = sports[sport].s;
 	var dataValue = (sports[sport].po[pType].dv)?sports[sport].po[pType].dv:'p';
 	var dataAr = [];
-	if (isSec || defPosP || defPosS) {
+	if (isSec) {
 		var secData = data.filter(function(p){return !(isData(gId,p.id,pType,isSec))});
 		dataAr.push(secData);
 	} else {
@@ -1560,7 +1562,6 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	if (isDef(func)) {
 		value = func(value);
 	}
-	//value = (value<0)?0:value;
 	return value;
 }
 
@@ -1734,33 +1735,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d))});
 			})
 			.text(function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time");
-				if (comp == null) {
-					return "";
-				}
-				if (primSum) {
-					var primTot = 0;
-					d.forEach(function(p) {
-						primTot += +p.p[mPos];
-					});
-					return shortNum(rawOrPPNum(primTot,gId,team.s,{index:i,type:"time", dp:defPosP}));
-				} else if (comp=="pos") {
-					var topTot = 0;
-					d.forEach(function(p) {
-						topTot += getPlayTime(gId,p.id);
-					});
-					return shortNum(rawOrPPNum(topTot,gId,team.s,{index:i,type:"time", dp:defPosP}));
-				} else {
-					var secLength = d.filter(function(p){return !primRegExp.test(p.p[primPos]);}).length;
-					var textStr = shortNum(rawOrPPNum((d.y - secLength),gId,team.s,{index:i,type:"time", dp:defPosP}));
-					if (sports[gId.substring(0,3)].po[pType].pl && 
-							!sports[gId.substring(0,3)].po[pType].fs) {
-						textStr += 
-							((sports[gId.substring(0,3)].po[pType].add)?"/":"-") 
-							+ shortNum(rawOrPPNum(((sports[gId.substring(0,3)].po[pType].add) ? d.y : secLength),gId,team.s,{index:i,type:"time"}));
-					}
-					return textStr;
-				} 
+				return reduceData(gId,pType,d,i,team.s,"time",shortNum); 
 			});
 		//set secondary box
 		var secBars = games[gId].histChart.selectAll('rect.s.'+team.s)
@@ -1783,7 +1758,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d))+2;});
 			})
 			.attr("height",function(d,i) {
-				return negZero(reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(d)-2;},true));
+				return negZero(reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(d)-histY(0)-2;},true));
 			});
 	});
 
@@ -2209,7 +2184,7 @@ function plotHist(gId, pType, dispTime) {
 			.attr("y",function(d,i) {return reduceData(gId,pType,d,i,team.s,"split",function(d) {return splitY(negZero(d))+2;});
 			})
 			.attr("height",function(d,i) {
-				return negZero(reduceData(gId,pType,d,i,team.s,"split",function(d){return graphVars.histGraphHeight-splitY(d)-2},true));
+				return negZero(reduceData(gId,pType,d,i,team.s,"split",function(d){return splitY(0)-splitY(d)-2},true));
 			});
 	});
 	games[gId].splitYAxis = d3.svg.axis()
@@ -2372,7 +2347,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(d)+2});
 			})
 			.attr("height",function(d,i){
-				return negZero(reduceData(gId,pType,d.plays,i,team.s,false,function(d){return graphVars.histGraphHeight-playerY(d)-2},true));
+				return negZero(reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(0)-playerY(d)-2},true));
 			});
 		playerSecBars
 			.exit()

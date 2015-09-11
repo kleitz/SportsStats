@@ -4,6 +4,12 @@
 	"s":300,
 	"pd":true,
 	"pos":"e",
+	"ave":[
+		{"i":"s",
+		"l":"Possession"},
+		{"i":"p",
+		"l":"Play"}
+	],
 	"q":{
 		"n":2,
 		"t":1200,
@@ -42,7 +48,6 @@
 		"r":{
 			"c":"r",
 			"mp":0,
-			"pp":0,
 			"l":"Run",
 			"a":"R",
 			"pv":"g",
@@ -101,8 +106,10 @@
 			"p":"s",
 			"l":"Sack",
 			"a":"S",
+			"player":1,
 			"ns":true,
-			"dpp":true
+			"dpp":true,
+			"ot":true
 		},
 		"tno":{
 			"c":"t",

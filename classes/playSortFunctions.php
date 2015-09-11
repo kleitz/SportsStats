@@ -542,7 +542,7 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 		//0 - c - coin toss
 		$playString .= "c";
 		$play->t = $theSportVars['maxTime'];
-		$play->x = 1;
+		$play->x = 0;
 		if (strpos($playTextLower, strtolower($teams[0]->teamName)) !== false) {
 			$play->e = 'a';
 		} else if (strpos($playTextLower, strtolower($teams[0]->teamName)) !== false) {
@@ -646,18 +646,20 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	} else if (strpos($playTextLower, 'timeout') !== false) {
 		//0 - o - timeout
 		$playString .= 'o';
-		if (strpos($playTextLower, $teams[0]) !== false) {
+		//echo $teams[0]->teamName;
+		if (strpos($playTextLower, strtolower($teams[0]->teamName)) !== false) {
+			//echo $playTextLower." a\n";
 			$play->e = 'a';
-		} else if (strpos($playTextLower, $teams[0]) !== false) {
+		} else if (strpos($playTextLower, strtolower($teams[1]->teamName)) !== false) {
+			//echo $playTextLower." h\n";
 			$play->e = 'h';
 		}
-		$possession = (end($plays)->e == 'a') ? 'a' : 'h';
+		//$possession = (end($plays)->e == 'a') ? 'a' : 'h';
 	} else if (strpos($playTextLower, 'end ') !== false) {
 		//0 - e - end of period
 		//1 - # - period number
 		$playString .= 'e';
 		$playString .= ($play->q <= $theSportVars['regPeriods']+1) ? $play->q : $theSportVars['regPeriods']+1;
-		$possession = end($plays)->s;
 		$play->e = (end($plays)->s)?end($plays)->s:end($plays)->e;
 	}
 	else {
