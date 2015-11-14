@@ -804,7 +804,16 @@ function getPlayText(gId,play) {
 					playAr.push(games[gId][play.e].teamName);
 				}
 			} else {
-				playAr.push(play[playText.order[oI]]);
+				if (playText[playText.order[oI]]) {
+					if (isDef(playText[playText.order[oI]].dataI)) {
+						var dataI = playText[playText.order[oI]].dataI;
+						playAr.push(play[playText.order[oI]][dataI]);
+					} else {
+						playAr.push(play[playText.order[oI]]);
+					}
+				} else {
+					playAr.push(play[playText.order[oI]]);
+				}
 			}
 			if (playText[playText.order[oI]] &&
 					play[playText.order[oI]] != null) {
@@ -827,14 +836,20 @@ function getPlayText(gId,play) {
 				);
 			}
 			if (playText[playText.order[oI]].data) {
-				playAr.push(play[playText[playText.order[oI]].data]);
+				if (isDef(playText[playText.order[oI]].dataI)) {
+					var dataI = playText[playText.order[oI]].dataI;
+					playAr.push(play[playText[playText.order[oI]].data][dataI]);
+				} else {
+					playAr.push(play[playText[playText.order[oI]].data]);
+				}
 			}
 			if (playText[playText.order[oI]].xt) {
 				playAr.push(playText[playText.order[oI]].xt);
 			}
 		}
 	}
-	if (play == games[gId].plays[games[gId].plays.length-1]) {
+	if (play == games[gId].plays[games[gId].plays.length-1] &&
+			oI == "e") {
 		playAr.pop();
 		playAr.push("game.");
 	}
@@ -1947,7 +1962,11 @@ function plotHist(gId, pType, dispTime) {
 					.duration(graphVars.dispTime/4)
 					.attr('r',10)
 					.attr('stroke-width',"6px");
-				var playText = histData[i].id + ": " +getPlayText(gId,histData[i]);
+				var playText = histData[i].a 
+						+ "-" 
+						+ histData[i].h 
+						+ ": " 
+						+ getPlayText(gId,histData[i]);
 				var labelCont = games[gId].chart.append("g")
 					.attr("id","pointLabel-"+histData[i].id);
 				var labelBox = labelCont.append("rect")

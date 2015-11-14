@@ -98,10 +98,10 @@ function getPlayShortNcb($theSportVars, $play, $plays, $teams) {
 	} else if (strpos($playTextLower, 'foul') !== false) {
 		$playString .= 'f';
 		$numFouls = 1;
-		$player1 = str_replace('.','', str_replace('Foul on ', '', $play->getPlayText()));
+		$player1 = str_replace('.','', str_replace('Foul on ', '', str_replace('Technical ','',$play->getPlayText())));
 		foreach($plays as $p) {
 			if (substr($p->p,0,1) == 'f' &&
-					$player1 == $p->m) {
+					$player1 == $p->m[0]) {
 				$numFouls++;
 			}
 		}

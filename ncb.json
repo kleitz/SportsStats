@@ -173,6 +173,9 @@
 	},
 	"pt":{
 		"1":{
+			"m": {
+				"dataI": 0
+			},
 			"1": {
 				"f": "free throw"
 			},
@@ -183,6 +186,9 @@
 			"order": "m21"
 		},
 		"2":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"2": "2-pt"
 			},
@@ -198,11 +204,15 @@
 			},
 			"3": {
 				"a": "assist by",
-				"data": "o"
+				"data": "m",
+				"dataI": 1
 			},
 			"order": "m2013"
 		},
 		"3":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"3": "3-pt"
 			},
@@ -218,11 +228,15 @@
 			},
 			"3": {
 				"a": "assist by",
-				"data": "o"
+				"data": "m",
+				"dataI": 1
 			},
 			"order": "m2013"
 		},
 		"r":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"r": "rebound"
 			},
@@ -233,28 +247,41 @@
 			"order": "m10"
 		},
 		"b":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"b": "Block by"
 			},
 			"order": "0m"
 		},
 		"t":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"t": "Turnover"
 			},
 			"1": {
 				"s": "stolen by",
-				"data": "o"
+				"data": "m",
+				"dataI": 1
 			},
 			"order": "0m1"
 		},
 		"s":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"s": "Ball stolen by"
 			},
 			"order": "0m"
 		},
 		"f":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"f": "foul"
 			},
@@ -278,6 +305,9 @@
 			"order": "e0"
 		},
 		"j":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"j": "Jump ball won by"
 			},
@@ -295,12 +325,18 @@
 			"order": "01"
 		},
 		"k":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"k": "Kicked ball"
 			},
 			"order": "0m"
 		},
 		"g":{
+			"m": {
+				"dataI": 0
+			},
 			"0": {
 				"g": "Goaltending"
 			},
