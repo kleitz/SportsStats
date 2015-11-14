@@ -1,10 +1,13 @@
+;(function() {
+"use strict";
+
 var games = {};
 var sports = {};
 var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom: 8},
 	loaderVars = {
 		num : 3,
 		width : 10,
-		pad : 40}
+		pad : 40},
 	graphVars = {
 		dispTime : 500,
 		graphTime : 1000,
@@ -23,6 +26,23 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 	width = graphVars.lineGraphWidth,
 	height = graphVars.lineGraphHeight,
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
+var nameSuffixes = ['sr','jr','ii','iii','iv','v','vi','vii'];
+graphVars.stat10Pad = 5;
+graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
+
+d3.select("#showGames")
+	.on("click",function(){
+		console.log(games);
+	});
+
+d3.select(".showDispCont")
+	.forEach(function(d,i){
+		var parentId = d[0].parentNode.id;
+		var id = d[0].id.replace(parentId,"");
+		var labelTitle = d3.select(d[0]).attr("labelTitle");
+		createShowDisp(parentId,id,labelTitle,true);
+	});
+
 function oppAH(team, skip) {
 	if (skip) {
 		return team;
@@ -36,9 +56,6 @@ function oppAH(team, skip) {
 function isDef(v) {
 	return (typeof v !== 'undefined');
 }
-nameSuffixes = ['sr','jr','ii','iii','iv','v','vi','vii'];
-graphVars.stat10Pad = 5;
-graphVars.stat10Width = (graphVars.lineGraphWidth)/20 - graphVars.stat10Pad;
 d3.select(window).on("hashchange",function(){
 	d3.selectAll("."+d3.select("div.gameBox").attr("id")).remove()
 	d3.select("div.gameBox").
@@ -63,7 +80,7 @@ function loadGames(){
 }
 function insertGameInput(div) {
 	if (d3.select(div).select("div.gameInputCont")[0][0]==null) {
-		gameInput = d3.select(div)
+		var gameInput = d3.select(div)
 			.append("div")
 			.classed("gameInputCont",true)
 			.append("input")
@@ -171,7 +188,7 @@ function addLoader(gId) {
 		.attr("width",graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height",graphVars.histGraphHeight)
 		.attr("id","loadingSvg");
-	loaderContainer = loaderSvg.append("g")
+	var loaderContainer = loaderSvg.append("g")
 		.attr("transform","translate(" + ((graphVars.histGraphWidth + margin.left + margin.right)/2) + "," + (graphVars.histGraphHeight/2) + ")");
 	for(var rI = 0; rI<loaderVars.num; rI++){
 		var rect = loaderContainer.append("g")
@@ -453,7 +470,7 @@ function rawOrPPNum(num,gId,teamS,args) {
 			plays = games[gId]["playsTot"+teamS];
 		} else {
 			if (args.dp) {
-				for(aHI = 0; aHI < aH.length; aHI++) {
+				for(var aHI = 0; aHI < aH.length; aHI++) {
 					if (teamS != aH[aHI].s) {
 						teamS = aH[aHI].s
 						break;
@@ -765,7 +782,7 @@ function getDispTime(gId,p) {
 	if (p.p[0] == 'e') {
 		return "0:00"+" "+games[gId].boxScore[p.q-1].l;
 	}
-	t = getMinutes(gId,p.t);
+	var t = getMinutes(gId,p.t);
 	dispTime += Math.trunc(t.t/60) + ":";
 	dispTime += (t.t%60 < 10)? "0"+(t.t%60):t.t%60;
 	return dispTime+" "+games[gId].boxScore[t.p].l;
@@ -940,7 +957,7 @@ function addPlayerStats(gId) {
 	
 	var sPO = sports[gId.substring(0,3)].po;
 	games[gId].players = {};
-	playerStatsTable = d3.select("div#"+gId)
+	var playerStatsTable = d3.select("div#"+gId)
 		.append("div")
 		.classed("playerStats",true)
 		.classed(gId,true)
@@ -962,7 +979,7 @@ function addPlayerStats(gId) {
 					});
 				}
 		});
-		playerRow = playerStatsTable.append("tr");
+		var playerRow = playerStatsTable.append("tr");
 		playerRow.append("td")
 			.classed("thead",true)
 			.text(games[gId][team.s].teamName);
@@ -1096,7 +1113,7 @@ function createShowDisp(gId,obId,title,hidden,secId) {
 
 //convert period seconds to minutes
 function getMinutes(gId,pTime) {
-	period = games[gId].boxScore.length-1;
+	var period = games[gId].boxScore.length-1;
 	for(var boxI = games[gId].boxScore.length-1; boxI>=0; boxI--) {
 		var b = games[gId].boxScore[boxI];
 		if (pTime > b.t) {
@@ -1278,7 +1295,7 @@ function plotScore(gId) {
 	
 	//create replay buttons
 	graphVars.replayTimes.forEach(function(timeInS,i){
-		replayButton = games[gId].chart
+		var replayButton = games[gId].chart
 			.append("g")
 			.attr("transform", "translate(" + (width + 20) + "," + (8-margin.top + 30*i) + ")")
 			.on("click", function(){
@@ -1571,7 +1588,7 @@ function negZero(a) {
 
 //switch score diff on click
 function switchScoreDiff(gId,ob) {
-	box = d3.select(ob);
+	var box = d3.select(ob);
 	if(!box.classed("svgLinkBoxActive")){
 		var links = [box.attr("id")[box.attr("id").length-gId.length-1],
 				(box.attr("id")[box.attr("id").length-gId.length-1]=="D")?"S":"D"];
@@ -1993,7 +2010,7 @@ function plotHist(gId, pType, dispTime) {
 		.style("opacity",0)
 		.remove();
 	
-	graphKeyG = graphKey
+	var graphKeyG = graphKey
 		.enter()
 		.append("g")
 		.classed("linePointKey "+gId+" "+pType,true)
@@ -2365,3 +2382,5 @@ function plotHist(gId, pType, dispTime) {
 			.call(games[gId].playerYAxis);
 	});
 }
+})();
+

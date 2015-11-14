@@ -59,6 +59,7 @@ if(preg_match('/^[a-zA-Z]{3}[0-9]+$/',$gId) &&
 }
 
 $html = file_get_html("http://espn.go.com/$sportId/playbyplay?gameId=$gameId&period=0");
+//$html = file_get_html("game1st.html");
 //error_reporting(E_ALL);
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597322'); //Ken TAM
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400788981'); //Wis Duke
@@ -101,13 +102,17 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 						$teamName = $a->innertext;
 						if (preg_match("/^(\w+ )?away( \w+)?$/",$tb->class)) {
 							$away = new Team();
-							$away->teamName = ucwords(strtolower($teamName));
+							$away->teamName = $teamName;
+							$shortNameTDs = $html->find('td.team');
+							$away->short = $shortNameTDs[1]->nodes[0]->innertext;
 							$game->a = $away;
 							getTeamData($game->a,$dbcon,"a",$sportVars[$sportId]);
 						}
 						else if (preg_match("/^(\w+ )?home( \w+)?$/",$tb->class)) {
 							$home = new Team();
-							$home->teamName = ucwords(strtolower($teamName));
+							$home->teamName = $teamName;
+							$shortNameTDs = $html->find('td.team');
+							$home->short = $shortNameTDs[2]->nodes[0]->innertext;
 							$game->h = $home;
 							getTeamData($game->h,$dbcon,"h",$sportVars[$sportId]);
 						}
@@ -117,7 +122,7 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 		}
 	}
 	$playTable = $html->find('table.mod-data', 0);
-	foreach($playTable->nodes as $a) {
+	foreach($playTable->nodes as $ai=>$a) {
 		if ($a->tag == "thead") {
 			if ($sportVars[$sportId]['sport'] == 'football' &&
 					$a->nodes[0]->class == 'team-color-strip') {
@@ -245,7 +250,6 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 				$play->a = $lastPlay->a;
 				$play->h = $lastPlay->h;
 			}
-		
 			if (strpos(strtolower($play->getPlayText()), strtolower('end of ')) !== false ||
 					strpos(strtolower($play->getPlayText()), strtolower('end game')) !== false ||
 					strpos(strtolower($play->getPlayText()), strtolower('end half')) !== false) {
@@ -464,6 +468,29 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 		}*/
 	}
 }
+//fill out box score for unfinished games
+if (sizeof($boxScore) < end($plays)->q) {
+	$play = end($plays);
+	$boxScoreElem = new BoxScore();
+	$boxScoreElem->period = $play->q;
+	$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
+	$lastABoxScore = 0;
+	$lastHBoxScore = 0;
+	foreach ($boxScore as $bse) {
+		$lastABoxScore += $bse->a;
+		$lastHBoxScore += $bse->h;
+	}
+	$boxScoreElem->a = $play->a - $lastABoxScore;
+	$boxScoreElem->h = $play->h - $lastHBoxScore;
+	array_push($boxScore,$boxScoreElem);
+}
+while (sizeof($boxScore) < $sportVars[$sportId]['regPeriods']) {
+	$boxScoreElem = new BoxScore();
+	$boxScoreElem->period = end($boxScore)->period+1;
+	$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
+	array_push($boxScore,$boxScoreElem);
+}
+//Do box score period things
 for($boxI = 0; $boxI<sizeof($boxScore); $boxI++) {
 	if ($boxI < $sportVars[$sportId]['regPeriods']) {
 		$boxScore[$boxI]->l = $periodNames[$boxI];
@@ -550,6 +577,7 @@ function getTeamData($team,$dbcon,$index,$sportVars) {
 	$team->primary = $primary[$index];
 	$team->secondary = $secondary[$index];
 	$team->id = 0;
+	
 }
 mysqli_close($dbcon);
 ?>

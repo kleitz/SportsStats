@@ -11,10 +11,9 @@
 <div class="gameBox notLoaded" id="">
 </div>
 <script src="./d3.v3.min.js"></script>
-<script src="loadGraph.js"></script>
 <div id="footer" class="footer">
 	Contact /u/quacainia with issues. List of currently known bugs:
-	<div id="bugListfooter" class="footerList showDispCont">
+	<div id="bugListfooter" class="footerList showDispCont" labelTitle="bug list">
 	<ul>
 		<li>Loading teams too quickly (or clicking back/forward too fast) will cause errors.</li>
 		<li>If there are too many plays at the same score and same time then it doesn't graph correctly</li>
@@ -26,8 +25,9 @@
 		<li>Some plays don't display text, unknown issues with Voronoi mapping</li>
 	</ul>
 	</div>
-	<script>createShowDisp('footer','bugList','bug list',true);</script>
 	Other feature additions are on hold while I work on football.
 </div>
+<input type="button" id="showGames" value="Show Games" />
+<script src="loadGraph.js"></script>
 </body>
 </html>
