@@ -19,10 +19,11 @@ var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom:
 		teamStatWidth: 200,
 		teamStatHeight: 18,
 		showHideShape: {
-		triangle:"M0,0L0,0L12,0L12,0L6,10Z",
-		dash:"M0,7L0,3L12,3L12,7L6,7Z",
-		plus:"M1,7L1,3L4,3L4,0L8,0L8,3L11,3L11,7L8,7L8,10L4,10L4,7Z",
-		pDash:"M1,7L1,3L1,3L4,3L8,3L11,3L11,3L11,7L11,7L8,7L4,7L1,7Z"}},
+			triangle:"M0,0L0,0L12,0L12,0L6,10Z",
+			dash:"M0,7L0,3L12,3L12,7L6,7Z",
+			plus:"M1,7L1,3L4,3L4,0L8,0L8,3L11,3L11,7L8,7L8,10L4,10L4,7Z",
+			pDash: "M1,7L1,3L1,3L4,3L8,3L11,3L11,3L11,7L11,7L8,7L4,7L1,7Z"},
+		sportMapping: {menscollegebasketball:"ncb"}},
 	width = graphVars.lineGraphWidth,
 	height = graphVars.lineGraphHeight,
 	aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
@@ -57,7 +58,9 @@ function isDef(v) {
 	return (typeof v !== 'undefined');
 }
 d3.select(window).on("hashchange",function(){
-	d3.selectAll("."+d3.select("div.gameBox").attr("id")).remove()
+	if (d3.select("div.gameBox").attr("id")) {
+		d3.selectAll("."+d3.select("div.gameBox").attr("id")).remove();
+	}
 	d3.select("div.gameBox").
 		attr("id",location.hash.substring(1));
 	loadGames();
@@ -96,6 +99,11 @@ function insertGameInput(div) {
 					var id = getReq("gameId","?"+this.value.split('?')[1]);
 					var sport = this.value.match(/\/[a-zA-Z-]+\//g)[0];
 					sport = sport.substring(1,sport.length-1);
+					sport = sport.replace(/-/g,'');
+					console.log(sport);
+					if (isDef(graphVars.sportMapping[sport])) {
+						sport = graphVars.sportMapping[sport];
+					}
 					if (isDef(id) && isNormalInteger(id)) {
 						if (div.id.length > 0)
 							d3.selectAll("."+div.id).remove();
@@ -104,7 +112,7 @@ function insertGameInput(div) {
 						gameInput.attr("disabled","disabled");
 						location.hash = "#"+sport+id;
 						this.value = "";
-						loadGames();
+						//loadGames();
 					} else {
 						this.value = "Please try again";
 					}
@@ -1713,7 +1721,8 @@ function plotHist(gId, pType, dispTime) {
 		.domain([
 			Math.min(
 				d3.min(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
-				d3.min(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");}))
+				d3.min(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");}),
+				0)
 			, 
 			Math.max(
 				d3.max(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
@@ -2162,7 +2171,8 @@ function plotHist(gId, pType, dispTime) {
 			}),
 			d3.min(splitTeam[aH[1].s], function(d,i) {
 				return reduceData(gId,pType,d,i,aH[1].s,"split");
-			})
+			}),
+			0
 		);
 	var yMax = Math.max(
 			d3.max(splitTeam[aH[0].s], function(d,i) {
