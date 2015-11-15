@@ -36,13 +36,17 @@ d3.select("#showGames")
 		console.log(games);
 	});
 
-d3.select(".showDispCont")
-	.forEach(function(d,i){
-		var parentId = d[0].parentNode.id;
-		var id = d[0].id.replace(parentId,"");
-		var labelTitle = d3.select(d[0]).attr("labelTitle");
-		createShowDisp(parentId,id,labelTitle,true);
-	});
+(function(){
+	var sDC = d3.select(".showDispCont");
+	if (sDC[0][0] != null) {
+		sDC.forEach(function(d,i){
+			var parentId = d[0].parentNode.id;
+			var id = d[0].id.replace(parentId,"");
+			var labelTitle = d3.select(d[0]).attr("labelTitle");
+			createShowDisp(parentId,id,labelTitle,true);
+		});
+	}
+})();
 
 function oppAH(team, skip) {
 	if (skip) {

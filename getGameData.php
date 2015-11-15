@@ -47,6 +47,7 @@ $sportVars = array(
 		'sport' => 'football'
 	)
 );
+$sportVars[$sportId]['gId'] = $sportId.$gameId;
 
 if(preg_match('/^[a-zA-Z]{3}[0-9]+$/',$gId) && 
 	$sportVars[$sportId] != null) {
@@ -59,7 +60,6 @@ if(preg_match('/^[a-zA-Z]{3}[0-9]+$/',$gId) &&
 }
 
 $html = file_get_html("http://espn.go.com/$sportId/playbyplay?gameId=$gameId&period=0");
-//$html = file_get_html("game1st.html");
 //error_reporting(E_ALL);
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400597322'); //Ken TAM
 //$html = file_get_html('http://espn.go.com/ncb/playbyplay?gameId=400788981'); //Wis Duke
@@ -103,7 +103,8 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 						if (preg_match("/^(\w+ )?away( \w+)?$/",$tb->class)) {
 							$away = new Team();
 							$away->teamName = $teamName;
-							$shortNameTDs = $html->find('td.team');
+							$shortNameDiv = $html->find('div.line-score-container');
+							$shortNameTDs = $shortNameDiv[0]->find('td.team');
 							$away->short = $shortNameTDs[1]->nodes[0]->innertext;
 							$game->a = $away;
 							getTeamData($game->a,$dbcon,"a",$sportVars[$sportId]);
@@ -111,7 +112,8 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 						else if (preg_match("/^(\w+ )?home( \w+)?$/",$tb->class)) {
 							$home = new Team();
 							$home->teamName = $teamName;
-							$shortNameTDs = $html->find('td.team');
+							$shortNameDiv = $html->find('div.line-score-container');
+							$shortNameTDs = $shortNameDiv[0]->find('td.team');
 							$home->short = $shortNameTDs[2]->nodes[0]->innertext;
 							$game->h = $home;
 							getTeamData($game->h,$dbcon,"h",$sportVars[$sportId]);
@@ -276,7 +278,37 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 			$play->q = $period;
 			$play->id = sizeof($plays);
 			++$playid;
-			selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h));
+			if (selectPlayShort($sportVars[$sportId],$play, $plays, array($game->a,$game->h)) === false) {
+				$teams = array($game->a,$game->h);
+				$playText = $play->getPlayText();
+				$teamsNames = array();
+				for ($i = 0; $i<2; $i++) {
+					array_push($teamsNames,$teams[0]->teamName);
+					array_push($teamsNames,$teams[0]->short);
+					if (sizeof($teams[0]->getShorts())>0) {
+						array_merge($teamsNames, $teams[0]->getShorts());
+					}
+				}
+				$textLike = preg_replace('/'.implode('|',$teamsNames).'/','%',$playText);
+				$pe_querySelect = "SELECT * FROM SPORTS_PARSE_ERRORS WHERE playtext LIKE '$textLike'";
+				$data = mysqli_query($dbcon,$pe_querySelect);
+				if ($data != null) {
+					if (mysqli_num_rows($data) == 0) {
+						$gId = mysqli_real_escape_string($dbcon,$sportVars[$sportId]['gId']);
+						$playText = mysqli_real_escape_string($dbcon,$playText);
+						$pe_queryInsert = "INSERT INTO SPORTS_PARSE_ERRORS (gid, playtext) VALUES ('$gId', '$playText')";
+						mysqli_query($dbcon,$pe_queryInsert);
+					} else {
+						$row = mysqli_fetch_array($data);
+						if (!preg_match("/$sportVars[$sportId][gId]/",$row['gid'])) {
+							$gId = $row['gid'].','.$sportVars[$sportId]['gId'];
+							$pe_queryInc = "UPDATE SPORTS_PARSE_ERRORS gid SET $gId WHERE id = $row[id]";
+							mysqli_query($dbcon,$pe_queryInc);
+						}
+					}
+				}
+				continue;
+			}
 		
 			//Fix ESPN data issues
 			if ($sportVars[$sportId]['sport'] == 'basketball') {
@@ -487,7 +519,7 @@ if (sizeof($boxScore) < end($plays)->q) {
 while (sizeof($boxScore) < $sportVars[$sportId]['regPeriods']) {
 	$boxScoreElem = new BoxScore();
 	$boxScoreElem->period = end($boxScore)->period+1;
-	$boxScoreElem->t = $plays[$lastBoxScorePlay]->t;
+	$boxScoreElem->t = $sportVars[$sportId]['maxTime'];
 	array_push($boxScore,$boxScoreElem);
 }
 //Do box score period things
@@ -577,7 +609,6 @@ function getTeamData($team,$dbcon,$index,$sportVars) {
 	$team->primary = $primary[$index];
 	$team->secondary = $secondary[$index];
 	$team->id = 0;
-	
 }
 mysqli_close($dbcon);
 ?>

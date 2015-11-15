@@ -2,15 +2,19 @@
 
 function selectPlayShort($theSportVars, $play, $plays, $teams) {
 	if ($theSportVars['id'] == 'ncb') {
-		getPlayShortNcb($theSportVars, $play, $plays, $teams);
+		return getPlayShortNcb($theSportVars, $play, $plays, $teams);
 	} else if ($theSportVars['id'] == 'nba') {
-		getPlayShortNba($theSportVars, $play, $plays, $teams);
+		return getPlayShortNba($theSportVars, $play, $plays, $teams);
 	} else if ($theSportVars['id'] == 'ncf') {
-		getPlayShortNcf($theSportVars, $play, $plays, $teams);
+		return getPlayShortNcf($theSportVars, $play, $plays, $teams);
 	} else {
 		echo "Sport not available.";
 	}
 }
+
+function insertParseError($gId, $text,$teams) {
+}
+
 /* //  NCB  //
 1 - free throw attempt
 2 - 2 point shot
@@ -177,6 +181,7 @@ function getPlayShortNcb($theSportVars, $play, $plays, $teams) {
 	}
 	else {
 		$playString .= $playTextLower;
+		return false;
 	}
 	$play->p = $playString;
 	$play->m = array();
@@ -190,6 +195,7 @@ function getPlayShortNcb($theSportVars, $play, $plays, $teams) {
 	}
 	$play->s = $possession;
 	$play->x = $possessionNew;
+	return true;
 }
 
 
@@ -415,6 +421,9 @@ function getPlayShortNba($theSportVars, $play, $plays, $teams) {
 	}
 	else {
 		$playString .= $playTextLower;
+		insertParseError($theSportVars['gId'],$playTextLower,$teams);
+		//var_dump($theSportVars);
+		return false;
 	}
 	$play->p = $playString;
 	$play->m = array();
@@ -428,6 +437,7 @@ function getPlayShortNba($theSportVars, $play, $plays, $teams) {
 	}
 	$play->s = $possession;
 	$play->x = $possessionNew;
+	return true;
 }
 
 ///////////////////
@@ -664,6 +674,7 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	}
 	else {
 		$playString .= $playTextLower;
+		return false;
 	}
 	$play->p = $playString;
 	if (strlen($play->p)>5) {
@@ -683,5 +694,6 @@ function getPlayShortNcf($theSportVars, $play, $plays, $teams) {
 	} else if (sizeof($play->m) > 0) {
 		array_unshift($play->m, '');
 	}
+	return true;
 }
 ?>
