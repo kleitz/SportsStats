@@ -46,7 +46,31 @@ d3.select("#showGames")
 			createShowDisp(parentId,id,labelTitle,true);
 		});
 	}
+	
+	d3.select("div#popup")
+		.on("click",closePopup);
+	
+	Date.prototype.yyyymmdd = function() {
+		var yyyy = this.getFullYear().toString();
+		var mm = (this.getMonth()+1).toString(); 
+		var dd  = (this.getDate()+1).toString();
+		return yyyy + (mm[1]?mm:"0"+mm[0]) + (dd[1]?dd:"0"+dd[0]);
+	};
+	Date.prototype.todayLocal = (function() {
+		var local = new Date(this);
+		local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+		return local;
+	});
 })();
+
+function minToTime(t) {
+	return Math.trunc(t/60)
+		+":"
+		+(
+			'00'
+			+Math.trunc(t%60)
+		).slice(-2);
+}
 
 function oppAH(team, skip) {
 	if (skip) {
@@ -87,10 +111,10 @@ function loadGames(){
 }
 function insertGameInput(div) {
 	if (d3.select(div).select("div.gameInputCont")[0][0]==null) {
-		var gameInput = d3.select(div)
+		var gameInputBox = d3.select(div)
 			.append("div")
-			.classed("gameInputCont",true)
-			.append("input")
+			.classed("gameInputCont",true);
+		var gameInput = gameInputBox.append("input")
 			.attr("type","text")
 			.attr("placeholder","Input ESPN box score URL (play-by-play required for compatibility)")
 			.classed("gameInput",true);
@@ -100,29 +124,197 @@ function insertGameInput(div) {
 					return;
 				}
 				if (e.keyCode == 13) {
-					var id = getReq("gameId","?"+this.value.split('?')[1]);
-					var sport = this.value.match(/\/[a-zA-Z-]+\//g)[0];
-					sport = sport.substring(1,sport.length-1);
-					sport = sport.replace(/-/g,'');
-					console.log(sport);
-					if (isDef(graphVars.sportMapping[sport])) {
-						sport = graphVars.sportMapping[sport];
-					}
-					if (isDef(id) && isNormalInteger(id)) {
-						if (div.id.length > 0)
-							d3.selectAll("."+div.id).remove();
-						d3.select(div)
-							.attr("id",sport + id);
-						gameInput.attr("disabled","disabled");
-						location.hash = "#"+sport+id;
-						this.value = "";
-						//loadGames();
-					} else {
-						this.value = "Please try again";
-					}
+					var inputThis = this;
+					inputGame(inputThis.value,
+						function(){
+							inputThis.value = "";
+						},
+						function(){
+							inputThis.value = "Please try again";
+					});
 				}
 			});
+		function inputGame(input,callback,errorCallback) {
+			var id,sport;
+			if (input.match(/^([a-z]{3})(\d+)$/)) {
+				id = input.substring(3);
+				sport = input.substring(0,3);
+			} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
+				id = getReq("gameId","?"+input.split('?')[1]);
+				sport = input.match(/\/[a-zA-Z-]+\//g)[0];
+				sport = sport.substring(1,sport.length-1);
+				sport = sport.replace(/-/g,'');
+				if (isDef(graphVars.sportMapping[sport])) {
+					sport = graphVars.sportMapping[sport];
+				}
+			} else {
+				if (errorCallback) {
+					errorCallback();
+				}
+				return;
+			}
+			if (isDef(id) && isNormalInteger(id)) {
+				if (div.id.length > 0)
+					d3.selectAll("."+div.id).remove();
+				d3.select(div)
+					.attr("id",sport + id);
+				gameInput.attr("disabled","disabled");
+				location.hash = "#"+sport+id;
+				if (callback) {
+					callback();
+				}
+				//loadGames();
+			} else {
+				if (errorCallback) {
+					errorCallback();
+				}
+			}
+		}
+		var browseSchedule = gameInputBox.append("input")
+			.attr("type","button")
+			.attr("value","Browse Schedule")
+			.classed("browseButton",true)
+			.classed("hover",true)
+			.on("click",function(e) {
+				event.preventDefault();
+				var browseCont = openPopup()
+					.append("div")
+					.classed("browseCont",true);
+				var buttonsDiv = browseCont
+					.append("div")
+					.classed("popupButtons",true);
+				var searchDiv = buttonsDiv.append("div")
+					.classed("left",true)
+					.on('click', function(){
+						d3.event.stopPropagation();
+					});
+				var schedIn = searchDiv.append("input")
+					.attr("type","date")
+					.on("change",searchSched);
+				schedIn[0][0]
+					.valueAsDate = new Date().todayLocal();
+				var schedSelect = searchDiv.append("select")
+					.on("change",searchSched);
+				schedSelect.append("option")
+					.attr("value","ncb")
+					.text("NCAAM");
+				schedSelect.append("option")
+					.attr("value","nba")
+					.text("NBA");
+				buttonsDiv.append("input")
+					.attr("type","button")
+					.attr("value","Close")
+					.classed("right",true);
+				var sched = browseCont.append("div")
+					.classed("browseSchedule",true)
+					.on('click', function(){
+						d3.event.stopPropagation();
+					});
+				var schedTop = sched.append("div");
+				var filterData=[];
+				schedTop.append("input")
+					.attr("type","text")
+					.attr("placeholder","Filter")
+					.on("keyup",function(){
+						var filterVal = this.value;
+						filterSched(
+							filterData.filter(function(d){
+								if (filterVal.length<1) {
+									return true;
+								} else {
+									var dStr = d.away+" vs. "+d.home;
+									filterVal.split(' ')
+									return false;
+								}
+							})
+						);
+					});
+				var schedBox = sched.append("div");
+				function searchSched() {
+					schedBox.html("<div>Loading...</div>");
+					d3.json("getGamesBySchedule.php?sport="
+							+schedSelect[0][0].value
+							+"&date="
+							+schedIn[0][0].valueAsDate.yyyymmdd(),
+						function(error,data){
+							if (error) {
+								console.error(error);
+								schedBox.html("<div>There was an error.</div>");
+								return;
+							}
+							if (isDef(data.error)) {
+								schedBox.html("<div>"+data.error+"</div>");
+								return;
+							}
+							filterData = data.games;
+							filterSched(data.games);
+						});
+				}
+				function filterSched(games) {
+					games.sort(function(a,b){
+						var result;
+						if (a.started == b.started) {
+							result = (+a.id.substring(3) < +b.id.substring(3)) ?
+								-1:1;
+						} else {
+							result = (a.started)?-1:1;
+						}
+						return result;
+					});
+					var schedItem = schedBox.selectAll("div")
+						.data(games, function(d) { 
+							return (isDef(d))?d.id:0;
+						});
+					schedItem.enter()
+						.append("div")
+						.classed("hover pointer bold",function(d){
+							return d.started;
+						})
+						.text(function(d){
+							return d.away+' vs. '+d.home;
+						})
+						.on("click",function(d){
+							if (d.started) {
+								inputGame(d.id,
+									closePopup,
+									function(){
+									schedTop.append("span")
+										.style("color","red")
+										.text("Error loading game.")
+										.transition()
+										.duration(graphVars.dispTime*4)
+										.style("opacity",0)
+										.each("end",function(){
+											d3.select(this).remove();
+										});
+								})
+							}
+						});
+					schedItem.exit()
+						.remove();
+				}
+				searchSched();
+			});;
 	}
+}
+function openPopup(white) {
+	var pop = d3.select("div#popup")
+		.html("")
+		.style("display","block")
+		.classed("popbgk",!white)
+		.classed("popbgw",white);
+	pop.transition(graphVars.dispTime)
+		.style("opacity",1);
+	return pop;
+}
+function closePopup() {
+	d3.select("div#popup")
+		.transition(graphVars.dispTime)
+		.style("opacity","0")
+		.each("end",function(d){
+			d3.select(this)
+				.style("display","none");
+		});
 }
 function getReq(name,string){
 	var obj = (string)?string:location.search;
@@ -929,6 +1121,17 @@ function displayTitleScore(gId) {
 			.text(function(){
 				if (teamI) {
 					return games[gId][team.s].short;
+				} else if (games[gId].final) {
+					return "Final"
+				} else {
+					var lastPlay = games[gId]
+						.plays[
+							games[gId].plays.length-1
+						];
+					return minToTime(lastPlay.t)
+						+ " "
+						+ games[gId].boxScore[
+							lastPlay.q-1].l;
 				}
 			});
 		var otTot = 0;
@@ -953,6 +1156,16 @@ function displayTitleScore(gId) {
 					});
 			}
 		});
+		bSTR.append("td")
+			.classed("center bold",true)
+			.classed("thead",!teamI)
+			.text(function(){
+				if (!teamI) {
+					return "T";
+				} else {
+					return games[gId][team.s+"Score"];
+				}
+			});
 	});
 	aH.shift();
 }
@@ -1006,7 +1219,8 @@ function addPlayerStats(gId) {
 					});
 				}
 		});
-		var playerRow = playerStatsTable.append("tr");
+		var playerRow = playerStatsTable.append("tr")
+			.classed("hover",true);
 		playerRow.append("td")
 			.classed("thead",true)
 			.text(games[gId][team.s].teamName);
@@ -1260,7 +1474,7 @@ function plotScore(gId) {
 			}
 			mOG.attr("transform","translate("+games[gId].x(mouseT)+",0)");
 			var perTime = getMinutes(gId,mouseT);
-			var time = Math.trunc(perTime.t/60)+":"+('00'+Math.trunc(perTime.t%60)).slice(-2);
+			var time = minToTime(perTime.t);
 			var pID = games[gId].bisectTime.left(games[gId].plays, games[gId].totTime - mouseT,1);
 			var scoreText = "";
 			aH.forEach(function(team){

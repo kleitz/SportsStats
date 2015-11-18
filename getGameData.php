@@ -1,6 +1,4 @@
 <?php
-//header('Content-Type: text/xml');
-/*echo '<?xml version="1.0" encoding="UTF8"?>';*/
 include_once('classes/simple_html_dom.php');
 include_once('classes/game.php');
 include_once('classes/dbvars.php');
@@ -90,6 +88,11 @@ $venue->city = trim($location[1]);
 $venue->state = trim($location[2]);
 $game->venue = $venue;
 
+
+$statusBar = $html->find('div.status-bar', 0);
+if (preg_match('/final/i',$statusBar->innertext)) {
+	$game->final = true;
+}
 
 if ($sportVars[$sportId]['sport'] == 'basketball') {
 	$teamBox = $html->find('div.team');

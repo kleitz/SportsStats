@@ -7,8 +7,15 @@ body,div,svg,span {
 	margin:0;
 	padding:0;
 }
+body {
+	background-color: #F9F9F9;
+}
 .center {
 	text-align:center;
+}
+.centerAl {
+	margin-left:auto;
+	margin-right:auto;
 }
 table, td {
 	border-spacing: 0px;
@@ -45,6 +52,9 @@ td.thead {
 .fullWidth {
 	width:100%;
 }
+.scroll {
+	overflow:auto;
+}
 .cf:before,.cf:after{
 	content:"";
 	display: table;
@@ -52,8 +62,29 @@ td.thead {
 .cf:after {
 	clear:both;
 }
+div.fullsize {
+	width:100%;
+	height:100%;
+	position:fixed;
+	top:0px;
+	left:0px;
+}
 
+div#mainCont {
+	z-index: 0;
+}
+div#popup {
+	z-index:1000;
+	display:none;
+}
+div.popbgk {
+	background-color:rgba(0,0,0,.5);
+}
+div.popbgw {
+	background-color:rgba(255,255,255,.5);
+}
 .gameBox {
+	background-color:#FFFFFF;
 	margin:0px auto 10px;
 	width:802px;
 	border:1px solid #EEEEEE;
@@ -135,7 +166,7 @@ svg {
 .teamStat, .teamStatMin {
 	cursor:pointer;
 }
-.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov {
+.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover {
 	background-color: #ebf3ff;
 }
 .teamStat.active, .teamStatMin.active {
@@ -241,15 +272,18 @@ svg {
 input[type=radio].pp {
 	display:none;
 }
-label.ppl {
+label.ppl, input[type=button], input[type=text], input[type=date], select {
 	border: solid 2px #d6e7ff;
 	background-color: #F9F9F9;
-	color: #444;
 	padding: 5px;
 	font-size: 12px;
 	display:inline-block;
-	cursor: pointer;
 	margin:0px 5px;
+	outline:none;
+}
+label.ppl, input[type=button] {
+	color: #444;
+	cursor: pointer;
 }
 label.ppl:hover{
 	background-color: #ebf3ff;
@@ -269,8 +303,23 @@ div.gameInputCont {
 input.gameInput {
 	border: solid 2px #d6e7ff;
 	padding:10px;
-	width:100%;
+	height:40px;
+	width:80%;
 }
+input.browseButton {
+	background-color: #F9F9F9;
+	border:2px solid #d6e7ff;
+	color: #444;
+	font-size: 12px;
+	height:30px;
+	margin: 5px 0px;
+	width:140px;
+	float:right;
+	outline: 0;
+	cursor:pointer;
+	font-weight:bold;
+}
+
 .playLabelBox {
 	stroke: #d6e7ff;
 	stroke-width: 2px;
@@ -294,4 +343,26 @@ div.footerList {
 	width:400px;
 	margin:0px auto;
 	text-align:left;
+}
+div.browseCont {
+	margin:0px auto;
+	padding:20px 0px 40px;
+	width:400px;
+	height:100%;
+	display:flex;
+	flex-flow:column;
+}
+div.popupButtons{
+	width:100%;
+	height:40px;
+	flex: 0 0 40px;
+}
+div.browseScheduleCont {
+}
+div.browseSchedule {
+	background-color: #FFFFFF;
+	border: solid 2px #d6e7ff;
+	flex: 1 0 100px;
+	width:100%;
+	overflow:auto;
 }
