@@ -21,6 +21,7 @@ $sportVars = array(
 		'maxTextTime' => '20:00',
 		'otTextTime' => '5:00',
 		'maxTime' => 1200,
+		'otTime' => 300,
 		'startPlay' => 'jump ball',
 		'startPlayShort' => 'j',
 		'regPeriods' => 2,
@@ -31,6 +32,7 @@ $sportVars = array(
 		'maxTextTime' => '12:00',
 		'otTextTime' => '12:00',
 		'maxTime' => 720,
+		'otTime' => 720,
 		'startPlay' => 'jump ball',
 		'startPlayShort' => 'i',
 		'regPeriods' => 4,
@@ -41,6 +43,7 @@ $sportVars = array(
 		'maxTextTime' => '15:00',
 		'otTextTime' => '0:00',
 		'maxTime' => 900,
+		'maxTime' => 300,
 		'regPeriods' => 4,
 		'sport' => 'football'
 	)
@@ -151,7 +154,13 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 				if ((sizeof($plays)==0 || strpos(strtolower(end($plays)->getPlayText()), strtolower('end of ')) !== false) && (strpos(strtolower($a_nodes[1]->innertext),$sportVars[$sportId]['startPlay']) === false && strpos(strtolower($a_nodes[3]->innertext),$sportVars[$sportId]['startPlay']) === false)) {
 					$play = new Play();
 					//{"id":0,"a":0,"e":"h","h":0,"m":null,"p":"j","q":1,"s":"h","t":2400,"x":1}
-					$play->t = $sportVars[$sportId]['maxTime'];
+					$period++;
+					$play->q = $period;
+					if ($period > $sportVars[$sportId]['regPeriods']) {
+						$play->t = $sportVars[$sportId]['otTime'];
+					} else {
+						$play->t = $sportVars[$sportId]['maxTime'];
+					}
 					$play->id = sizeof($plays);
 					$playid++;
 					$play->p = $sportVars[$sportId]['startPlayShort'];
@@ -167,8 +176,6 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 						$play->e = end($plays)->e;
 					}
 					$play->x = 1;
-					$period++;
-					$play->q = $period;
 					array_push($plays,$play);
 				}
 			}
