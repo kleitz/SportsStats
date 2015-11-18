@@ -18,8 +18,8 @@
 		"title":"Shot clock breakdown",
 		"type":"play",
 		"rangeMin":0,
-		"rangeMax":35,
-		"bins":7,
+		"rangeMax":30,
+		"bins":6,
 		"reverse":true,
 		"top":false
 	},
