@@ -57,7 +57,7 @@ if (isset($date) &&
 					}
 					preg_match('/gameId\=(\d+)/',$schedRow->nodes[2]->innertext,$gameId);
 					$game->id=$sport.$gameId[1];
-					if (preg_match('/(^.+ \d+, .+ \d+$)|(live)/i',$schedRow->nodes[2]->nodes[0]->innertext,$scores)) {
+					if (preg_match('/(^.+ \d+, .+ \d+( \(\d+OT\))?)|(live)/i',$schedRow->nodes[2]->nodes[0]->innertext,$scores)) {
 						$game->started = true;
 					}
 					preg_match_all('/\d/',$schedRow->nodes[2]->nodes[0]->innertext,$scores);
