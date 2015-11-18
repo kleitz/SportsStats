@@ -1219,8 +1219,7 @@ function addPlayerStats(gId) {
 					});
 				}
 		});
-		var playerRow = playerStatsTable.append("tr")
-			.classed("hover",true);
+		var playerRow = playerStatsTable.append("tr");
 		playerRow.append("td")
 			.classed("thead",true)
 			.text(games[gId][team.s].teamName);
@@ -1233,7 +1232,8 @@ function addPlayerStats(gId) {
 			}
 		});
 		games[gId].players[team.s].ps.forEach(function(player){
-			playerRow = playerStatsTable.append("tr");
+			playerRow = playerStatsTable.append("tr")
+				.classed("hover",true);
 			playerRow.append("td").text(player);
 			sports[gId.substring(0,3)].p.forEach(function(p){
 				if(p!="top" && p!="to") {
