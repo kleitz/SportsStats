@@ -633,12 +633,12 @@ function graphTeamStats(gId) {
 		aH.forEach(function(team,teamI){
 			//change stats
 			function text (i){ 
-				return shortNum(rawOrPPNum(teamStatData[team.s+"val"][0],gId,team.s,{dp:sPO[p].dpp}))
+				return shortNum(teamStatData[team.s+"val"][0],gId,team.s,{dp:sPO[p].dpp})
 				+ ((sPO[p].pl && !sPO[p].fs)?
 					((sPO[p].add)?"/":"-") 
 					+ shortNum((sPO[p].add) ? 
 						teamStatData[team.s+"valTot"] : 
-						rawOrPPNum(teamStatData[team.s+"val"][1],gId,team.s,{dp:sPO[p].dps}))
+						teamStatData[team.s+"val"][1],gId,team.s,{dp:sPO[p].dps})
 					: "")};
 			d3.select("#"+gId+"_"+p)
 				.select("div.tSDataCont")
@@ -1747,7 +1747,7 @@ function isData(gId,pId,pType,isPrim) {
 	}
 }
 
-function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
+function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec,diog) {
 	var sport = gId.substring(0,3);
 	var comp = sports[sport].po[pType].c;
 	var prim = sports[sport].po[pType].p;
@@ -1813,8 +1813,8 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 							getNextPos(gId,p.id,playDir) != p &&
 							((!playDir && getNextPos(gId,p.id,playDir).t > startTime) || 
 							(playDir && getNextPos(gId,p.id,playDir).t < finTime))) {
-						var func = (playDir)?Math.floor:Math.ceil;
-						tempVal += Math.abs(p.t - func(p.t/splitTime)*splitTime);
+						var funct = (playDir)?Math.floor:Math.ceil;
+						tempVal += Math.abs(p.t - funct(p.t/splitTime)*splitTime);
 					} else {
 						tempVal += getPlayTime(gId,p.id,playDir);
 					}
@@ -1824,11 +1824,14 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 			tempVal += d.length;
 		}
 		if (gType !== false) {
-			value += rawOrPPNum(tempVal,gId,teamS,{index:gIndex, type:gType, dp:((i)?defPosS:defPosP)});
+			value = rawOrPPNum(tempVal,gId,teamS,{index:gIndex, type:gType, dp:((i)?defPosS:defPosP)});
 		} else {
-			value += tempVal;
+			value = tempVal;
 		}
 	});
+	if (diog) {
+		console.log(value);
+	}
 	if (isDef(func)) {
 		value = func(value);
 	}
@@ -2540,10 +2543,10 @@ function plotHist(gId, pType, dispTime) {
 				return ((graphVars.stat10Width+graphVars.stat10Pad)*pI + (margin.right+margin.left)/2) * Math.pow(-1,!teamI) - graphVars.stat10Width*!teamI;
 			})
 			.attr("y",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(negZero(d));});
+				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(negZero(d));},false,true);
 			})
 			.attr("height",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(0)-playerY(Math.abs(d))});
+				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(0)-playerY(Math.abs(d))});
 			});
 		playerBars
 			.exit()
@@ -2620,10 +2623,10 @@ function plotHist(gId, pType, dispTime) {
 				return ((graphVars.stat10Width+graphVars.stat10Pad)*pI + (margin.right+margin.left)/2) * Math.pow(-1,!teamI)-graphVars.stat10Width*!teamI+2;
 			})
 			.attr("y",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(d)+2});
+				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(d)+2});
 			})
 			.attr("height",function(d,i){
-				return negZero(reduceData(gId,pType,d.plays,i,team.s,false,function(d){return playerY(0)-playerY(d)-2},true));
+				return negZero(reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(0)-playerY(d)-2},true));
 			});
 		playerSecBars
 			.exit()
@@ -2635,7 +2638,7 @@ function plotHist(gId, pType, dispTime) {
 		games[gId].playerYAxis = d3.svg.axis()
 			.scale(playerY)
 			.orient((teamI)?"left":"right")
-			.ticks((playerStats.max<4)?playerStats.max:4)
+			.ticks(4)
 			.tickFormat(function(d){return d;});
 		games[gId].playerStatsGraph.select("g."+team.s+".axis")
 			.call(games[gId].playerYAxis);
