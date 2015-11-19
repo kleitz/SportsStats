@@ -16,12 +16,14 @@ $returnedObject->games = array();
 
 $date = $_REQUEST['date'];
 $sport = $_REQUEST['sport'];
+$numUnfin = 0;
 if (isset($date) &&
 		preg_match('/\d{8}/',$date) &&
 		intval(substr($date,0,4))>1900 &&
 		intval(substr($date,4,2))<13 &&
 		intval(substr($date,6,2))<32) 
 {
+	$returnedObject->date = $date;
 	if (isset($sport) &&
 			preg_match('/[a-z]{3}/i',$sport)) 
 	{
@@ -59,13 +61,20 @@ if (isset($date) &&
 					$game->id=$sport.$gameId[1];
 					if (preg_match('/(^.+ \d+, .+ \d+( \(\d+OT\))?)|(live)/i',$schedRow->nodes[2]->nodes[0]->innertext,$scores)) {
 						$game->started = true;
+					} else if (preg_match('/(postponed)/i',$schedRow->nodes[2]->nodes[0]->innertext,$scores)) {
+						$game->postponed = true;
 					}
 					preg_match_all('/\d/',$schedRow->nodes[2]->nodes[0]->innertext,$scores);
 				}
 				if (isset($game->away) &&
-						isset($game->home) &&
-						isset($game->id)) 
+					isset($game->home) &&
+					isset($game->id)) 
 				{
+					if (!$game->started &&
+						!$game->postponed) 
+					{
+						$numUnfin++;
+					}
 					array_push($returnedObject->games,$game);
 				}
 			}
@@ -76,6 +85,9 @@ if (isset($date) &&
 	}
 } else {
 	$returnedObject->error = "Invalid date.";
+}
+if ($numUnfin == 0) {
+	
 }
 echo json_encode($returnedObject);
 

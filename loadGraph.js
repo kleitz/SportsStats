@@ -141,7 +141,7 @@ function insertGameInput(div) {
 				sport = input.substring(0,3);
 			} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
 				id = getReq("gameId","?"+input.split('?')[1]);
-				sport = input.match(/\/[a-zA-Z-]+\//g)[0];
+				sport = input.match(/\/[a-zA-Z-]+\//);
 				sport = sport.substring(1,sport.length-1);
 				sport = sport.replace(/-/g,'');
 				if (isDef(graphVars.sportMapping[sport])) {
@@ -217,13 +217,17 @@ function insertGameInput(div) {
 					.attr("placeholder","Filter")
 					.on("keyup",function(){
 						var filterVal = this.value;
+						if (filterVal.length > 0) {
+							var filterWords = filterVal.match(/\b[a-z]+\b/gi);
+							var filterRegEx = new RegExp("^(?=.*\\b" + filterWords.join("\\b)(?=.*\\b")+"\\w*\\b).*$","i");
+						}
 						filterSched(
 							filterData.filter(function(d){
 								if (filterVal.length<1) {
 									return true;
 								} else {
-									var dStr = d.away+" vs. "+d.home;
-									filterVal.split(' ')
+									var dStr = d.away+" vs "+d.home;
+									return dStr.match(filterRegEx);
 									return false;
 								}
 							})
@@ -239,15 +243,17 @@ function insertGameInput(div) {
 						function(error,data){
 							if (error) {
 								console.error(error);
-								schedBox.html("<div>There was an error.</div>");
+								schedBox.html("<div>There was an error. Please try again.</div>");
 								return;
 							}
 							if (isDef(data.error)) {
 								schedBox.html("<div>"+data.error+"</div>");
 								return;
 							}
-							filterData = data.games;
-							filterSched(data.games);
+							if (data.date == schedIn[0][0].valueAsDate.yyyymmdd()) {
+								filterData = data.games;
+								filterSched(data.games);
+							}
 						});
 				}
 				function filterSched(games) {
@@ -732,6 +738,8 @@ function getNextPos(gId,pId,direction) {
 //load and set game data
 function loadGame (gId) {
 	if (!isDef(games[gId])) {
+		d3.select("input.gameInput")
+			.attr("value","");
 		d3.json("getGameData.php?gameId=" + gId
 				,function(error,game) {
 			d3.select("div#"+gId)
@@ -740,10 +748,14 @@ function loadGame (gId) {
 				.attr("disabled",null);
 			if (error) {
 				console.error(error);
-				d3.select(".chart."+gId)
-					.append("text")
-					.text("Error loading game data")
-					.attr("y",20);
+				stopLoader(gId);
+				return;
+			}
+			if (isDef(game.error)) {
+				d3.select("input.gameInput")
+					.attr("value",game.error);
+				console.error(game.error);
+				stopLoader(gId);
 				return;
 			}
 			game.totTime = 0;
