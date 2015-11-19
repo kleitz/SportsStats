@@ -1747,7 +1747,7 @@ function isData(gId,pId,pType,isPrim) {
 	}
 }
 
-function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec,diog) {
+function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var sport = gId.substring(0,3);
 	var comp = sports[sport].po[pType].c;
 	var prim = sports[sport].po[pType].p;
@@ -1829,9 +1829,6 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec,diog) {
 			value = tempVal;
 		}
 	});
-	if (diog) {
-		console.log(value);
-	}
 	if (isDef(func)) {
 		value = func(value);
 	}
@@ -2543,7 +2540,7 @@ function plotHist(gId, pType, dispTime) {
 				return ((graphVars.stat10Width+graphVars.stat10Pad)*pI + (margin.right+margin.left)/2) * Math.pow(-1,!teamI) - graphVars.stat10Width*!teamI;
 			})
 			.attr("y",function(d,i){
-				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(negZero(d));},false,true);
+				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(negZero(d));});
 			})
 			.attr("height",function(d,i){
 				return reduceData(gId,pType,d.plays,i,team.s,null,function(d){return playerY(0)-playerY(Math.abs(d))});
