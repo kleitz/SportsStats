@@ -221,6 +221,7 @@ function insertGameInput(div) {
 							var filterWords = filterVal.match(/\b[a-z]+\b/gi);
 							var filterRegEx = new RegExp("^(?=.*\\b" + filterWords.join("\\b)(?=.*\\b")+"\\w*\\b).*$","i");
 						}
+						filterSched([]);
 						filterSched(
 							filterData.filter(function(d){
 								if (filterVal.length<1) {
@@ -257,13 +258,16 @@ function insertGameInput(div) {
 						});
 				}
 				function filterSched(games) {
+					function started(g) {
+						return ((g.status=='f')||(g.status=='l'))
+					}
 					games.sort(function(a,b){
 						var result;
-						if (a.started == b.started) {
+						if (started(a) == started(b)) {
 							result = (+a.id.substring(3) < +b.id.substring(3)) ?
 								-1:1;
 						} else {
-							result = (a.started)?-1:1;
+							result = (started(a))?-1:1;
 						}
 						return result;
 					});
@@ -274,13 +278,13 @@ function insertGameInput(div) {
 					schedItem.enter()
 						.append("div")
 						.classed("hover pointer bold",function(d){
-							return d.started;
+							return started(d);
 						})
 						.text(function(d){
 							return d.away+' vs. '+d.home;
 						})
 						.on("click",function(d){
-							if (d.started) {
+							if (started(d)) {
 								inputGame(d.id,
 									closePopup,
 									function(){
