@@ -1,4 +1,5 @@
 <?php
+header('Content-type: application/json');
 include_once('classes/simple_html_dom.php');
 include_once('classes/game.php');
 include_once('classes/dbvars.php');
@@ -14,8 +15,8 @@ $returnedObject = new emptyClass();
 $returnedObject->games = array();
 
 
-$date = $_REQUEST['date'];
-$sport = $_REQUEST['sport'];
+$date = utf8_encode($_REQUEST['date']);
+$sport = utf8_encode($_REQUEST['sport']);
 $numUnfin = 0;
 $numFin = 0;
 if (isset($date) &&
@@ -48,11 +49,11 @@ SQL;
 			$unprepGames = 0;
 			while($row = $select_data->fetch_assoc()) {
 				$game = new emptyClass();
-				$game->id = $sport.$row['gid'];
-				$game->home = $row['home'];
-				$game->away = $row['away'];
-				$game->status = $row['status'];
-				$game->date = $row['date'];
+				$game->id = utf8_encode($sport.$row['gid']);
+				$game->home = utf8_encode($row['home']);
+				$game->away = utf8_encode($row['away']);
+				$game->status = utf8_encode($row['status']);
+				$game->date = utf8_encode($row['date']);
 				$select_date = explode(' ',$row['date']);
 				if (!preg_match('/^[lfps]$/',$game->status) &&
 					$select_date[1] == '00:00:01' &&
@@ -65,10 +66,10 @@ SQL;
 			if ($select_data->num_rows > 0 &&
 					$unprepGames == 0) 
 			{
-				$returnedObject->fetch = 'd';
+				$returnedObject->fetch = utf8_encode('d');
 				$returnedObject->games = $games;
 			} else {
-				$returnedObject->fetch = 's';
+				$returnedObject->fetch = utf8_encode('s');
 				$html = file_get_html("http://espn.go.com/$sport/schedule/_/date/$date");
 				$tables = $html->find("table.schedule");
 				foreach($tables as $table) {
@@ -90,9 +91,9 @@ SQL;
 										foreach($teamA->nodes as $teamSp) {
 											if ($teamSp->tag == 'span') {
 												if ($srI==0) {
-													$game->away = $teamSp->innertext;
+													$game->away = utf8_encode($teamSp->innertext);
 												} else {
-													$game->home = $teamSp->innertext;
+													$game->home = utf8_encode($teamSp->innertext);
 												}
 											}
 										}
@@ -100,8 +101,8 @@ SQL;
 								}
 							}
 							preg_match('/gameId\=(\d+)/',$schedRow->nodes[2]->innertext,$gameId);
-							$game->id=$sport.$gameId[1];
-							$game->date = substr($date,0,4) . '-' . substr($date,4,2) . '-' . substr($date,6,2);
+							$game->id=utf8_encode($sport.$gameId[1]);
+							$game->date = utf8_encode(substr($date,0,4) . '-' . substr($date,4,2) . '-' . substr($date,6,2));
 							if (preg_match('/(live)/i',$schedRow->nodes[2]->nodes[0]->innertext,$status)) {
 								$game->status = 'l';
 							} else if (preg_match('/^.+ \d+, .+ \d+( \(\d*OT\))?$/i',$schedRow->nodes[2]->nodes[0]->innertext,$status)) {
@@ -113,11 +114,12 @@ SQL;
 							} else {
 								$game->status = "u";
 							}
+							$game->status = utf8_encode($game->status);
 							//set time
 							if (preg_match( '/T(\d{2}:\d{2})Z/i', $schedRow->nodes[2]->attr['data-date'], $status)) {
-								$game->date .= " $status[2].:00";
+								$game->date .= utf8_encode(" $status[2].:00");
 							} else {
-								$game->date .= ' 00:00:01';
+								$game->date .= utf8_encode(' 00:00:01');
 							}
 							preg_match_all('/\d/',$schedRow->nodes[2]->nodes[0]->innertext,$scores);
 						}
@@ -177,24 +179,4 @@ SQL;
 echo json_encode($returnedObject);
 
 $dbcon->close();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ?>
