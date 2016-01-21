@@ -1839,6 +1839,26 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	return value;
 }
 
+function reduceDataText(gId,pType,data,gIndex,teamS,gType,func,isSec) {
+	var sport = gId.substring(0,3),
+		sPOT = sports[sport].po[pType],
+		string = "",
+		total = reduceData(gId,pType,data,gIndex,teamS,gType,func,false),
+		sec;
+	if (sPOT.ns || sPOT.ls) {
+		string += total;
+	} else {
+		sec = reduceData(gId,pType,data,gIndex,teamS,gType,func,true);
+		string += (total-sec);
+		if (sPOT.add) {
+			string += '/' + total;
+		} else {
+			string += '-' + sec;
+		}
+	}
+	return string;
+}
+
 function negZero(a) {
 	return (a>0)?a:0;
 }
@@ -2010,7 +2030,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d,i,team.s,"time",function(d){return graphVars.histGraphHeight-histY(negZero(d))});
 			})
 			.text(function(d,i) {
-				return reduceData(gId,pType,d,i,team.s,"time",shortNum); 
+				return reduceDataText(gId,pType,d,i,team.s,"time",shortNum); 
 			});
 		//set secondary box
 		var secBars = games[gId].histChart.selectAll('rect.s.'+team.s)
