@@ -1,0 +1,34 @@
+{
+  "name": "SportsStats",
+  "homepage": "https://github.com/quacainia/SportsStats",
+  "authors": [
+    "Ben Becker <bforbendetta@gmail.com>"
+  ],
+  "description": "Graphing sports data with D3",
+  "main": "",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "college",
+    "nba",
+    "basketball",
+    "sports",
+    "stats",
+    "infograph"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.13",
+    "bootstrap-css-only": "~3.3.6",
+    "angular": "~1.4.9",
+    "angular-route": "~1.4.9"
+  }
+}
