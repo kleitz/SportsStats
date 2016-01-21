@@ -636,21 +636,13 @@ function graphTeamStats(gId) {
 		
 		aH.forEach(function(team,teamI){
 			//change stats
-			function text (i){ 
-				return shortNum(teamStatData[team.s+"val"][0],gId,team.s,{dp:sPO[p].dpp})
-				+ ((sPO[p].pl && !sPO[p].fs)?
-					((sPO[p].add)?"/":"-") 
-					+ shortNum((sPO[p].add) ? 
-						teamStatData[team.s+"valTot"] : 
-						teamStatData[team.s+"val"][1],gId,team.s,{dp:sPO[p].dps})
-					: "")};
 			d3.select("#"+gId+"_"+p)
 				.select("div.tSDataCont")
 				.select("div.tsDataLabel."+team.l)
-				.text(function(d,i){return text(i);});
+				.text(function(d,i){return reduceDataText(gId,p,teamStatData[team.s+"PS"][1],i,team.s,"tot",shortNum);});
 			d3.select("#teamStatsMinRow"+team.s+gId)
 				.select(".col"+p)
-				.text(function(d,i){return text(i);});
+				.text(function(d,i){return reduceDataText(gId,p,teamStatData[team.s+"PS"][1],i,team.s,"tot",shortNum);});
 			//change stat bar
 			d3.select("#svg_"+gId+"_"+p)
 				.select("g")
