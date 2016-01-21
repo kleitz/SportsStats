@@ -237,7 +237,7 @@ function insertGameInput(div) {
 				var schedBox = sched.append("div");
 				function searchSched() {
 					schedBox.html("<div>Loading...</div>");
-					d3.json("getGamesBySchedule.php?sport="
+					d3.json("./app/api/getGamesBySchedule.php?sport="
 							+schedSelect[0][0].value
 							+"&date="
 							+schedIn[0][0].valueAsDate.yyyymmdd(),
