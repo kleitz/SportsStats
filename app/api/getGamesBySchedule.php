@@ -116,7 +116,7 @@ SQL;
 							}
 							$game->status = utf8_encode($game->status);
 							//set time
-							if (preg_match( '/T(\d{2}:\d{2})Z/i', $schedRow->nodes[2]->attr['data-date'], $status)) {
+							if (isset($schedRow->nodes[2]->attr['data-date']) && preg_match( '/T(\d{2}:\d{2})Z/i', $schedRow->nodes[2]->attr['data-date'], $status)) {
 								$game->date .= utf8_encode(" $status[2].:00");
 							} else {
 								$game->date .= utf8_encode(' 00:00:01');
