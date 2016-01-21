@@ -141,7 +141,7 @@ function insertGameInput(div) {
 				sport = input.substring(0,3);
 			} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
 				id = getReq("gameId","?"+input.split('?')[1]);
-				sport = input.match(/\/[a-zA-Z-]+\//);
+				sport = input.match(/\/[a-zA-Z-]+\//)[0];
 				sport = sport.substring(1,sport.length-1);
 				sport = sport.replace(/-/g,'');
 				if (isDef(graphVars.sportMapping[sport])) {
