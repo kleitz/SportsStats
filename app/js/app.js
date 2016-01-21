@@ -1,4 +1,6 @@
 ;(function(){
 	angular.module('ssApp',[])
-		.controller('ssCtrl',['$scope',fucntion(){}])
+		.controller('ssCtrl',['$scope',function($scope){
+
+		}]);
 });
