@@ -6,13 +6,15 @@ include_once('classes/playSortFunctions.php');
 
 $dbcon = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-$gId = mysqli_real_escape_string($dbcon,$_GET['gameId']);
+$gId = (isset($_GET['gameId']))?
+	mysqli_real_escape_string($dbcon,$_GET['gameId']):
+	null;
 $game = new GameWithPlays();
 
 preg_match('/[0-9]+$/',$gId,$gameId);
-$gameId = $gameId[0];
+$gameId = isset($gameId[0])?$gameId[0]:null;
 preg_match('/^[a-zA-Z]{3}/',$gId,$sportId);
-$sportId = $sportId[0];
+$sportId = isset($sportId[0])?$sportId[0]:null;
 
 $periodNames = array("1st", "2nd", "3rd", "4th");
 $sportVars = array(
@@ -323,26 +325,26 @@ if ($sportVars[$sportId]['sport'] == 'basketball') {
 		
 				//Fix ESPN data issues
 				if ($sportVars[$sportId]['sport'] == 'basketball') {
-					if ($play->a < end($plays)->a) {
+					if (sizeof($plays) && $play->a < end($plays)->a) {
 						if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
 							end($plays)->a = $plays[sizeof($plays)-2]->a;
 						} else {
 							$play->a = end($plays)->a;
 						}
 					}
-					if ($play->h < end($plays)->h) {
+					if (sizeof($plays) && $play->h < end($plays)->h) {
 						if (preg_match('/^[0-9][a-z]m/',end($plays)->p[2])) {
 							end($plays)->h = $plays[sizeof($plays)-2]->h;
 						} else {
 							$play->h = end($plays)->h;
 						}
 					}
-					if ($play->a > end($plays)->a) {
+					if (sizeof($plays) && $play->a > end($plays)->a) {
 						if ($play->p[2] != 'm') {
 							$play->a = end($plays)->a;
 						}
 					}
-					if ($play->h > end($plays)->h) {
+					if (sizeof($plays) && $play->h > end($plays)->h) {
 						if ($play->p[2] != 'm') {
 							$play->h = end($plays)->h;
 						}

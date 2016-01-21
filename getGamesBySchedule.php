@@ -15,8 +15,8 @@ $returnedObject = new emptyClass();
 $returnedObject->games = array();
 
 
-$date = utf8_encode($_REQUEST['date']);
-$sport = utf8_encode($_REQUEST['sport']);
+$date = isset($_REQUEST['date'])?utf8_encode($_REQUEST['date']):null;
+$sport = isset($_REQUEST['sport'])?utf8_encode($_REQUEST['sport']):null;
 $numUnfin = 0;
 $numFin = 0;
 if (isset($date) &&
