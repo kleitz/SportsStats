@@ -379,7 +379,7 @@ function loadSport (gId) {
 	if (isDef(sports[gId.substring(0,3)])) {
 		loadGame(gId);
 	} else {
-		d3.json(gId.substring(0,3)+".json",function(error,data) {
+		d3.json("./data/"+gId.substring(0,3)+".json",function(error,data) {
 			if (error) {
 				console.error(error);
 				d3.select("input.gameInput")
@@ -736,7 +736,7 @@ function loadGame (gId) {
 	if (!isDef(games[gId])) {
 		d3.select("input.gameInput")
 			.attr("value","");
-		d3.json("getGameData.php?gameId=" + gId
+		d3.json("./app/api/getGameData.php?gameId=" + gId
 				,function(error,game) {
 			d3.select("div#"+gId)
 				.classed("loaded",true)
