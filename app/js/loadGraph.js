@@ -1,8 +1,37 @@
 ;(function() {
 "use strict";
 
+angular.module("oldD3Script",[])
+angular.module("oldD3Script").directive("ssD3Old",function(){
+		var directive = {};
+		directive.restrict = 'A';
+		directive.scope = {
+			game:"=ssD3Old",
+			sport:"=ssD3OldSport"
+		}
+		directive.link = function(scope, elements, attr){
+			///begin old code definitions
+
 var games = {};
 var sports = {};
+
+			///end old code definitoins
+			var regraph = function () {
+				if (scope.game != null && scope.sport != null) {
+					console.log(scope.game);
+					var divs = d3.select(elements[0])
+						.select("div.gameBox")
+						.attr("id",scope.game.id)
+						.text("");
+					//dispGame();
+					loadGames();
+				}
+			}
+			scope.$watch("game",regraph);
+			scope.$watch("sport",regraph);
+
+			///begin old code
+
 var margin = {top: 20, right: 40, bottom: 30, left: 30, histTop: 30, histBottom: 8},
 	loaderVars = {
 		num : 3,
@@ -85,15 +114,15 @@ function oppAH(team, skip) {
 function isDef(v) {
 	return (typeof v !== 'undefined');
 }
-d3.select(window).on("hashchange",function(){
+/*d3.select(window).on("hashchange",function(){
 	if (d3.select("div.gameBox").attr("id")) {
 		d3.selectAll("."+d3.select("div.gameBox").attr("id")).remove();
 	}
 	d3.select("div.gameBox").
 		attr("id",location.hash.substring(1));
 	loadGames();
-});
-loadGames();
+});*/
+//loadGames();
 
 function loadGames(){
 	d3.selectAll("div.gameBox.notLoaded")
@@ -103,7 +132,7 @@ function loadGames(){
 				loadSport(d[0].id);
 			else {
 				if (location.hash.length) {
-					d[0].id = location.hash.substring(1);
+					d[0].id = location.hash.substring(2);
 					loadSport(d[0].id);
 				}
 			}
@@ -136,7 +165,7 @@ function insertGameInput(div) {
 			});
 		function inputGame(input,callback,errorCallback) {
 			var id,sport;
-			if (input.match(/^([a-z]{3})(\d+)$/)) {
+			if (input.match(/^\/([a-z]{3})(\d+)$/)) {
 				id = input.substring(3);
 				sport = input.substring(0,3);
 			} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
@@ -159,7 +188,7 @@ function insertGameInput(div) {
 				d3.select(div)
 					.attr("id",sport + id);
 				gameInput.attr("disabled","disabled");
-				location.hash = "#"+sport+id;
+				location.hash = "#/"+sport+id;
 				if (callback) {
 					callback();
 				}
@@ -760,26 +789,32 @@ function loadGame (gId) {
 			}
 			games[gId] = game;
 		
-			dispGame()
+			dispGame();
 		});
 	}
 	else {
 		dispGame();
 	}
-	function dispGame() {
-		stopLoader(gId);
-		colorTest(gId);
-		displayTitleScore(gId);
-		addSplitButtons(gId);
-		setMainGraph(gId);
-		addTeamStats(gId);
-		addPlayerStats(gId);
-		addSplitGraph(gId);
-		addPlayByPlay(gId);
-		countPlays(gId);
-		plotScore(gId);
-		graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
+}
+
+function dispGame() {
+	var gId = scope.game.id;
+	scope.game.totTime = 0;
+	for (var boxI=0; boxI<scope.game.boxScore.length; boxI++) {
+		scope.game.totTime += scope.game.boxScore[boxI].t;
 	}
+	stopLoader(gId);
+	colorTest(gId);
+	displayTitleScore(gId);
+	addSplitButtons(gId);
+	setMainGraph(gId);
+	addTeamStats(gId);
+	addPlayerStats(gId);
+	addSplitGraph(gId);
+	addPlayByPlay(gId);
+	countPlays(gId);
+	plotScore(gId);
+	graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
 }
 
 function addSplitButtons(gId) {
@@ -2657,5 +2692,9 @@ function plotHist(gId, pType, dispTime) {
 			.call(games[gId].playerYAxis);
 	});
 }
+		///end old code
+		}
+		return directive;
+	});
 })();
 

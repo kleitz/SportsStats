@@ -56,8 +56,7 @@ SQL;
 				$game->date = utf8_encode($row['date']);
 				$select_date = explode(' ',$row['date']);
 				if (!preg_match('/^[lfps]$/',$game->status) &&
-					$select_date[1] == '00:00:01' &&
-					$date == date(Ymd))
+					$date <= date(Ymd))
 				{
 					$unprepGames++;
 				}

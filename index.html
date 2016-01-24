@@ -1,25 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="ssApp" ng-contoller="ssCtrl">
+<html lang="en" ng-app="ssApp" ng-controller="ssCtrl">
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap-css-only/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="./app/css/main.css">
+		<title ng-bind="mainScope.title | ssTitleFilter">Act Opener</title>
+		<script>
+			document.write('<base href="' + document.location + '" />');
+		</script>
 		<script src="./bower_components/d3/d3.js"></script>
 		<script src="./bower_components/angular/angular.js"></script>
 		<script src="./bower_components/angular-route/angular-route.js"></script>
 		<script src="./app/js/app.js"></script>
+		<script src="./app/js/controllers/controllers.js"></script>
+		<script src="./app/js/directives/directives.js"></script>
+		<script src="./app/js/services/services.js"></script>
+		<script src="./app/js/filters/filters.js"></script>
 	</head>
 	<body>
 		<div id="mainCont" class="scroll fullsize">
 			<div class="footer fullWidth">
 				Compatibility: NCAA Men's Basketball, NBA
 			</div>
-		<div class="gameBox notLoaded" id="">
-		</div>
-		<div id="footer" class="footer">
-			<span>Contact /u/quacainia with issues.</span><br />
-			<a href="bugs.html">List of currently known bugs.</a>
-		</div>
+			<div class="contentContainer">
+				<div class="" ng-view></div>
+				<div ss-d3-old="mainScope.gameData" ss-d3-old-sport="mainScope.sportData">
+					<div class="gameBox notLoaded" id="">
+					</div>
+				</div>
+			</div>
+			<div id="footer" class="footer">
+				<span>Contact /u/quacainia with issues.</span><br />
+				<a href="bugs.html">List of currently known bugs.</a>
+			</div>
 		</div>
 		<div id="popup" class="fullsize"></div>
 	<script src="./app/js/loadGraph.js"></script>
