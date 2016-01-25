@@ -23,8 +23,8 @@ var sports = {};
 						.select("div.gameBox")
 						.attr("id",scope.game.id)
 						.text("");
-					//dispGame();
-					loadGames();
+					dispGame();
+					//loadGames();
 				}
 			}
 			scope.$watch("game",regraph);
@@ -380,7 +380,7 @@ function hexToRgb(hex) {
 function colorTest(gId) {
 	var colors = {};
 	aH.forEach(function (team,teamI) {
-		colors[team.s] = hexToRgb(games[gId][team.s].primary);
+		colors[team.s] = hexToRgb(scope.game[team.s].primary);
 		if (!colors[team.s]) {
 			return;
 		}
@@ -390,22 +390,22 @@ function colorTest(gId) {
 		difTot += Math.abs(colors[aH[0].s][rgbI]-colors[aH[1].s][rgbI]);
 	}
 	if (difTot < 150) {
-		var tempColor = games[gId]['h'].secondary;
+		var tempColor = scope.game['h'].secondary;
 		var tempColorRgb = hexToRgb(tempColor);
 		if (tempColorRgb) {
 			if (tempColorRgb.reduce(function(a,b){return a+b;}) > 612) {
 				tempColor = "CCCCCC";
 			}
 		}
-		games[gId]['h'].secondary = games[gId]['h'].primary;
-		games[gId]['h'].primary = tempColor;
+		scope.game['h'].secondary = scope.game['h'].primary;
+		scope.game['h'].primary = tempColor;
 	}
 }
 
 //load data for that particular sport
 function loadSport (gId) {
 	addLoader(gId);
-	if (isDef(sports[gId.substring(0,3)])) {
+	if (isDef(scope.sport)) {
 		loadGame(gId);
 	} else {
 		d3.json("./data/"+gId.substring(0,3)+".json",function(error,data) {
@@ -416,7 +416,7 @@ function loadSport (gId) {
 				stopLoader(gId);
 				return;
 			}
-			sports[gId.substring(0,3)] = data;
+			scope.sport = data;
 			loadGame(gId);
 		});
 	}
@@ -498,7 +498,7 @@ function addTeamStats(gId) {
 		.attr("id","teamStats"+gId);
 	var teamStat = d3.select("div.teamStats." + gId)
 		.selectAll("div.teamStat."+gId)
-		.data(sports[gId.substring(0,3)].p)
+		.data(scope.sport.p)
 		.enter()
 		.append("div")
 		.classed("teamStat " + gId, true)
@@ -516,10 +516,10 @@ function addTeamStats(gId) {
 		.classed("right", function(p,i){ return i%2==0; })
 		.append("span")
 		.classed("medTitle",true)
-		.text(function(p) { return sports[gId.substring(0,3)].po[p].l+((p!="top")?"s":"")	; });
+		.text(function(p) { return scope.sport.po[p].l+((p!="top")?"s":"")	; });
 	titleDiv.select("div.tSLabelCont").append("br");
 	titleDiv.select("div.tSLabelCont").append("span")
-		.text(function(p,i){ if (sports[gId.substring(0,3)].po[p].pl && !sports[gId.substring(0,3)].po[p].fs) return sports[gId.substring(0,3)].po[p].pl + ((sports[gId.substring(0,3)].po[p].add)?" / ":" - ") + sports[gId.substring(0,3)].po[p].sl});
+		.text(function(p,i){ if (scope.sport.po[p].pl && !scope.sport.po[p].fs) return scope.sport.po[p].pl + ((scope.sport.po[p].add)?" / ":" - ") + scope.sport.po[p].sl});
 	var statSvg = teamStat.append("div")
 		.classed("left", function(p,i){ return i%2==0; })
 		.classed("right", function(p,i){ return i%2==1; })
@@ -545,7 +545,7 @@ function addTeamStats(gId) {
 			.attr("height",graphVars.teamStatHeight)
 			.attr("x",0)
 			.attr("width",0)
-			.style("fill","#"+games[gId][team.s].primary);
+			.style("fill","#"+scope.game[team.s].primary);
 		//create sec stat bar
 		statSvg.append("rect")
 			.classed("statBarSec "+team.l,true)
@@ -553,7 +553,7 @@ function addTeamStats(gId) {
 			.attr("height",graphVars.teamStatHeight-4)
 			.attr("x", -2)
 			.attr("width", 0)
-			.style("fill","#"+games[gId][team.s].secondary);
+			.style("fill","#"+scope.game[team.s].secondary);
 	});
 	var teamStatTable = d3.select("div#"+gId)
 		.append("div")
@@ -568,13 +568,13 @@ function addTeamStats(gId) {
 	tRow.append("td")
 		.classed("thead",true)
 		.text("Team");
-	sports[gId.substring(0,3)].p.forEach(function(p){
+	scope.sport.p.forEach(function(p){
 		tRow.append("td")
 			.classed("thead",true)
 			.classed("teamStatMin",true)
 			.classed("col"+p,true)
-			.attr("title",sports[gId.substring(0,3)].po[p].l+"s")
-			.text(sports[gId.substring(0,3)].po[p].a)
+			.attr("title",scope.sport.po[p].l+"s")
+			.text(scope.sport.po[p].a)
 			.on("click", function(){return plotHist(gId,p);})
 			.on("mouseover", function(){
 				d3.select("#teamStatsMin"+gId)
@@ -592,8 +592,8 @@ function addTeamStats(gId) {
 			.append("tr")
 			.attr("id","teamStatsMinRow"+team.s+gId);
 		tRow.append("td")
-			.text(games[gId][team.s].teamName);
-		sports[gId.substring(0,3)].p.forEach(function(p){
+			.text(scope.game[team.s].teamName);
+		scope.sport.p.forEach(function(p){
 			tRow.append("td")
 				.classed("teamStatMin",true)
 				.classed("col"+p,true)
@@ -612,7 +612,7 @@ function addTeamStats(gId) {
 	});
 	
 	//adding extra blank tile
-	if (sports[gId.substring(0,3)].p.length%2 == 1) {
+	if (scope.sport.p.length%2 == 1) {
 		d3.select("div.teamStats." + gId)
 			.append("div")
 			.classed("teamStatFill " + gId,true)
@@ -623,13 +623,13 @@ function addTeamStats(gId) {
 
 //graph static team stats
 function graphTeamStats(gId) {
-	var sPL = sports[gId.substring(0,3)].p;//sportsPlayList
-	var sPO = sports[gId.substring(0,3)].po;
+	var sPL = scope.sport.p;//sportsPlayList
+	var sPO = scope.sport.po;
 	sPL.forEach(function(p,pI){
 		var teamStatData = {};
 		//collect data for each play type
 		aH.forEach(function(team){
-			teamStatData[team.s] = games[gId].plays.filter(
+			teamStatData[team.s] = scope.game.plays.filter(
 				function(d){
 					if(sPO[p].c=="pos") {
 						return d.x && d.e == oppAH(team.s,!sPO[p].ot);
@@ -702,7 +702,7 @@ function rawOrPPNum(num,gId,teamS,args) {
 	if (d3.select('input[name="pp'+gId+'"]:checked').node().value == "s") {
 		var plays;
 		if (!isDef(args)) {
-			plays = games[gId]["playsTot"+teamS];
+			plays = scope.game["playsTot"+teamS];
 		} else {
 			if (args.dp) {
 				for(var aHI = 0; aHI < aH.length; aHI++) {
@@ -713,11 +713,11 @@ function rawOrPPNum(num,gId,teamS,args) {
 				}
 			}
 			if (args.type == "time") {
-				plays = games[gId]["plays"+teamS][args.index];
+				plays = scope.game["plays"+teamS][args.index];
 			} else if (args.type == "split") {
-				plays = games[gId]["playsSplit"+teamS][args.index];
+				plays = scope.game["playsSplit"+teamS][args.index];
 			} else {
-				plays = games[gId]["playsTot"+teamS];
+				plays = scope.game["playsTot"+teamS];
 			}
 		}
 		var value = (plays>0)?num/plays:0;
@@ -742,27 +742,27 @@ function shortNum(value) {
 function getPlayTime(gId,pId,direction) {
 	var play = getNextPos(gId,pId,direction);
 	direction = (direction)?1:-1;
-	if (play == games[gId].plays[pId]) {
+	if (play == scope.game.plays[pId]) {
 		return 0;
 	} else {
-		return ((games[gId].plays[pId].t - play.t)*direction);
+		return ((scope.game.plays[pId].t - play.t)*direction);
 	}
 }
 
 function getNextPos(gId,pId,direction) {
-	if((direction)?pId<games[gId].plays.length-1:pId>0) {
+	if((direction)?pId<scope.game.plays.length-1:pId>0) {
 		direction = (direction)?1:-1;
 		var id = pId;
-		for(id+=direction;!games[gId].plays[id].x;id+=direction){}
-		return games[gId].plays[id];
+		for(id+=direction;!scope.game.plays[id].x;id+=direction){}
+		return scope.game.plays[id];
 	} else {
-		return games[gId].plays[pId];
+		return scope.game.plays[pId];
 	}
 }
 
 //load and set game data
 function loadGame (gId) {
-	if (!isDef(games[gId])) {
+	if (!isDef(scope.game)) {
 		d3.select("input.gameInput")
 			.attr("value","");
 		d3.json("./app/api/getGameData.php?gameId=" + gId
@@ -787,7 +787,7 @@ function loadGame (gId) {
 			for (var boxI=0; boxI<game.boxScore.length; boxI++) {
 				game.totTime += game.boxScore[boxI].t;
 			}
-			games[gId] = game;
+			scope.game = game;
 		
 			dispGame();
 		});
@@ -814,7 +814,7 @@ function dispGame() {
 	addPlayByPlay(gId);
 	countPlays(gId);
 	plotScore(gId);
-	graphAll(gId, sports[gId.substring(0,3)].p[0], graphVars.graphTime);
+	graphAll(gId, scope.sport.p[0], graphVars.graphTime);
 }
 
 function addSplitButtons(gId) {
@@ -832,7 +832,7 @@ function addSplitButtons(gId) {
 		.classed("ppl",true)
 		.attr("for","pp"+gId+"r")
 		.text("Raw data");
-	sports[gId.substring(0,3)].ave.forEach(function(ave){
+	scope.sport.ave.forEach(function(ave){
 		opLoc.append("input")
 			.attr("type","radio")
 			.attr("name","pp"+gId)
@@ -846,16 +846,16 @@ function addSplitButtons(gId) {
 	});
 	
 	d3.selectAll("input.pp."+gId)
-		.on("click",function(){return graphAll(gId, games[gId].lastPType, 0);});
+		.on("click",function(){return graphAll(gId, scope.game.lastPType, 0);});
 }
 
 function graphAll(gId,pType,time) {
 		graphTeamStats(gId);
-		if (pType == games[gId].lastPType) {
-			games[gId].lastPType = null;
+		if (pType == scope.game.lastPType) {
+			scope.game.lastPType = null;
 		}
 		setTimeout(function(){
-			if (games[gId].lastPType == null
+			if (scope.game.lastPType == null
 					&& pType !== null) {
 				plotHist(gId,pType);
 			}
@@ -863,40 +863,40 @@ function graphAll(gId,pType,time) {
 }
 
 function countPlays(gId){
-	var split = sports[gId.substring(0,3)].split;
-	var pos = sports[gId.substring(0,3)].pos;
+	var split = scope.sport.split;
+	var pos = scope.sport.pos;
 	aH.forEach(function(team,teamI){
-		games[gId]["plays"+team.s] = d3.layout.histogram()
-			.bins(games[gId].totTime/sports[gId.substring(0,3)].s)
-			.range([0,games[gId].totTime])
-			.value(function(p){return p.t;})(games[gId].plays.filter(function(p){
+		scope.game["plays"+team.s] = d3.layout.histogram()
+			.bins(scope.game.totTime/scope.sport.s)
+			.range([0,scope.game.totTime])
+			.value(function(p){return p.t;})(scope.game.plays.filter(function(p){
 				return p.x && p[pos] == team.s;
 			}));
-		games[gId]["plays"+team.s].forEach(function(d,i){
-			games[gId]["plays"+team.s][i] = d.length;
+		scope.game["plays"+team.s].forEach(function(d,i){
+			scope.game["plays"+team.s][i] = d.length;
 		});
-		games[gId]["playsSplit"+team.s] = d3.layout.histogram()
+		scope.game["playsSplit"+team.s] = d3.layout.histogram()
 			.bins(split.bins)
 			.range([split.rangeMin,split.rangeMax])
 			.value(function(p){return getPlayTime(gId,p.id,true);})
-			(games[gId].plays.filter(
+			(scope.game.plays.filter(
 				function(p){
 				return p.x && p[pos] == team.s;
 			}));
-		games[gId]["playsSplit"+team.s].forEach(function(d,i){
-			games[gId]["playsSplit"+team.s][i] = d.length;
+		scope.game["playsSplit"+team.s].forEach(function(d,i){
+			scope.game["playsSplit"+team.s][i] = d.length;
 		});
-		games[gId]["playsTot"+team.s] = games[gId].plays.filter(function(p){
+		scope.game["playsTot"+team.s] = scope.game.plays.filter(function(p){
 			return p.x && p[pos] == team.s;
 		}).length;
 		//some shots at the buzzer hit after 35 seconds
-		games[gId]["playsSplit"+team.s][split.bins-1] += games[gId]["playsTot"+team.s] - games[gId]["playsSplit"+team.s].reduce(function(a,b){return a+b;});
+		scope.game["playsSplit"+team.s][split.bins-1] += scope.game["playsTot"+team.s] - scope.game["playsSplit"+team.s].reduce(function(a,b){return a+b;});
 	});
 }
 
 function setMainGraph(gId) {
 	//set svgs
-	games[gId].histChart = d3.select("div#"+gId)
+	scope.game.histChart = d3.select("div#"+gId)
 		.append("svg")
 		.attr("width", graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.histGraphHeight + margin.histTop + margin.histBottom)
@@ -905,7 +905,7 @@ function setMainGraph(gId) {
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.histTop + ")");
 	
-	games[gId].chart = d3.select("div#"+gId)
+	scope.game.chart = d3.select("div#"+gId)
 		.append("svg")
 		.attr("width", graphVars.lineGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.lineGraphHeight + margin.top + margin.bottom)
@@ -924,34 +924,34 @@ function addSplitGraph(gId) {
 	splitGraphCont.append("div")
 		.append("label")
 		.classed("medTitle",true)
-		.text(sports[gId.substring(0,3)].split.title);
-	games[gId].splitGraph = splitGraphCont.append("svg")
+		.text(scope.sport.split.title);
+	scope.game.splitGraph = splitGraphCont.append("svg")
 		.attr("width", graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.histGraphHeight + margin.histTop + margin.bottom)
 		.attr("id","splitGraph"+gId)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.histTop + ")");
-	games[gId].splitX = d3.scale.linear()
+	scope.game.splitX = d3.scale.linear()
 		.range([1, graphVars.histGraphWidth])
-		.domain([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.bins]);
-	games[gId].splitXAxis = d3.svg.axis()
-		.scale(games[gId].splitX)
+		.domain([scope.sport.split.rangeMin,scope.sport.split.bins]);
+	scope.game.splitXAxis = d3.svg.axis()
+		.scale(scope.game.splitX)
 		.orient("bottom")
-		.ticks(sports[gId.substring(0,3)].split.bins+1)
+		.ticks(scope.sport.split.bins+1)
 		.tickFormat(function(d){
-			if (sports[gId.substring(0,3)].split.reverse) {
-				return sports[gId.substring(0,3)].split.rangeMax - d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
+			if (scope.sport.split.reverse) {
+				return scope.sport.split.rangeMax - d / scope.sport.split.bins * scope.sport.split.rangeMax;
 			} else {
-				return d / sports[gId.substring(0,3)].split.bins * sports[gId.substring(0,3)].split.rangeMax;
+				return d / scope.sport.split.bins * scope.sport.split.rangeMax;
 			}
 		});
-	games[gId].splitGraph.append("g")
+	scope.game.splitGraph.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + graphVars.histGraphHeight + ")")
-		.call(games[gId].splitXAxis);
-	games[gId].splitGraph.append("g")
+		.call(scope.game.splitXAxis);
+	scope.game.splitGraph.append("g")
 		.attr("class", "y axis");
-	createShowDisp(gId,"splitGraphCont",sports[gId.substring(0,3)].split.title.toLowerCase(),false);
+	createShowDisp(gId,"splitGraphCont",scope.sport.split.title.toLowerCase(),false);
 }
 
 function addPlayByPlay(gId) {
@@ -961,7 +961,7 @@ function addPlayByPlay(gId) {
 		.attr("id","pbpCont"+gId)
 		.append("table")
 		.classed("fullWidth",true);
-	games[gId].plays.forEach(function(p,pI){
+	scope.game.plays.forEach(function(p,pI){
 		if (pI==0) {
 			pbpHead();
 		}
@@ -977,7 +977,7 @@ function addPlayByPlay(gId) {
 				.attr("colspan",3)
 				.classed("center",true)
 				.classed("pbp",true);
-			if (p.p[0] == 'e' && pI!=games[gId].plays.length-1) {
+			if (p.p[0] == 'e' && pI!=scope.game.plays.length-1) {
 				pbpHead();
 			}
 		} else {
@@ -1004,7 +1004,7 @@ function addPlayByPlay(gId) {
 			.classed("pbpHead",true)
 			.classed("center",true);
 		tr.append("td")
-			.text(games[gId][aH[0].s].teamName)
+			.text(scope.game[aH[0].s].teamName)
 			.classed("pbp",true)
 			.classed("pbpHead",true)
 			.classed("center",true);
@@ -1015,7 +1015,7 @@ function addPlayByPlay(gId) {
 			.classed("pbpHead",true)
 			.classed("center",true);
 		tr.append("td")
-			.text(games[gId][aH[1].s].teamName)
+			.text(scope.game[aH[1].s].teamName)
 			.classed("pbp",true)
 			.classed("pbpHead",true)
 			.classed("center",true);
@@ -1027,17 +1027,17 @@ function addPlayByPlay(gId) {
 function getDispTime(gId,p) {
 	var dispTime = "";
 	if (p.p[0] == 'e') {
-		return "0:00"+" "+games[gId].boxScore[p.q-1].l;
+		return "0:00"+" "+scope.game.boxScore[p.q-1].l;
 	}
 	var t = getMinutes(gId,p.t);
 	dispTime += Math.trunc(t.t/60) + ":";
 	dispTime += (t.t%60 < 10)? "0"+(t.t%60):t.t%60;
-	return dispTime+" "+games[gId].boxScore[t.p].l;
+	return dispTime+" "+scope.game.boxScore[t.p].l;
 }
 
 function getPlayText(gId,play) {
 	var sport = gId.substring(0,3);
-	var playText = sports[sport].pt[play.p[0]];
+	var playText = scope.sport.pt[play.p[0]];
 	var playAr = [];
 	for(var oI = 0; oI < playText.order.length; oI++) {
 		if (isNaN(playText.order[oI])) {
@@ -1048,7 +1048,7 @@ function getPlayText(gId,play) {
 				if (play.e == "n") {
 					playAr.push("Media");
 				} else {
-					playAr.push(games[gId][play.e].teamName);
+					playAr.push(scope.game[play.e].teamName);
 				}
 			} else {
 				if (playText[playText.order[oI]]) {
@@ -1095,7 +1095,7 @@ function getPlayText(gId,play) {
 			}
 		}
 	}
-	if (play == games[gId].plays[games[gId].plays.length-1] &&
+	if (play == scope.game.plays[scope.game.plays.length-1] &&
 			oI == "e") {
 		playAr.pop();
 		playAr.push("game.");
@@ -1121,12 +1121,12 @@ function displayTitleScore(gId) {
 			.classed("left tRight",(teamI%2==0))
 			.classed("right tLeft",(teamI%2==1))
 			.classed("mainTeamLabel",true)
-			.style("border-color","#"+games[gId][team.s].primary)
+			.style("border-color","#"+scope.game[team.s].primary)
 			.append("div")
 			.classed("larTitle "+gId+" "+team.l, true)
 			.classed("bottomText",true)
 			.classed("fullWidth",true)
-			.text(games[gId][team.s].teamName);
+			.text(scope.game[team.s].teamName);
 	});
 	var bSCont = bS
 		.append("div")
@@ -1134,7 +1134,7 @@ function displayTitleScore(gId) {
 	bSCont.append("div")
 		.classed("bSDateLoc",true)
 		.classed("fullWidth center",true)
-		.html(games[gId].gameDate+"<br>"+games[gId].venue.venueName+", "+games[gId].venue.city+", "+games[gId].venue.state);
+		.html(scope.game.gameDate+"<br>"+scope.game.venue.venueName+", "+scope.game.venue.city+", "+scope.game.venue.state);
 	var bSLower = bSCont
 		.append("div")
 		.classed("fullWidth",true);
@@ -1149,37 +1149,37 @@ function displayTitleScore(gId) {
 			.classed("bottomText",true)
 			.classed("fullWidth",true)
 			.classed("scoreNum",true)
-			.text(games[gId][team.s+"Score"]);
+			.text(scope.game[team.s+"Score"]);
 	})
 	var bSTable = bSLower
 		.append("table")
 		.classed("bSTable",true);
 	aH.unshift({s:"period"});
 	aH.forEach(function(team,teamI) {
-//		if (games[gId].boxScore.length > 3)
+//		if (scope.game.boxScore.length > 3)
 		var bSTR = bSTable.append("tr");
 		bSTR.append("td")
 			.classed("bold",true)
 			.classed("thead",!teamI)
 			.text(function(){
 				if (teamI) {
-					return games[gId][team.s].short;
-				} else if (games[gId].final) {
+					return scope.game[team.s].short;
+				} else if (scope.game.final) {
 					return "Final"
 				} else {
-					var lastPlay = games[gId]
+					var lastPlay = scope.game
 						.plays[
-							games[gId].plays.length-1
+							scope.game.plays.length-1
 						];
 					return minToTime(lastPlay.t)
 						+ " "
-						+ games[gId].boxScore[
+						+ scope.game.boxScore[
 							lastPlay.q-1].l;
 				}
 			});
 		var otTot = 0;
-		games[gId].boxScore.forEach(function(bS,bSI){
-			if (bS.ot && bSI != games[gId].boxScore.length-1 && games[gId].boxScore.length>5) {
+		scope.game.boxScore.forEach(function(bS,bSI){
+			if (bS.ot && bSI != scope.game.boxScore.length-1 && scope.game.boxScore.length>5) {
 				if (teamI) {
 					otTot += bS[team.s];
 				} else {
@@ -1206,7 +1206,7 @@ function displayTitleScore(gId) {
 				if (!teamI) {
 					return "T";
 				} else {
-					return games[gId][team.s+"Score"];
+					return scope.game[team.s+"Score"];
 				}
 			});
 	});
@@ -1221,7 +1221,7 @@ function addPlayerStats(gId) {
 		.append("svg")
 		.attr("width", graphVars.histGraphWidth + margin.left + margin.right)
 		.attr("height", graphVars.histGraphHeight + margin.bottom + margin.top);
-	games[gId].playerStatsGraph = playerStatsSvg
+	scope.game.playerStatsGraph = playerStatsSvg
 		.append("g")
 		.attr("transform", "translate(" + ((graphVars.histGraphWidth + margin.left + margin.right)/2) + ","+margin.top+")");
 	playerStatsSvg.append("g")
@@ -1234,12 +1234,12 @@ function addPlayerStats(gId) {
 		.text("Player Stats");
 	createShowDisp(gId,"playerStatsGraph","player stats graph",false);
 	aH.forEach(function(team){
-		games[gId].playerStatsGraph.append("g")
+		scope.game.playerStatsGraph.append("g")
 			.attr("class", team.s+" axis");
 	});
 	
-	var sPO = sports[gId.substring(0,3)].po;
-	games[gId].players = {};
+	var sPO = scope.sport.po;
+	scope.game.players = {};
 	var playerStatsTable = d3.select("div#"+gId)
 		.append("div")
 		.classed("playerStats",true)
@@ -1249,24 +1249,24 @@ function addPlayerStats(gId) {
 		.classed("playerStatsT",true);
 	
 	aH.forEach(function(team) {
-		games[gId].players[team.s] = {};
-		games[gId].players[team.s].ps = [];
-		games[gId].plays.forEach(function(p){
+		scope.game.players[team.s] = {};
+		scope.game.players[team.s].ps = [];
+		scope.game.plays.forEach(function(p){
 				if(p.e == team.s && p.m) {
 					p.m.forEach(function(player) {
-						if (!games[gId].players[team.s][player]) {
-							games[gId].players[team.s].ps.push(player);
-							games[gId].players[team.s][player] = [];
+						if (!scope.game.players[team.s][player]) {
+							scope.game.players[team.s].ps.push(player);
+							scope.game.players[team.s][player] = [];
 						}
-						games[gId].players[team.s][player].push(p);
+						scope.game.players[team.s][player].push(p);
 					});
 				}
 		});
 		var playerRow = playerStatsTable.append("tr");
 		playerRow.append("td")
 			.classed("thead",true)
-			.text(games[gId][team.s].teamName);
-		sports[gId.substring(0,3)].p.forEach(function(p){
+			.text(scope.game[team.s].teamName);
+		scope.sport.p.forEach(function(p){
 			if(p!="top" && p!="to") {
 				playerRow.append("td")
 					.classed("thead",true)
@@ -1274,16 +1274,16 @@ function addPlayerStats(gId) {
 					.text(sPO[p].a + ((sPO[p].ad)?" ("+sPO[p].ad+")":""));
 			}
 		});
-		games[gId].players[team.s].ps.forEach(function(player){
+		scope.game.players[team.s].ps.forEach(function(player){
 			playerRow = playerStatsTable.append("tr")
 				.classed("hover",true);
 			playerRow.append("td").text(player);
-			sports[gId.substring(0,3)].p.forEach(function(p){
+			scope.sport.p.forEach(function(p){
 				if(p!="top" && p!="to") {
 					var mainRegExp = new RegExp(sPO[p].c,"i");
-					var totPlays = games[gId].players[team.s][player].filter(function(play){
+					var totPlays = scope.game.players[team.s][player].filter(function(play){
 						return (isData(gId,play.id,p) 
-								&& player == games[gId].plays[play.id].m[(sPO[p].player)?sPO[p].player:0]);
+								&& player == scope.game.plays[play.id].m[(sPO[p].player)?sPO[p].player:0]);
 					});
 					var primRegExp,totPrims;
 					if(sPO[p].p || sPO[p].dv || sPO[p].pv) {
@@ -1397,9 +1397,9 @@ function createShowDisp(gId,obId,title,hidden,secId) {
 
 //convert period seconds to minutes
 function getMinutes(gId,pTime) {
-	var period = games[gId].boxScore.length-1;
-	for(var boxI = games[gId].boxScore.length-1; boxI>=0; boxI--) {
-		var b = games[gId].boxScore[boxI];
+	var period = scope.game.boxScore.length-1;
+	for(var boxI = scope.game.boxScore.length-1; boxI>=0; boxI--) {
+		var b = scope.game.boxScore[boxI];
 		if (pTime > b.t) {
 			period -= 1;
 			pTime = pTime - b.t;
@@ -1411,7 +1411,7 @@ function getMinutes(gId,pTime) {
 //plot line, axes
 function plotScore(gId) {
 	//Mouse Over G
-	var mOG = games[gId].chart.append("g")
+	var mOG = scope.game.chart.append("g")
 		.classed("mouseover "+gId,true)
 		.style("display","none");
 	
@@ -1427,7 +1427,7 @@ function plotScore(gId) {
 		.attr("y2",graphVars.lineGraphHeight);
 	
 	//set line key
-	var lineKey = games[gId].chart.append("g")
+	var lineKey = scope.game.chart.append("g")
 		.attr("class", "lineKey " + gId);
 	aH.forEach(function(team, teamI) {
 		lineKey.append("line")
@@ -1436,10 +1436,10 @@ function plotScore(gId) {
 			.attr("y1", 10 + teamI*20)
 			.attr("y2", 10 + teamI*20)
 			.style("stroke-width",5)
-			.style("stroke", "#"+games[gId][team.s].primary)
+			.style("stroke", "#"+scope.game[team.s].primary)
 			.style("shape-rendering", "crispEdges");
 		lineKey.append("text")
-			.text(games[gId][team.s].teamName)
+			.text(scope.game[team.s].teamName)
 			.attr("x", 35)
 			.attr("text-anchor", "start")
 			.attr("y", 10 + teamI*20)
@@ -1447,21 +1447,21 @@ function plotScore(gId) {
 	});
 	
 	//setup domain
-	var yMax = 10*Math.ceil(Math.max(d3.max(games[gId].plays, function(p) { return p.a; }), d3.max(games[gId].plays, function(p) { return p.h; }))/10);
-	games[gId].x = d3.scale.linear()
+	var yMax = 10*Math.ceil(Math.max(d3.max(scope.game.plays, function(p) { return p.a; }), d3.max(scope.game.plays, function(p) { return p.h; }))/10);
+	scope.game.x = d3.scale.linear()
 		.range([0, width])
-		.domain([games[gId].totTime,0]);
-	games[gId].xAxisScale = d3.scale.linear()
+		.domain([scope.game.totTime,0]);
+	scope.game.xAxisScale = d3.scale.linear()
 		.range([0, width])
-		.domain([games[gId].totTime/sports[gId.substring(0,3)].s,0]);
+		.domain([scope.game.totTime/scope.sport.s,0]);
 
-	games[gId].y = d3.scale.linear()
+	scope.game.y = d3.scale.linear()
 		.range([height, 0])
 		.domain([-10, yMax]);
 	//axes are printed after mouse over g
 	
 	//add score diff links - needs to be over mOG for link reasons
-	var scoreDiff = games[gId].chart.append("g")
+	var scoreDiff = scope.game.chart.append("g")
 		.attr("transform","translate("+graphVars.lineGraphWidth/2+",0)");
 	scoreDiff.append("line")
 		.attr("x1", 0)
@@ -1485,7 +1485,7 @@ function plotScore(gId) {
 		.attr("x",-10-text.node().getBBox().width)
 		.attr("width",text.node().getBBox().width)
 		.attr("height",text.node().getBBox().height)
-		.on("click",function(){switchScoreDiff(gId,this);graphAll(gId, games[gId].lastPType, 0);});
+		.on("click",function(){switchScoreDiff(gId,this);graphAll(gId, scope.game.lastPType, 0);});
 	text = scoreDiff.append("text")
 		.classed("svgLink",true)
 		.attr("id","scoreDiffD"+gId)
@@ -1499,38 +1499,38 @@ function plotScore(gId) {
 		.attr("x",10)
 		.attr("width",text.node().getBBox().width)
 		.attr("height",text.node().getBBox().height)
-		.on("click",function(){switchScoreDiff(gId,this);graphAll(gId, games[gId].lastPType, 0);});
+		.on("click",function(){switchScoreDiff(gId,this);graphAll(gId, scope.game.lastPType, 0);});
 	
 	//bisect time
-    games[gId].bisectTime = d3.bisector(function(p) {
-    	return games[gId].totTime - p.t; 
+    scope.game.bisectTime = d3.bisector(function(p) {
+    	return scope.game.totTime - p.t; 
     });
 	
 	//create mouseover
 	d3.select("svg#chart"+gId)
 		.on("mousemove",function(){
-			var mouseT = games[gId].x.invert(d3.mouse(this)[0]-margin.left);
+			var mouseT = scope.game.x.invert(d3.mouse(this)[0]-margin.left);
 			if (mouseT < 0) {
 				mouseT = 0;
-			} else if (mouseT > games[gId].totTime) {
-				mouseT = games[gId].totTime;
+			} else if (mouseT > scope.game.totTime) {
+				mouseT = scope.game.totTime;
 			}
-			mOG.attr("transform","translate("+games[gId].x(mouseT)+",0)");
+			mOG.attr("transform","translate("+scope.game.x(mouseT)+",0)");
 			var perTime = getMinutes(gId,mouseT);
 			var time = minToTime(perTime.t);
-			var pID = games[gId].bisectTime.left(games[gId].plays, games[gId].totTime - mouseT,1);
+			var pID = scope.game.bisectTime.left(scope.game.plays, scope.game.totTime - mouseT,1);
 			var scoreText = "";
 			aH.forEach(function(team){
-				scoreText += games[gId][team.s].short + ":";
-				scoreText += games[gId].plays[pID-1][team.s] + " ";
+				scoreText += scope.game[team.s].short + ":";
+				scoreText += scope.game.plays[pID-1][team.s] + " ";
 			});
 			var text = mOG.select("text")
-				.text(scoreText+"- "+time+" "+games[gId].boxScore[perTime.p].l);
+				.text(scoreText+"- "+time+" "+scope.game.boxScore[perTime.p].l);
 			var textSize = text.node().getBBox();
-			if (games[gId].x(mouseT) + textSize.width/2 > graphVars.lineGraphWidth) {
-				text.attr("dx", graphVars.lineGraphWidth - (games[gId].x(mouseT) + textSize.width/2));
-			} else if (games[gId].x(mouseT) - textSize.width/2 < 0) {
-				text.attr("dx", textSize.width/2-games[gId].x(mouseT));
+			if (scope.game.x(mouseT) + textSize.width/2 > graphVars.lineGraphWidth) {
+				text.attr("dx", graphVars.lineGraphWidth - (scope.game.x(mouseT) + textSize.width/2));
+			} else if (scope.game.x(mouseT) - textSize.width/2 < 0) {
+				text.attr("dx", textSize.width/2-scope.game.x(mouseT));
 			} else {
 				text.attr("dx",0);
 			}
@@ -1540,46 +1540,46 @@ function plotScore(gId) {
 		.on("mouseout",function(){mOG.style("display","none")});
 	
 	//display axes (on top of mouse over g)
-	games[gId].xAxis = d3.svg.axis()
-		.scale(games[gId].xAxisScale)
+	scope.game.xAxis = d3.svg.axis()
+		.scale(scope.game.xAxisScale)
 		.orient("bottom")
 		.tickFormat(function(d,i) { 
-			var perTime = getMinutes(gId,d*sports[gId.substring(0,3)].s);
-			if(games[gId].boxScore[perTime.p].t == perTime.t) {
-				return games[gId].boxScore[perTime.p].l;
+			var perTime = getMinutes(gId,d*scope.sport.s);
+			if(scope.game.boxScore[perTime.p].t == perTime.t) {
+				return scope.game.boxScore[perTime.p].l;
 			} else {
 				return (perTime.t/60) + ":00";
 			}
 		});
 	
-	games[gId].yAxis = d3.svg.axis()
-		.scale(games[gId].y)
+	scope.game.yAxis = d3.svg.axis()
+		.scale(scope.game.y)
 		.orient("left");
 	
-	games[gId].histXAxis = d3.svg.axis()
-		.scale(games[gId].xAxisScale)
+	scope.game.histXAxis = d3.svg.axis()
+		.scale(scope.game.xAxisScale)
 		.orient("bottom")
 		.tickFormat("");
 	
 	displayClip(gId,graphVars.graphTime);
 	
 	//create plot axes
-	games[gId].chart.append("g")
+	scope.game.chart.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
-		.call(games[gId].xAxis);
-	games[gId].chart.append("g")
+		.call(scope.game.xAxis);
+	scope.game.chart.append("g")
 		.attr("class", "y axis "+gId)
-		.call(games[gId].yAxis);
+		.call(scope.game.yAxis);
 	
-	games[gId].histChart.append("g")
+	scope.game.histChart.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + graphVars.histGraphHeight + ")")
-		.call(games[gId].histXAxis);
+		.call(scope.game.histXAxis);
 	
 	//create replay buttons
 	graphVars.replayTimes.forEach(function(timeInS,i){
-		var replayButton = games[gId].chart
+		var replayButton = scope.game.chart
 			.append("g")
 			.attr("transform", "translate(" + (width + 20) + "," + (8-margin.top + 30*i) + ")")
 			.on("click", function(){
@@ -1608,28 +1608,28 @@ function plotScore(gId) {
 			.style("cursor","pointer");
 	});
 	
-	games[gId].lineData = {a:[],h:[]};
+	scope.game.lineData = {a:[],h:[]};
 	//set up score paths
-	games[gId].line = {a:d3.svg.line()
-		.x(function(p) { return games[gId].x(p.t); })
-		.y(function(p) { return games[gId].y(p.a); }),
+	scope.game.line = {a:d3.svg.line()
+		.x(function(p) { return scope.game.x(p.t); })
+		.y(function(p) { return scope.game.y(p.a); }),
 		h:d3.svg.line()
-		.x(function(p) { return games[gId].x(p.t); })
-		.y(function(p) { return games[gId].y(p.h); })};
+		.x(function(p) { return scope.game.x(p.t); })
+		.y(function(p) { return scope.game.y(p.h); })};
 	aH.forEach(function(team){
-		games[gId].chart
+		scope.game.chart
 				.append("path")
 				.attr("class", "line")
 				.attr("id","line"+gId+team.s)
 				.attr("stroke-width","2px")
-				.attr("stroke", "#"+games[gId][team.s].primary)
+				.attr("stroke", "#"+scope.game[team.s].primary)
 				.attr("clip-path", "url(#graphClip"+gId+")");
 	});
-	games[gId].chart.append("line")
-		.attr("x1",games[gId].x(0))
-		.attr("x2",games[gId].x(games[gId].totTime))
-		.attr("y1",games[gId].y(0))
-		.attr("y2",games[gId].y(0))
+	scope.game.chart.append("line")
+		.attr("x1",scope.game.x(0))
+		.attr("x2",scope.game.x(scope.game.totTime))
+		.attr("y1",scope.game.y(0))
+		.attr("y2",scope.game.y(0))
 		.style("stroke","black")
 		.style("stroke-width",2)
 		.style("display","none")
@@ -1640,46 +1640,46 @@ function plotScore(gId) {
 //plot score line
 function plotLine(gId) {
 	var yMax,yMin;
-	var sc = sports[gId.substring(0,3)].score;
-	if (games[gId].scoreDiff) {
-		yMin = 10*Math.floor(d3.min(games[gId].plays, function(p) { return p.a-p.h; })/10);
+	var sc = scope.sport.score;
+	if (scope.game.scoreDiff) {
+		yMin = 10*Math.floor(d3.min(scope.game.plays, function(p) { return p.a-p.h; })/10);
 		if (yMin == 0) {
 			yMin = -10;
 		}
-		yMax = 10*Math.ceil(d3.max(games[gId].plays, function(p) { return p.a-p.h; })/10);
+		yMax = 10*Math.ceil(d3.max(scope.game.plays, function(p) { return p.a-p.h; })/10);
 		if (yMax == 0) {
 			yMax = 10;
 		}
 	} else {
 		yMin = 0;
-		yMax = 10*Math.ceil(Math.max(d3.max(games[gId].plays, function(p) { return p.a; }), d3.max(games[gId].plays, function(p) { return p.h; }))/10);
+		yMax = 10*Math.ceil(Math.max(d3.max(scope.game.plays, function(p) { return p.a; }), d3.max(scope.game.plays, function(p) { return p.h; }))/10);
 	}
-	games[gId].y = d3.scale.linear()
+	scope.game.y = d3.scale.linear()
 		.range([height, 0])
 		.domain([yMin, yMax]);
-	games[gId].yAxis = d3.svg.axis()
+	scope.game.yAxis = d3.svg.axis()
 		.orient("left")
-		.scale(games[gId].y)
+		.scale(scope.game.y)
 		.tickFormat(function(d){return Math.abs(d)});
 	d3.select(".y.axis."+gId)
-		.call(games[gId].yAxis);
-	games[gId].lineData["a"].length = 0;
-	games[gId].lineData["h"].length = 0;
+		.call(scope.game.yAxis);
+	scope.game.lineData["a"].length = 0;
+	scope.game.lineData["h"].length = 0;
 	//create plot path data (extra points to make it square)
-	games[gId].plays.forEach(function(play,playI) {
+	scope.game.plays.forEach(function(play,playI) {
 		if (isData(gId,play.id,'pt') ||
-				playI==0 || playI == games[gId].plays.length-1) {
-			if (games[gId].scoreDiff) {
+				playI==0 || playI == scope.game.plays.length-1) {
+			if (scope.game.scoreDiff) {
 				aH.forEach(function(team) {
 					if(playI!=0){
 						var score = {
-							h: games[gId].plays[playI-1].h-games[gId].plays[playI-1].a,
-							a: games[gId].plays[playI-1].a-games[gId].plays[playI-1].h
+							h: scope.game.plays[playI-1].h-scope.game.plays[playI-1].a,
+							a: scope.game.plays[playI-1].a-scope.game.plays[playI-1].h
 						}
 						if (score[team.s]<0) {
 							score[team.s]=0;
 						}
-						games[gId].lineData[team.s].push({
+						scope.game.lineData[team.s].push({
 							t: play.t,
 							h: -score.h,
 							a: score.a,
@@ -1693,7 +1693,7 @@ function plotLine(gId) {
 					if (score[team.s]<0) {
 						score[team.s]=0;
 					}
-					games[gId].lineData[team.s].push({
+					scope.game.lineData[team.s].push({
 						t: play.t,
 						h: -score.h,
 						a: score.a,
@@ -1703,14 +1703,14 @@ function plotLine(gId) {
 			} else {
 				aH.forEach(function(team) {
 					if(playI!=0){
-						games[gId].lineData[team.s].push({
+						scope.game.lineData[team.s].push({
 							t: play.t,
-							h: games[gId].plays[playI-1].h,
-							a: games[gId].plays[playI-1].a,
+							h: scope.game.plays[playI-1].h,
+							a: scope.game.plays[playI-1].a,
 							q: play.q
 						});
 					}
-					games[gId].lineData[team.s].push(play);
+					scope.game.lineData[team.s].push(play);
 				});
 			}
 		}
@@ -1719,15 +1719,15 @@ function plotLine(gId) {
 	//plot score path
 	aH.forEach(function(team) {
 		d3.select("#line"+gId+team.s)
-			.datum(games[gId].lineData[team.s])
+			.datum(scope.game.lineData[team.s])
 			.transition().duration(graphVars.dispTime)
-			.attr("d",games[gId].line[team.s]);
+			.attr("d",scope.game.line[team.s]);
 	});
 	
-	if (games[gId].scoreDiff) {
+	if (scope.game.scoreDiff) {
 		d3.select("#diffMidLine"+gId)
-			.attr("y1",games[gId].y(0))
-			.attr("y2",games[gId].y(0))
+			.attr("y1",scope.game.y(0))
+			.attr("y2",scope.game.y(0))
 			.style("display",null);
 	} else {
 		d3.select("#diffMidLine"+gId)
@@ -1736,15 +1736,15 @@ function plotLine(gId) {
 }
 
 function isData(gId,pId,pType,isPrim) {
-	var play = games[gId].plays[pId];
+	var play = scope.game.plays[pId];
 	var sport = gId.substring(0,3);
-	var comp = sports[sport].po[pType].c;
-	var mPos = sports[sport].po[pType].mp;
-	var prim = sports[sport].po[pType].p;
-	var primPos = sports[sport].po[pType].pp;
-	var primDat = sports[sport].po[pType].pd;
-	var noSec = sports[sport].po[pType].ns;
-	var nextPlay = sports[sport].po[pType].np;
+	var comp = scope.sport.po[pType].c;
+	var mPos = scope.sport.po[pType].mp;
+	var prim = scope.sport.po[pType].p;
+	var primPos = scope.sport.po[pType].pp;
+	var primDat = scope.sport.po[pType].pd;
+	var noSec = scope.sport.po[pType].ns;
+	var nextPlay = scope.sport.po[pType].np;
 	prim = (!isDef(prim)) ? comp : prim;
 	var compRegExp = new RegExp(comp,"i");
 	var primRegExp = new RegExp(prim,"i");
@@ -1752,7 +1752,7 @@ function isData(gId,pId,pType,isPrim) {
 	if(comp == "pos"){
 		return play.x;	
 	} else {
-		var dv = (sports[sport].po[pType].dv) ? sports[sport].po[pType].dv : 'p';
+		var dv = (scope.sport.po[pType].dv) ? scope.sport.po[pType].dv : 'p';
 		if (isDef(mPos)) {
 			mainBool = compRegExp.test(play[dv][mPos]);
 		} else {
@@ -1765,7 +1765,7 @@ function isData(gId,pId,pType,isPrim) {
 	if ((isPrim || noSec || prim==comp) && mainBool) {
 		var secBool;
 		if (nextPlay) {
-			var nP = games[gId].plays[pId+1];
+			var nP = scope.game.plays[pId+1];
 			secBool = primRegExp.test(nP[dv]);
 		} else if (isDef(primPos)) {
 			secBool = primRegExp.test(play[dv][primPos]);
@@ -1780,19 +1780,19 @@ function isData(gId,pId,pType,isPrim) {
 
 function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var sport = gId.substring(0,3);
-	var comp = sports[sport].po[pType].c;
-	var prim = sports[sport].po[pType].p;
-	var defPosP = sports[sport].po[pType].dpp; //primary is defense, mainly for per possession calculation
-	var defPosS = sports[sport].po[pType].dps;
-	var primSum = sports[sport].po[pType].sum;
-	var primPos = sports[sport].po[pType].pp;
-	var mPos = sports[sport].po[pType].mp;
-	var primVal = sports[sport].po[pType].pv;
-	var primValPos = sports[sport].po[pType].pvp;
-	var noSec = sports[sport].po[pType].ns;
-	var playDir = sports[sport].pd;
-	var splitTime = sports[sport].s;
-	var dataValue = (sports[sport].po[pType].dv)?sports[sport].po[pType].dv:'p';
+	var comp = scope.sport.po[pType].c;
+	var prim = scope.sport.po[pType].p;
+	var defPosP = scope.sport.po[pType].dpp; //primary is defense, mainly for per possession calculation
+	var defPosS = scope.sport.po[pType].dps;
+	var primSum = scope.sport.po[pType].sum;
+	var primPos = scope.sport.po[pType].pp;
+	var mPos = scope.sport.po[pType].mp;
+	var primVal = scope.sport.po[pType].pv;
+	var primValPos = scope.sport.po[pType].pvp;
+	var noSec = scope.sport.po[pType].ns;
+	var playDir = scope.sport.pd;
+	var splitTime = scope.sport.s;
+	var dataValue = (scope.sport.po[pType].dv)?scope.sport.po[pType].dv:'p';
 	var dataAr = [];
 	if (isSec) {
 		var secData = data.filter(function(p){return !(isData(gId,p.id,pType,isSec))});
@@ -1815,17 +1815,17 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 					tempVal += +p[dataValue][mPos];
 				}
 			});
-		} else if (comp=="pos" && (gType!="split" || sports[sport].split.top)) {
+		} else if (comp=="pos" && (gType!="split" || scope.sport.split.top)) {
 			//calculating time of possession
 			if (gType != 'tot' && !isSec) {
 				var finTime = gIndex*splitTime;
 				var startTime = (gIndex+1)*splitTime;
-				var pId = games[gId].bisectTime[
-					(playDir?'right':'left')](games[gId].plays, games[gId].totTime - ((playDir)?startTime:finTime),0);
+				var pId = scope.game.bisectTime[
+					(playDir?'right':'left')](scope.game.plays, scope.game.totTime - ((playDir)?startTime:finTime),0);
 				var prevPos = getNextPos(gId,pId,false);
-				var nextPos = (games[gId].plays[pId].x)? games[gId].plays[pId]: getNextPos(gId,pId,true);
+				var nextPos = (scope.game.plays[pId].x)? scope.game.plays[pId]: getNextPos(gId,pId,true);
 				if (((playDir)?prevPos.e:nextPos.e) == teamS &&
-						((playDir && startTime != games[gId].totTime) ||
+						((playDir && startTime != scope.game.totTime) ||
 						(!playDir && finTime != 0))) {
 					var outsideTime = (playDir)?startTime:finTime;
 					var insideTime = (playDir)?
@@ -1868,7 +1868,7 @@ function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 
 function reduceDataText(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var sport = gId.substring(0,3),
-		sPOT = sports[sport].po[pType],
+		sPOT = scope.sport.po[pType],
 		string = "",
 		total = reduceData(gId,pType,data,gIndex,teamS,gType,func,false),
 		sec;
@@ -1900,26 +1900,26 @@ function switchScoreDiff(gId,ob) {
 			d3.select("#scoreDiff"+link+gId).classed("svgLinkActive",!linkI);
 			d3.select("#scoreDiffBox"+link+gId).classed("svgLinkBoxActive",!linkI);
 		});
-		games[gId].scoreDiff = (links[0]=="D");
+		scope.game.scoreDiff = (links[0]=="D");
 		plotLine(gId);
 	}
 }
 
 function displayClip(gId,time) {
 	//clip for point path and points
-	var clipRect = games[gId].chart
+	var clipRect = scope.game.chart
 		.select("#graphClip"+gId);
 	if (clipRect[0][0] != null) {
 		clipRect.remove();
 		if (time != false) {
-			games[gId].chart.selectAll("circle.point."+gId).remove();
+			scope.game.chart.selectAll("circle.point."+gId).remove();
 			//only display points if user has not cleared data
-			if (games[gId].lastPType != null) {
-				plotHist(gId, games[gId].lastPType, time);
+			if (scope.game.lastPType != null) {
+				plotHist(gId, scope.game.lastPType, time);
 			}
 		}
 	}
-	games[gId].chart.append("clipPath")
+	scope.game.chart.append("clipPath")
 		.attr("id","graphClip"+gId)
 		.append("rect")
 		.attr("x",0)
@@ -1934,7 +1934,7 @@ function displayClip(gId,time) {
 //plot histogram, points, point keys
 function plotHist(gId, pType, dispTime) {
 	var sport = gId.substring(0,3);
-	var sPO = sports[sport].po[pType];
+	var sPO = scope.sport.po[pType];
 	//display clicked link as active
 	d3.selectAll("div.teamStat."+gId)
 		.classed("active",false);
@@ -1959,26 +1959,26 @@ function plotHist(gId, pType, dispTime) {
 	var player = (sPO.player) ? sPO.player : 0;
 	
 	//cut last animation short for points
-	games[gId].chart.selectAll("circle.transWaiting.point."+gId)
+	scope.game.chart.selectAll("circle.transWaiting.point."+gId)
 		.remove();
 	
 	//create comparisons	
 	var compRegExp = new RegExp(comp,"i");
 	var primRegExp = new RegExp(prim,"i");
 	
-	var histData = games[gId].plays.filter(function(p,pI) {
-		if (pType == games[gId].lastPType && !dispTime) {
+	var histData = scope.game.plays.filter(function(p,pI) {
+		if (pType == scope.game.lastPType && !dispTime) {
 			return false;
 		}
 		return isData(gId,pI,pType);
 	});
 	
 	//if user pressed same button again
-	if (pType == games[gId].lastPType && !dispTime) {
-		games[gId].lastPType = null;
+	if (pType == scope.game.lastPType && !dispTime) {
+		scope.game.lastPType = null;
 	} else {
 		displayClip(gId,0)
-		games[gId].lastPType = pType;
+		scope.game.lastPType = pType;
 		d3.select("#"+gId+"_"+pType)
 			.classed("active",true);
 		d3.select("#teamStatsMin"+gId)
@@ -1989,14 +1989,14 @@ function plotHist(gId, pType, dispTime) {
 	var histTeam = {}
 	aH.forEach(function(team,teamI){
 		histTeam[team.s] = d3.layout.histogram()
-			.bins(games[gId].totTime/sports[gId.substring(0,3)].s)
-			.range([0,games[gId].totTime])
+			.bins(scope.game.totTime/scope.sport.s)
+			.range([0,scope.game.totTime])
 			.value(function(p){return p.t;})(histData.filter(function(p) { return p.e == oppAH(team.s,!otherTeam); }))
 	});
 		
 	var histX = d3.scale.linear()
 		.range([1, graphVars.histGraphWidth+1])
-		.domain([games[gId].totTime,0]);
+		.domain([scope.game.totTime,0]);
 	var histY = d3.scale.linear()
 		.range([0, graphVars.histGraphHeight])
 		.domain([
@@ -2009,25 +2009,25 @@ function plotHist(gId, pType, dispTime) {
 				d3.max(histTeam.a, function(d,i) { return reduceData(gId,pType,d,i,aH[0].s,"time");}),
 				d3.max(histTeam.h, function(d,i) { return reduceData(gId,pType,d,i,aH[1].s,"time");}))
 		]);
-	games[gId].histChart.select('g.x.axis')
+	scope.game.histChart.select('g.x.axis')
 		.transition().duration(graphVars.dispTime)
 		.attr("transform","translate(0,"
 				+(graphVars.histGraphHeight-histY(0))+")");
 	
 	//display bars
 	aH.forEach(function(team,teamI) {
-		var chartBars = games[gId].histChart.selectAll('rect.p.'+team.s)
+		var chartBars = scope.game.histChart.selectAll('rect.p.'+team.s)
 			.data(histTeam[team.s]);
 		chartBars
 		  .enter()
 			.append('rect')
 			.attr("class","p "+team.s)
 			.attr("x",function(d,i){return histX(d.dx*i + d.dx/2*(2-teamI));})
-			.attr("width",function(d) {return histX(games[gId].totTime-d.dx/2)-2;})
+			.attr("width",function(d) {return histX(scope.game.totTime-d.dx/2)-2;})
 			.attr("y",graphVars.histGraphHeight)
 			.attr("height",0)
 			.style("shape-rendering", "crispEdges")
-			.style("fill","#"+games[gId][team.s].primary);
+			.style("fill","#"+scope.game[team.s].primary);
 		
 		chartBars
 			.transition().duration(graphVars.dispTime)
@@ -2039,7 +2039,7 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d,i,team.s,"time",function(d){return histY(Math.abs(d)) - histY(0);});
 			});
 		
-		var textFields = games[gId].histChart.selectAll('text.p.'+team.s)
+		var textFields = scope.game.histChart.selectAll('text.p.'+team.s)
 			.data(histTeam[team.s]);
 		
 		textFields.enter()
@@ -2060,17 +2060,17 @@ function plotHist(gId, pType, dispTime) {
 				return reduceDataText(gId,pType,d,i,team.s,"time",shortNum); 
 			});
 		//set secondary box
-		var secBars = games[gId].histChart.selectAll('rect.s.'+team.s)
+		var secBars = scope.game.histChart.selectAll('rect.s.'+team.s)
 			.data(histTeam[team.s]);
 		secBars
 		  .enter()
 			.append('rect')
 			.attr("class","s "+team.s)
 			.attr("x",function(d,i){return histX(d.dx*i + d.dx/2*(2-teamI))+2;})
-			.attr("width",function(d) {return histX(games[gId].totTime-d.dx/2)-6;})
+			.attr("width",function(d) {return histX(scope.game.totTime-d.dx/2)-6;})
 			.attr("y",graphVars.histGraphHeight)
 			.attr("height",function(d) {return 0;})
-			.style("fill","#"+games[gId][team.s].secondary)
+			.style("fill","#"+scope.game[team.s].secondary)
 			.style("shape-rendering", "crispEdges");
 		
 		secBars
@@ -2085,9 +2085,9 @@ function plotHist(gId, pType, dispTime) {
 	});
 
 	//display points
-	var graphPoint = games[gId].chart.selectAll("circle.point."+gId)
+	var graphPoint = scope.game.chart.selectAll("circle.point."+gId)
 		.data(histData,function(p) {return p.id;});
-	var prevGraphPoints = games[gId].chart.selectAll("circle.point."+gId);
+	var prevGraphPoints = scope.game.chart.selectAll("circle.point."+gId);
 	prevGraphPoints = prevGraphPoints[0].length;
 	
 	graphPoint
@@ -2103,24 +2103,24 @@ function plotHist(gId, pType, dispTime) {
 		.attr("r",3)
 		.style("fill",function(p) {
 				if (p.e != "n") {
-					return (isData(gId,p.id,pType,true)) ? "#"+games[gId][p.e].primary : "#"+games[gId][p.e].secondary;
+					return (isData(gId,p.id,pType,true)) ? "#"+scope.game[p.e].primary : "#"+scope.game[p.e].secondary;
 				}
 				return "white";
 			})
 		.attr("cy",function(p) {
-				if (games[gId].scoreDiff) {
+				if (scope.game.scoreDiff) {
 					if (p.e != "n") {
-						return games[gId].y(p.a-p.h);
+						return scope.game.y(p.a-p.h);
 					}
 					else {
-						return games[gId].y(0);
+						return scope.game.y(0);
 					}
 				} else {
 					if (p.e != "n") {
-						return games[gId].y(p[p.e]);
+						return scope.game.y(p[p.e]);
 					}
 					else {
-						return games[gId].y((p.a+p.h)/2);
+						return scope.game.y((p.a+p.h)/2);
 					}
 				}
 			})
@@ -2130,21 +2130,21 @@ function plotHist(gId, pType, dispTime) {
 		.append("circle")
 		.attr("class","point " + gId)
 		.attr("id",function(p){return "playpoint-"+p.id;})
-		.attr("cx",function(p) {return games[gId].x(p.t);})
+		.attr("cx",function(p) {return scope.game.x(p.t);})
 		.attr("cy",function(p) {
-				if (games[gId].scoreDiff) {
+				if (scope.game.scoreDiff) {
 					if (p.e != "n") {
-						return games[gId].y(p.a-p.h);
+						return scope.game.y(p.a-p.h);
 					}
 					else {
-						return games[gId].y(0);
+						return scope.game.y(0);
 					}
 				} else {
 					if (p.e != "n") {
-						return games[gId].y(p[p.e]);
+						return scope.game.y(p[p.e]);
 					}
 					else {
-						return games[gId].y((p.a+p.h)/2);
+						return scope.game.y((p.a+p.h)/2);
 					}
 				}
 			})
@@ -2152,13 +2152,13 @@ function plotHist(gId, pType, dispTime) {
 		.style("opacity",function(){return (dispTime)?1:0;})
 		.style("fill",function(p) {
 				if (p.e != "n") {
-					return (isData(gId,p.id,pType,true)) ? "#"+games[gId][p.e].primary : "#"+games[gId][p.e].secondary;
+					return (isData(gId,p.id,pType,true)) ? "#"+scope.game[p.e].primary : "#"+scope.game[p.e].secondary;
 				}
 				return "white";
 			})
 		.style("stroke",function(p) {
 				if (p.e != "n") {
-					return "#"+games[gId][p.e].primary;
+					return "#"+scope.game[p.e].primary;
 				}
 				return "black";
 			})
@@ -2169,7 +2169,7 @@ function plotHist(gId, pType, dispTime) {
 			if(!dispTime) {
 				return graphVars.dispTime/2/histData.length*i+graphVars.dispTime/2;
 			} else {
-				return (games[gId].totTime - p.t)/games[gId].totTime*dispTime;
+				return (scope.game.totTime - p.t)/scope.game.totTime*dispTime;
 			}
 		})
 		.ease("bounce")
@@ -2182,18 +2182,18 @@ function plotHist(gId, pType, dispTime) {
 	
 	//Point links - voronoi
 	var voronoiData = [];
-	games[gId].chart.selectAll("path.vorPath").remove();
-	games[gId].chart.selectAll(".vorClip").remove();
+	scope.game.chart.selectAll("path.vorPath").remove();
+	scope.game.chart.selectAll(".vorClip").remove();
 	histData.forEach(function(p){
-		var x = games[gId].x(p.t);
-		var y = ((games[gId].scoreDiff)?
+		var x = scope.game.x(p.t);
+		var y = ((scope.game.scoreDiff)?
 					((p.e != "n")?
-						games[gId].y(p.a-p.h):
-						games[gId].y(0)
+						scope.game.y(p.a-p.h):
+						scope.game.y(0)
 					):
 					((p.e != "n")?
-						games[gId].y(p[p.e]):
-						games[gId].y((p.a+p.h)/2)))
+						scope.game.y(p[p.e]):
+						scope.game.y((p.a+p.h)/2)))
 		if (voronoiData.length == 0) {
 			voronoiData.push([x,y]);
 		} else {
@@ -2222,7 +2222,7 @@ function plotHist(gId, pType, dispTime) {
 			}
 		}
 	});
-	games[gId].chart.selectAll("clipPath")
+	scope.game.chart.selectAll("clipPath")
 		.data(voronoiData)
 		.enter().append("svg:clipPath")
 		.attr("id", function(d, i) { return gId+"-playvorclip-"+i;})
@@ -2231,7 +2231,7 @@ function plotHist(gId, pType, dispTime) {
 		.attr('cx', function(d) { return d[0]; })
 		.attr('cy', function(d) { return d[1]; })
 		.attr('r', 10);
-	games[gId].chart.selectAll("path.vorPath")
+	scope.game.chart.selectAll("path.vorPath")
 		.data(d3.geom.voronoi(voronoiData))
 		.enter().append("svg:path")
 		.classed("vorPath",true)
@@ -2246,7 +2246,7 @@ function plotHist(gId, pType, dispTime) {
 		.style("fill", function(d,i){return ("hsl("+(i / (voronoiData.length-1) * 720)+",100%,50%)");})
 		.style('fill-opacity', 0)
 		.on('mouseover',function(d,i){
-			var graphPoint = games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+			var graphPoint = scope.game.chart.select("circle#playpoint-" + histData[i].id + "." + gId)
 			if (!graphPoint.classed("transWaiting")){
 				graphPoint.transition()
 					.duration(graphVars.dispTime/4)
@@ -2257,7 +2257,7 @@ function plotHist(gId, pType, dispTime) {
 						+ histData[i].h 
 						+ ": " 
 						+ getPlayText(gId,histData[i]);
-				var labelCont = games[gId].chart.append("g")
+				var labelCont = scope.game.chart.append("g")
 					.attr("id","pointLabel-"+histData[i].id);
 				var labelBox = labelCont.append("rect")
 					.attr("height",30)
@@ -2281,34 +2281,34 @@ function plotHist(gId, pType, dispTime) {
 			}
 		})
 		.on('mouseout',function(d,i){
-			var graphPoint = games[gId].chart.select("circle#playpoint-" + histData[i].id + "." + gId)
+			var graphPoint = scope.game.chart.select("circle#playpoint-" + histData[i].id + "." + gId)
 			if (!graphPoint.classed("transWaiting")){
 				graphPoint.transition()
 					.duration(graphVars.dispTime/4)
 					.attr('r',3)
 					.attr('stroke-width',"2px");
 			}
-			games[gId].chart.select("g#pointLabel-"+histData[i].id)
+			scope.game.chart.select("g#pointLabel-"+histData[i].id)
 				.remove();
 		});
 	
 	//Points Key
-	var primLabel = (sports[gId.substring(0,3)].po[pType].l2)?
-			sports[gId.substring(0,3)].po[pType].l2:
-			sports[gId.substring(0,3)].po[pType].l,
+	var primLabel = (scope.sport.po[pType].l2)?
+			scope.sport.po[pType].l2:
+			scope.sport.po[pType].l,
 		keyData;
-	if (sports[gId.substring(0,3)].po[pType].pl) {
-		primLabel += " - " + sports[gId.substring(0,3)].po[pType].pl
+	if (scope.sport.po[pType].pl) {
+		primLabel += " - " + scope.sport.po[pType].pl
 	}
-	if (games[gId].lastPType == null) {
+	if (scope.game.lastPType == null) {
 		keyData = []
 	} else {
 		keyData = [{"pType":pType,"label": primLabel}];
-		if ((prim != comp && !noSec) || sports[gId.substring(0,3)].po[pType].fs) {
-			keyData.push( {"pType":pType, "label":sports[gId.substring(0,3)].po[pType].sl} );
+		if ((prim != comp && !noSec) || scope.sport.po[pType].fs) {
+			keyData.push( {"pType":pType, "label":scope.sport.po[pType].sl} );
 		}
 	}
-	var graphKey = games[gId].chart.selectAll("g.linePointKey."+gId)
+	var graphKey = scope.game.chart.selectAll("g.linePointKey."+gId)
 		.data(keyData,function(d,i) {return d.pType+i});
 	
 	graphKey
@@ -2336,7 +2336,7 @@ function plotHist(gId, pType, dispTime) {
 		graphKeyG
 			.append("circle")
 			.attr("r",function(d,i) {
-				if (sports[gId.substring(0,3)].po[pType].fs && i>0 && teamI<1) {
+				if (scope.sport.po[pType].fs && i>0 && teamI<1) {
 					return 0;
 				}
 				return 4;
@@ -2344,17 +2344,17 @@ function plotHist(gId, pType, dispTime) {
 			.attr("cx",14 + 12*teamI)
 			.attr("cy",10)
 			.style("fill", function(d,i) {
-				if (sports[gId.substring(0,3)].po[pType].fs && i>0) {
+				if (scope.sport.po[pType].fs && i>0) {
 					return 'white';
 				}
-				return i%2==0 ? "#"+games[gId][team.s].primary : "#"+games[gId][team.s].secondary;
+				return i%2==0 ? "#"+scope.game[team.s].primary : "#"+scope.game[team.s].secondary;
 			})
 			.style("stroke-width","2px")
 			.style("stroke", function(d,i) {
-				if (sports[gId.substring(0,3)].po[pType].fs && i>0) {
+				if (scope.sport.po[pType].fs && i>0) {
 					return 'black';
 				}
-				return "#"+games[gId][team.s].primary;
+				return "#"+scope.game[team.s].primary;
 			});
 	});
 	graphKeyG
@@ -2366,13 +2366,13 @@ function plotHist(gId, pType, dispTime) {
 		.attr("dy", ".3em");
 	
 	//histogram label
-	var pTypeFilter = games[gId].lastPType == null ? [] : [sports[gId.substring(0,3)].po[pType]];
+	var pTypeFilter = scope.game.lastPType == null ? [] : [scope.sport.po[pType]];
 	var histLabels = 
-			[games[gId].histChart.selectAll("g.graphTitle."+gId)
+			[scope.game.histChart.selectAll("g.graphTitle."+gId)
 				.data(pTypeFilter,function(d) {return d.l}),
-			games[gId].splitGraph.selectAll("g.graphTitle."+gId)
+			scope.game.splitGraph.selectAll("g.graphTitle."+gId)
 				.data(pTypeFilter,function(d) {return d.l}),
-			games[gId].playerStatsGraph.selectAll("g.graphTitle."+gId)
+			scope.game.playerStatsGraph.selectAll("g.graphTitle."+gId)
 				.data(pTypeFilter,function(d) {return d.l})];
 	histLabels.forEach(function(histLabel,hLI){
 		var labVars = {};
@@ -2420,7 +2420,7 @@ function plotHist(gId, pType, dispTime) {
 			.append("tspan")
 			.style("font-weight","bold")
 			.text(function(d){
-				var l2 = sports[gId.substring(0,3)].po[pType].l2;
+				var l2 = scope.sport.po[pType].l2;
 				return ((hLI==2 && l2)? l2 : d.l) + ((labelSing && !(hLI && l2))?"":"s");}
 			);
 		hLText
@@ -2435,12 +2435,12 @@ function plotHist(gId, pType, dispTime) {
 	var splitTeam = {}
 	aH.forEach(function(team,teamI){
 		splitTeam[team.s] = d3.layout.histogram()
-			.bins(sports[gId.substring(0,3)].split.bins)
-			.range([sports[gId.substring(0,3)].split.rangeMin,sports[gId.substring(0,3)].split.rangeMax])
+			.bins(scope.sport.split.bins)
+			.range([scope.sport.split.rangeMin,scope.sport.split.rangeMax])
 			.value(function(p){
-				if (sports[gId.substring(0,3)].split.type == 'play') {
+				if (scope.sport.split.type == 'play') {
 					return getPlayTime(gId,p.id);
-				} else if (sports[gId.substring(0,3)].split.type == 'down') {
+				} else if (scope.sport.split.type == 'down') {
 					return p.d-.1;
 				}
 			})
@@ -2466,23 +2466,23 @@ function plotHist(gId, pType, dispTime) {
 	var splitY = d3.scale.linear()
 		.range([graphVars.histGraphHeight,0])
 		.domain([yMin,yMax]);
-	games[gId].splitGraph.select('g.x.axis')
+	scope.game.splitGraph.select('g.x.axis')
 		.transition().duration(graphVars.dispTime)
 		.attr("transform","translate(0,"
 				+(splitY(0))+")");
 	aH.forEach(function(team,teamI){
-		var splitBars = games[gId].splitGraph.selectAll('rect.splitBar.'+team.s)
+		var splitBars = scope.game.splitGraph.selectAll('rect.splitBar.'+team.s)
 			.data(splitTeam[team.s]);
 		splitBars
 		  .enter()
 			.append('rect')
 			.attr("class","splitBar "+team.s)
-			.attr("x",function(d,i){return games[gId].splitX(i + (teamI/2))+1;})
-			.attr("width",function(d) {return games[gId].splitX(1/2)-2})
+			.attr("x",function(d,i){return scope.game.splitX(i + (teamI/2))+1;})
+			.attr("width",function(d) {return scope.game.splitX(1/2)-2})
 			.attr("y",function(d) {return graphVars.histGraphHeight;})
 			.attr("height", 0)
 			.style("shape-rendering", "crispEdges")
-			.style("fill","#"+games[gId][team.s].primary);
+			.style("fill","#"+scope.game[team.s].primary);
 		splitBars
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(i); } )
@@ -2493,18 +2493,18 @@ function plotHist(gId, pType, dispTime) {
 				return reduceData(gId,pType,d,i,team.s,"split",function(d){return splitY(0)-splitY(Math.abs(d))});
 			});
 		
-		var splitBarsSec = games[gId].splitGraph.selectAll('rect.splitBarSec.'+team.s)
+		var splitBarsSec = scope.game.splitGraph.selectAll('rect.splitBarSec.'+team.s)
 			.data(splitTeam[team.s]);
 		splitBarsSec
 		  .enter()
 			.append('rect')
 			.attr("class","splitBarSec "+team.s)
-			.attr("x",function(d,i){return games[gId].splitX(i + (teamI/2))+3;})
-			.attr("width",function(d) {return games[gId].splitX(1/2)-6})
+			.attr("x",function(d,i){return scope.game.splitX(i + (teamI/2))+3;})
+			.attr("width",function(d) {return scope.game.splitX(1/2)-6})
 			.attr("y",function(d) {return graphVars.histGraphHeight;})
 			.attr("height", 0)
 			.style("shape-rendering", "crispEdges")
-			.style("fill","#"+games[gId][team.s].secondary);
+			.style("fill","#"+scope.game[team.s].secondary);
 		splitBarsSec
 			.transition().duration(graphVars.dispTime)
 			.delay(function(p,i) { return graphVars.dispTime/2/histTeam[team.s].length*(i); } )
@@ -2514,13 +2514,13 @@ function plotHist(gId, pType, dispTime) {
 				return negZero(reduceData(gId,pType,d,i,team.s,"split",function(d){return splitY(0)-splitY(d)-2},true));
 			});
 	});
-	games[gId].splitYAxis = d3.svg.axis()
+	scope.game.splitYAxis = d3.svg.axis()
 		.scale(splitY)
 		.orient("left")
 		.ticks((yMax<3)?2:4)
 		.tickFormat(function(d){return d;});
-	games[gId].splitGraph.select("g.y.axis")
-		.call(games[gId].splitYAxis);
+	scope.game.splitGraph.select("g.y.axis")
+		.call(scope.game.splitYAxis);
 	
 	//player graph
 	var playerStats = {}
@@ -2570,7 +2570,7 @@ function plotHist(gId, pType, dispTime) {
 		.range([0,graphVars.histGraphHeight])
 		.domain([playerStats.max,playerStats.min]);
 	aH.forEach(function(team,teamI){
-		var playerBars = games[gId].playerStatsGraph.selectAll("rect.playerBar."+team.l)
+		var playerBars = scope.game.playerStatsGraph.selectAll("rect.playerBar."+team.l)
 			.data(playerStats[team.s],function(p) {return p.name;});
 		playerBars
 			.enter()
@@ -2583,7 +2583,7 @@ function plotHist(gId, pType, dispTime) {
 			.attr("y",graphVars.histGraphHeight)
 			.attr("width",graphVars.stat10Width)
 			.attr("height",0)
-			.style("fill","#"+games[gId][team.s].primary);
+			.style("fill","#"+scope.game[team.s].primary);
 		playerBars
 			.transition()
 			.duration(graphVars.dispTime)
@@ -2603,7 +2603,7 @@ function plotHist(gId, pType, dispTime) {
 			.attr("y",graphVars.histGraphHeight)
 			.attr("height",0)
 			.remove();
-		var playerLabel = games[gId].playerStatsGraph.selectAll("g.playerText."+team.l)
+		var playerLabel = scope.game.playerStatsGraph.selectAll("g.playerText."+team.l)
 			.data(playerStats[team.s],function(p) {return p.name;});
 		playerLabel
 			.enter()
@@ -2650,7 +2650,7 @@ function plotHist(gId, pType, dispTime) {
 			.duration(graphVars.dispTime)
 			.style("opacity",0)
 			.remove();
-		var playerSecBars = games[gId].playerStatsGraph.selectAll("rect.playerSecBar."+team.l)
+		var playerSecBars = scope.game.playerStatsGraph.selectAll("rect.playerSecBar."+team.l)
 			.data(playerStats[team.s],function(p) {return p.name;});
 		playerSecBars
 			.enter()
@@ -2663,7 +2663,7 @@ function plotHist(gId, pType, dispTime) {
 			.attr("y",graphVars.histGraphHeight+2)
 			.attr("width",graphVars.stat10Width-4)
 			.attr("height",0)
-			.style("fill","#"+games[gId][team.s].secondary);
+			.style("fill","#"+scope.game[team.s].secondary);
 		playerSecBars
 			.transition()
 			.duration(graphVars.dispTime)
@@ -2683,13 +2683,13 @@ function plotHist(gId, pType, dispTime) {
 			.attr("y",graphVars.histGraphHeight+2)
 			.attr("height",0)
 			.remove();
-		games[gId].playerYAxis = d3.svg.axis()
+		scope.game.playerYAxis = d3.svg.axis()
 			.scale(playerY)
 			.orient((teamI)?"left":"right")
 			.ticks(4)
 			.tickFormat(function(d){return d;});
-		games[gId].playerStatsGraph.select("g."+team.s+".axis")
-			.call(games[gId].playerYAxis);
+		scope.game.playerStatsGraph.select("g."+team.s+".axis")
+			.call(scope.game.playerYAxis);
 	});
 }
 		///end old code
