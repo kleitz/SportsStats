@@ -1,0 +1,19 @@
+{
+  "version": "0.0.0",
+  "private": true,
+  "name": "sports-stats",
+  "description": "This is a php/javascript webapp used to graph basketball stats.",
+  "repository": "https://github.com/quacainia/SportsStats",
+  "license": "MIT",
+  "devDependencies": {
+    "karma": "^0.12.16",
+    "karma-chrome-launcher": "^0.1.4",
+    "karma-firefox-launcher": "^0.1.3",
+    "karma-jasmine": "~0.1.0"
+  },
+  "scripts": {
+    "pretest": "npm install",
+    "test": "node node_modules/karma/bin/karma start test/karma.conf.js",
+    "test-single-run": "node node_modules/karma/bin/karma start test/karma.conf.js  --single-run"
+  }
+}

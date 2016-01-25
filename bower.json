@@ -29,6 +29,7 @@
     "d3": "~3.5.13",
     "bootstrap-css-only": "~3.3.6",
     "angular": "~1.4.9",
-    "angular-route": "~1.4.9"
+    "angular-route": "~1.4.9",
+    "angular-mocks": "~1.4.9"
   }
 }

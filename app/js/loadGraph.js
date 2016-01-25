@@ -17,14 +17,14 @@ var sports = {};
 
 			///end old code definitoins
 			var regraph = function () {
+				var gameBox = d3.select(elements[0])
+					.select("div.gameBox");
+				gameBox.text("");
 				if (scope.game != null && scope.sport != null) {
-					console.log(scope.game);
-					var divs = d3.select(elements[0])
-						.select("div.gameBox")
-						.attr("id",scope.game.id)
-						.text("");
+					gameBox.attr("id",scope.game.id);
 					dispGame();
-					//loadGames();
+				} else {
+					gameBox.attr("id","");
 				}
 			}
 			scope.$watch("game",regraph);
