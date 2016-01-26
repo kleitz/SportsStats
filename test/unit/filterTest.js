@@ -8,8 +8,8 @@ describe('filter', function() {
 	beforeEach(function(){
 		module('ssFilters');
 	});
-	beforeEach(inject(function(ssTitleFilterFilter) {
-		_ssTitleFilter = ssTitleFilterFilter;
+	beforeEach(inject(function(pageTitleFilter) {
+		_ssTitleFilter = pageTitleFilter;
 	}));
 
 

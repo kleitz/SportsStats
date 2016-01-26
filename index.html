@@ -4,18 +4,15 @@
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap-css-only/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="./app/css/main.css">
-		<title ng-bind="mainScope.title | ssTitleFilter">Act Opener</title>
+		<title ng-bind="mainScope.title | pageTitle">Act Opener</title>
 		<script>
 			document.write('<base href="' + document.location + '" />');
 		</script>
 		<script src="./bower_components/d3/d3.js"></script>
 		<script src="./bower_components/angular/angular.js"></script>
 		<script src="./bower_components/angular-route/angular-route.js"></script>
+		<script src="./bower_components/angular-sanitize/angular-sanitize.js"></script>
 		<script src="./app/js/app.js"></script>
-		<script src="./app/js/controllers/controllers.js"></script>
-		<script src="./app/js/directives/directives.js"></script>
-		<script src="./app/js/services/services.js"></script>
-		<script src="./app/js/filters/filters.js"></script>
 	</head>
 	<body>
 		<div id="mainCont" class="scroll fullsize">
@@ -34,7 +31,11 @@
 				<a href="bugs.html">List of currently known bugs.</a>
 			</div>
 		</div>
-		<div id="popup" class="fullsize"></div>
-	<script src="./app/js/loadGraph.js"></script>
+		<div id="popup" class="fullsize popbgk" ng-show="mainScope.popup" ng-click="close()" ng-controller="popupCtrl">
+			<div class="browseCont">
+				<div class="browseSchedule" ng-click="$event.stopPropagation();" compile-popup="mainScope.popup">
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

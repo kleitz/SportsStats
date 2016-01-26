@@ -4,7 +4,7 @@
 
 	angular.module("ssFilters")
 		.value("ssSiteName","Act Opener")
-		.filter("ssTitleFilter",["ssSiteName",function(ssSiteName){
+		.filter("pageTitle",["ssSiteName",function(ssSiteName){
 			return function(input) {
 				if (input && input.length) {
 					return input + " | " + ssSiteName;

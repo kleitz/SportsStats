@@ -76,8 +76,8 @@ d3.select("#showGames")
 		});
 	}
 	
-	d3.select("div#popup")
-		.on("click",closePopup);
+	//d3.select("div#popup")
+	//	.on("click",closePopup);
 	
 	Date.prototype.yyyymmdd = function() {
 		var yyyy = this.getFullYear().toString();

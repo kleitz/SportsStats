@@ -26,3 +26,5 @@ Set up `app/api/classes/dbvars.php`
 `define('DB_NAME', '***');`
 
 `?>`
+
+Run `gulp js` to ensure javascript is concatenated

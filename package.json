@@ -1,11 +1,16 @@
 {
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "name": "sports-stats",
   "description": "This is a php/javascript webapp used to graph basketball stats.",
   "repository": "https://github.com/quacainia/SportsStats",
   "license": "MIT",
   "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-ng-annotate": "^1.1.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.1",
     "karma": "^0.12.16",
     "karma-chrome-launcher": "^0.1.4",
     "karma-firefox-launcher": "^0.1.3",

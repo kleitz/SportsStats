@@ -75,7 +75,6 @@ div#mainCont {
 }
 div#popup {
 	z-index:1000;
-	display:none;
 }
 div.popbgk {
 	background-color:rgba(0,0,0,.5);
