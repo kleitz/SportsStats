@@ -56,7 +56,7 @@ SQL;
 				$game->date = utf8_encode($row['date']);
 				$select_date = explode(' ',$row['date']);
 				if (!preg_match('/^[lfps]$/',$game->status) &&
-					$date <= date(Ymd))
+					$date <= date("Ymd"))
 				{
 					$unprepGames++;
 				}
@@ -116,7 +116,7 @@ SQL;
 							$game->status = utf8_encode($game->status);
 							//set time
 							if (isset($schedRow->nodes[2]->attr['data-date']) && preg_match( '/T(\d{2}:\d{2})Z/i', $schedRow->nodes[2]->attr['data-date'], $status)) {
-								$game->date .= utf8_encode(" $status[2].:00");
+								$game->date .= utf8_encode(" $status[1]:00");
 							} else {
 								$game->date .= utf8_encode(' 00:00:01');
 							}
