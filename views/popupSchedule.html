@@ -1,44 +1,28 @@
 <div class="clearfix">
 	<div class="left">
-		<input type="date">
-		<select>
+		<input type="date" ng-model="date">
+		<select ng-model="sport">
 			<option value="ncb">NCAAM</option>
 			<option value="nba">NBA</option>
 		</select>
 	</div>
-	<input type="button" value="Close" class="right">
+	<input type="button" value="Close" class="right" ng-click="close()">
 </div>
 <div>
 	<div>
 		<input type="text" placeholder="Filter" ng-model="scheduleFilter">
 	</div>
 	<div>
-		<div>South Alabama vs. Troy</div>
-		<div>Wyoming vs. Fresno State</div>
-		<div>San Diego State vs. Nevada</div>
-		<div>Florida vs. Vanderbilt</div>
-		<div>Georgia vs. LSU</div>
-		<div>Mississippi State vs. South Carolina</div>
-		<div>Tennessee vs. Alabama</div>
-		<div>Kansas State vs. West Virginia</div>
-		<div>Texas Tech vs. Oklahoma</div>
-		<div>TCU vs. Texas</div>
-		<div>Memphis vs. UCF</div>
-		<div>Indiana vs. Wisconsin</div>
-		<div>Virginia vs. Wake Forest</div>
-		<div>Florida State vs. Boston College</div>
-		<div>Creighton vs. Georgetown</div>
-		<div>Xavier vs. Providence</div>
-		<div>Ohio vs. Toledo</div>
-		<div>La Salle vs. Duquesne</div>
-		<div>Northern Illinois vs. Akron</div>
-		<div>Ball State vs. Buffalo</div>
-		<div>Bowling Green vs. Western Michigan</div>
-		<div>Central Michigan vs. Miami (OH)</div>
-		<div>Eastern Michigan vs. Kent State</div>
-		<div>Siena vs. Niagara</div>
-		<div>Drake vs. Illinois State</div>
-		<div>Southeastern Louisiana vs. Texas A&amp;M-CC</div>
-		<div>Bethune-Cookman vs. Howard</div>
+		<div ng-show="message" ng-bind="message"></div>
+		<div ng-show="games.length">
+			<div ng-repeat="game in games | filter:scheduleFilter"  ng-class="{selectText: game.status == 'f' || game.status == 'l'}">
+				<a href="#/{{game.id.substring(0,3)}}/game/{{game.id.substring(3)}}" ng-click="close()" ng-show="game.status == 'f' || game.status == 'l'">
+					{{game.away}} vs. {{game.home}}
+				</a>
+				<span ng-hide="game.status == 'f' || game.status == 'l'">
+					{{game.away}} vs. {{game.home}}
+				</span>
+			</div>
+		</div>
 	</div>
 </div>

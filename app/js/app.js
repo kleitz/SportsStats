@@ -1,6 +1,6 @@
 ;(function(){
 	"use strict";
-	angular.module("ssApp",["ssServices","ssCtrls","ssDirectives","ssFilters","ngRoute","oldD3Script"]);
+	angular.module("ssApp",["ssServices","ssCtrls","ssDirectives","ssFilters","ngRoute","oldD3Script","ngSanitize"]);
 })();
 ;(function(){
 	"use strict";
@@ -2749,60 +2749,131 @@ function plotHist(gId, pType, dispTime) {
 				sport = $routeParams.sport;
 				id = $routeParams.id;
 			}
+			$scope.mainScope.messageReset();
+			$scope.mainScope.messageSet("Loading . . .");
 			$http({
 				method: "GET",
 				url: "./data/"+sport+".json"
 			})
 			.then(function(response){
 					$scope.mainScope.sportData = response.data;
+					getGames();
 				},
 				function(response){
 					$scope.mainScope.sportData = null;
+					if (response.status === 404) {
+						$scope.mainScope.messageSet("Chosen sport not supported.",true);
+					}
+				}
+			);
+			var getGames = function () {
+				var apiUrl = "./app/api/getGameData.php?gameId="+sport+id;
+				$http({
+					method: "GET",
+					url: apiUrl,
+					transformResponse: function(data, headersGetter) {
+						try {
+							var jsonObject = JSON.parse(data); // verify that json is valid
+							return jsonObject;
+						}
+						catch (e) {
+							console.error("Invalid data: "+e);
+							console.log(headersGetter);
+							return {error: "Invalid data"};
+						}
+					}
+				})
+				.then(function(response){
+						if (response.data.error) {
+							$scope.mainScope.messageSet(response.data.error,true)
+						} else {
+							if (response.data.id === null) {
+								response.data.id = sport+id;
+							}
+							$scope.mainScope.gameData = response.data;
+							$scope.mainScope.title = 
+								response.data.a.short + ":" +
+								response.data.aScore + " " +
+								response.data.h.short + ":" +
+								response.data.hScore;
+							$scope.mainScope.messageReset();
+						}
+					},
+					function(response){
+						$scope.mainScope.gameData = null;
+						$scope.mainScope.title = "";
+						$scope.mainScope.messageSet("Error loading game, please try again.",true);
+						///show error
+					}
+				);
+			}
+		}
+	}]);
+})();
+;(function(){
+	"use strict";
+	angular.module("ssCtrls")
+	.controller("popupScheduleCtrl",["$scope","$http",function($scope,$http){
+		$scope.sport = "ncb";
+		
+		$scope.gamesReset = function() {
+			$scope.games = [];
+		}
+		$scope.gamesReset();
+
+		var outputDate = function () {
+			var year,month,day;
+			year = $scope.date.getFullYear();
+			month = $scope.date.getMonth()+1;
+			month = (month<10) ? "0"+month : month;
+			day = $scope.date.getDate();
+			day = (day<10) ? "0"+day : day;
+			return (""+year+month+day);
+		}
+
+		$scope.getSchedule = function () {
+			$scope.gamesReset();
+			$http({
+				method: "GET",
+				url: "./app/api/getGamesBySchedule.php?sport="+$scope.sport+"&date="+outputDate()
+			})
+			.then(function(response){
+					$scope.games = response.data.games;
+				},
+				function(response){
+					//$scope.mainScope.sportData = null;
 					if (response.status === 404) {
 						///show error
 					}
 				}
 			);
-			$http({
-				method: "GET",
-				url: "./app/api/getGameData.php?gameId="+sport+id
-			})
-			.then(function(response){
-					if (response.data.id === null) {
-						response.data.id = sport+id;
-					}
-					$scope.mainScope.gameData = response.data;
-					$scope.mainScope.title = 
-						response.data.a.short + ":" +
-						response.data.aScore + " " +
-						response.data.h.short + ":" +
-						response.data.hScore;
-				},
-				function(response){
-					$scope.mainScope.gameData = null;
-					$scope.mainScope.title = "";
-					///show error
-				}
-			);
-		}
+		};
+
+		$scope.$watchGroup(["date","sport"],$scope.getSchedule);
+		$scope.date = new Date();
 	}]);
 })();
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("popupCtrl", ["$scope","$sce",function($scope,$sce){
-		$scope.close = function(){
-			$scope.mainScope.popup = null;
+	.controller("scheduleCtrl",["$scope",function($scope){
+		$scope.openSchedule = function() {
+			$scope.mainScope.popup = {
+				id: "schedule",
+				directive: "popup-schedule"
+			};
 		}
 	}]);
 })();
 ;(function(){
 	"use strict";
-	angular.module("ssCtrls")
-	.controller("ssCtrl", ["$scope",function($scope){
-		$scope.question = 'question';
-		$scope.mainScope = {};
-	}]);
+	angular.module("ssDirectives")
+	.directive('popupSchedule', function() {
+		return {
+			templateUrl: '/views/popupSchedule.html',
+			controller: 'popupScheduleCtrl'
+		};
+	});
 })();
 ;(function(){
 	"use strict";
@@ -2832,26 +2903,33 @@ function plotHist(gId, pType, dispTime) {
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("popupScheduleCtrl",["$scope",function($scope){
-		
+	.controller("popupCtrl", ["$scope","$sce",function($scope,$sce){
+		$scope.close = function(){
+			$scope.mainScope.popup = null;
+		}
 	}]);
 })();
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("scheduleCtrl",["$scope",function($scope){
-		$scope.openSchedule = function() {
-			$scope.mainScope.popup = {
-				id: "schedule",
-				directive: "popup-schedule"
-			};
+	.controller("ssCtrl", ["$scope",function($scope){
+		$scope.question = 'question';
+		$scope.mainScope = {};
+		$scope.mainScope.messageReset = function () {
+			$scope.mainScope.message = "";
+			$scope.mainScope.messageWarning = false;
+		}
+		$scope.mainScope.messageSet = function (message, warning) {
+			$scope.mainScope.messageReset();
+			$scope.mainScope.message = message.toString();
+			$scope.mainScope.messageWarning = !!warning;
 		}
 	}]);
 })();
 ;(function(){
 	"use strict";
 	angular.module("ssDirectives")
-	.directive("compilePopup",["$compile",function($compile) {
+	.directive("compilePopup",["$compile","$sanitize",function($compile,$sanitize) {
 		return function(scope,element,attrs) {
 			scope.$watch(
 				function(scope) {
@@ -2859,23 +2937,17 @@ function plotHist(gId, pType, dispTime) {
 				},
 				function (value) {
 					if (value) {
-						if (value.directive) {
-							element.html("<"+value.directive+"></"+value.directive+">");
+						var regex = /^[a-z0-9-]+$/i;
+						if (value.directive && regex.test(value.directive)) {
+							var directive = "<"+value.directive+"></"+value.directive+">";
+							element.html(directive);
 							$compile(element.contents())(scope);
+							
+							value.displayed = true;
 						}
 					}
 				}
 			);
 		}
 	}]);
-})();
-;(function(){
-	"use strict";
-	angular.module("ssDirectives")
-	.directive('popupSchedule', function() {
-		return {
-			templateUrl: '/views/popupSchedule.html',
-			controller: 'popupScheduleCtrl'
-		};
-	});
 })();

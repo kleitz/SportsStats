@@ -25,7 +25,7 @@ td {
 	font: inherit;
 	padding:2px;
 }
-td.thead, .bold{
+td.thead, .bold, .selectText a{
 	font-weight:bold;
 }
 td.thead {
@@ -116,7 +116,7 @@ div.popbgw {
 	position:absolute;
 	bottom:0px;
 }
-.pointer {
+.pointer, .selectText {
 	cursor:pointer;
 }
 
@@ -165,7 +165,7 @@ svg {
 .teamStat, .teamStatMin {
 	cursor:pointer;
 }
-.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover {
+.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover, .selectText:hover {
 	background-color: #ebf3ff;
 }
 .teamStat.active, .teamStatMin.active {
@@ -364,4 +364,15 @@ div.browseSchedule {
 	flex: 1 0 100px;
 	width:100%;
 	overflow:auto;
+}
+div.headlineMessage {
+	font-weight: bold;
+	padding: 10px;
+	text-align: center;
+	background-color: #FCFCFC;
+	color: #AAA;
+}
+div.headlineMessageWarning {
+	background-color: #FD9;
+	color: #F70;
 }

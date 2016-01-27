@@ -20,6 +20,7 @@
 				Compatibility: NCAA Men's Basketball, NBA
 			</div>
 			<div class="contentContainer">
+				<div class="headlineMessage" ng-class="{headlineMessageWarning : mainScope.messageWarning}" ng-bind="mainScope.message" ng-show="mainScope.message"></div>
 				<div class="" ng-view></div>
 				<div ss-d3-old="mainScope.gameData" ss-d3-old-sport="mainScope.sportData">
 					<div class="gameBox notLoaded" id="">
@@ -31,7 +32,7 @@
 				<a href="bugs.html">List of currently known bugs.</a>
 			</div>
 		</div>
-		<div id="popup" class="fullsize popbgk" ng-show="mainScope.popup" ng-click="close()" ng-controller="popupCtrl">
+		<div id="popup" class="fullsize popbgk" ng-show="mainScope.popup.displayed" ng-click="close()" ng-controller="popupCtrl">
 			<div class="browseCont">
 				<div class="browseSchedule" ng-click="$event.stopPropagation();" compile-popup="mainScope.popup">
 				</div>
