@@ -13,18 +13,6 @@
 ;(function(){
 	"use strict";
 	angular.module("ssFilters",[]);
-
-	angular.module("ssFilters")
-		.value("ssSiteName","Act Opener")
-		.filter("pageTitle",["ssSiteName",function(ssSiteName){
-			return function(input) {
-				if (input && input.length) {
-					return input + " | " + ssSiteName;
-				} else {
-					return ssSiteName;
-				}
-			}
-		}]);
 })();
 ;(function(){
 	"use strict";
@@ -837,7 +825,7 @@ function dispGame() {
 	}
 	stopLoader(gId);
 	colorTest(gId);
-	displayTitleScore(gId);
+	//displayTitleScore(gId);
 	addSplitButtons(gId);
 	setMainGraph(gId);
 	addTeamStats(gId);
@@ -1136,7 +1124,7 @@ function getPlayText(gId,play) {
 }
 
 //display headline score and teams
-function displayTitleScore(gId) {
+/*function displayTitleScore(gId) {
 	var bS = d3.select("div#"+gId)
 		.append("div")
 		.classed("boxScore",true)
@@ -1243,7 +1231,7 @@ function displayTitleScore(gId) {
 			});
 	});
 	aH.shift();
-}
+}*/
 
 function addPlayerStats(gId) {
 	var playerStatsSvg = d3.select("div#"+gId)
@@ -2757,6 +2745,7 @@ function plotHist(gId, pType, dispTime) {
 			})
 			.then(function(response){
 					$scope.mainScope.sportData = response.data;
+					$scope.sport = response.data;
 					getGames();
 				},
 				function(response){
@@ -2773,12 +2762,11 @@ function plotHist(gId, pType, dispTime) {
 					url: apiUrl,
 					transformResponse: function(data, headersGetter) {
 						try {
-							var jsonObject = JSON.parse(data); // verify that json is valid
+							var jsonObject = JSON.parse(data);
 							return jsonObject;
 						}
 						catch (e) {
 							console.error("Invalid data: "+e);
-							console.log(headersGetter);
 							return {error: "Invalid data"};
 						}
 					}
@@ -2791,6 +2779,7 @@ function plotHist(gId, pType, dispTime) {
 								response.data.id = sport+id;
 							}
 							$scope.mainScope.gameData = response.data;
+							$scope.game = response.data;
 							$scope.mainScope.title = 
 								response.data.a.short + ":" +
 								response.data.aScore + " " +
@@ -2808,6 +2797,57 @@ function plotHist(gId, pType, dispTime) {
 				);
 			}
 		}
+	}]);
+})();
+;(function(){
+	"use strict";
+	angular.module("ssCtrls")
+	.controller("popupCtrl", ["$scope","$sce",function($scope,$sce){
+		$scope.close = function(){
+			$scope.mainScope.popup = null;
+		}
+	}]);
+})();
+;(function(){
+	"use strict";
+	angular.module("ssCtrls")
+	.controller("ssCtrl", ["$scope",function($scope){
+		$scope.question = 'question';
+		$scope.mainScope = {};
+		$scope.mainScope.messageReset = function () {
+			$scope.mainScope.message = "";
+			$scope.mainScope.messageWarning = false;
+		}
+		$scope.mainScope.messageSet = function (message, warning) {
+			$scope.mainScope.messageReset();
+			$scope.mainScope.message = message.toString();
+			$scope.mainScope.messageWarning = !!warning;
+		}
+	}]);
+})();
+;(function(){
+	"use strict";
+	angular.module("ssCtrls")
+	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+		$routeProvider    
+		.when('/:sport/game/:id', {
+			templateUrl: '/views/game/game.html',
+			controller: 'gameController',
+			controllerAs: 'game',
+			caseInsensitiveMatch: true
+		})
+		.when('/:id', {
+			templateUrl: '/views/game/game.html',
+			controller: 'gameController',
+			controllerAs: 'game'
+		})
+		.otherwise({
+			templateUrl: '/views/game/game.html',
+			controller: 'gameController',
+			controllerAs: 'game'
+		});
+
+		//$locationProvider.html5Mode(true);
 	}]);
 })();
 ;(function(){
@@ -2868,63 +2908,11 @@ function plotHist(gId, pType, dispTime) {
 ;(function(){
 	"use strict";
 	angular.module("ssDirectives")
-	.directive('popupSchedule', function() {
+	.directive('boxScore', function() {
 		return {
-			templateUrl: '/views/popupSchedule.html',
-			controller: 'popupScheduleCtrl'
+			templateUrl: '/views/game/boxScore.html'
 		};
 	});
-})();
-;(function(){
-	"use strict";
-	angular.module("ssCtrls")
-	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-		$routeProvider    
-		.when('/:sport/game/:id', {
-			templateUrl: '/views/game.html',
-			controller: 'gameController',
-			controllerAs: 'game',
-			caseInsensitiveMatch: true
-		})
-		.when('/:id', {
-			templateUrl: '/views/game.html',
-			controller: 'gameController',
-			controllerAs: 'game'
-		})
-		.otherwise({
-			templateUrl: '/views/game.html',
-			controller: 'gameController',
-			controllerAs: 'game'
-		});
-
-		//$locationProvider.html5Mode(true);
-	}]);
-})();
-;(function(){
-	"use strict";
-	angular.module("ssCtrls")
-	.controller("popupCtrl", ["$scope","$sce",function($scope,$sce){
-		$scope.close = function(){
-			$scope.mainScope.popup = null;
-		}
-	}]);
-})();
-;(function(){
-	"use strict";
-	angular.module("ssCtrls")
-	.controller("ssCtrl", ["$scope",function($scope){
-		$scope.question = 'question';
-		$scope.mainScope = {};
-		$scope.mainScope.messageReset = function () {
-			$scope.mainScope.message = "";
-			$scope.mainScope.messageWarning = false;
-		}
-		$scope.mainScope.messageSet = function (message, warning) {
-			$scope.mainScope.messageReset();
-			$scope.mainScope.message = message.toString();
-			$scope.mainScope.messageWarning = !!warning;
-		}
-	}]);
 })();
 ;(function(){
 	"use strict";
@@ -2950,4 +2938,78 @@ function plotHist(gId, pType, dispTime) {
 			);
 		}
 	}]);
+})();
+;(function(){
+	"use strict";
+	angular.module("ssDirectives")
+	.directive('popupSchedule', function() {
+		return {
+			templateUrl: '/views/popupSchedule.html',
+			controller: 'popupScheduleCtrl'
+		};
+	});
+})();
+;(function(){
+	"use strict";
+
+	angular.module("ssFilters")
+		.filter("printedTime",function(){
+			return function(input, scope) {
+				if (scope) {
+					if (scope.game && scope.sport) {
+						if (scope.game.totTime && scope.sport.q) {
+							var totPeriods = scope.game.boxScore.length,
+								n = scope.sport.q.n,
+								time;
+							input = +input;
+
+							while (totPeriods > n && input > scope.sport.q.o) {
+								totPeriods--;
+								input -= scope.sport.q.o;
+							}
+							while (totPeriods > 0 && input > scope.sport.q.t) {
+								totPeriods--;
+								input -= scope.sport.q.t;
+							}
+
+							if (input == 0) {
+								if (totPeriods === scope.game.boxScore.length && scope.game.aScore != scope.game.hScore) {
+									return "Final";
+								}
+								else {
+									time = "End";
+								}
+							} else {
+								time = secondsToTime(input);
+							}
+							return time + " " + scope.game.boxScore[totPeriods-1].l;
+						}
+					}
+				}
+				return input;
+
+
+				var secondsToTime = function (totSeconds) {
+					var seconds = totSeconds%60;
+					var minutes = (totSeconds-seconds)/60;
+					seconds = (seconds < 10) ? "0"+seconds : seconds;
+					return = minutes + ":" + seconds;
+				}
+			}
+		});
+})();
+;(function(){
+	"use strict";
+
+	angular.module("ssFilters")
+		.value("ssSiteName","Act Opener")
+		.filter("pageTitle",["ssSiteName",function(ssSiteName){
+			return function(input) {
+				if (input && input.length) {
+					return input + " | " + ssSiteName;
+				} else {
+					return ssSiteName;
+				}
+			}
+		}]);
 })();
