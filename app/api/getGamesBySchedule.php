@@ -83,6 +83,9 @@ SQL;
 					}
 					foreach($tNode->nodes as $schedRow) {
 						$game = new emptyClass();
+						if (preg_match('/No games scheduled/i', $schedRow->nodes[0]->innertext)) {
+							break;
+						}
 						if ($schedRow->tag == 'tr') {
 							for ($srI = 0; $srI<2; $srI++) {
 								foreach($schedRow->nodes[$srI]->nodes as $teamA) {
@@ -174,6 +177,9 @@ SQL;
 	}
 } else {
 	$returnedObject->error = "Invalid date.";
+}
+if (sizeof($returnedObject->games) == 0) {
+	$returnedObject->error = "No games scheduled";
 }
 echo json_encode($returnedObject);
 

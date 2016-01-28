@@ -9,7 +9,7 @@
 		}
 		$scope.gamesReset();
 
-		var outputDate = function () {
+		$scope.outputDate = function () {
 			var year,month,day;
 			year = $scope.date.getFullYear();
 			month = $scope.date.getMonth()+1;
@@ -23,15 +23,23 @@
 			$scope.gamesReset();
 			$http({
 				method: "GET",
-				url: "./app/api/getGamesBySchedule.php?sport="+$scope.sport+"&date="+outputDate()
+				url: "./app/api/getGamesBySchedule.php?sport=" + $scope.sport + "&date=" + $scope.outputDate()
 			})
 			.then(function(response){
-					$scope.games = response.data.games;
+					if (response.data.error) {
+						$scope.error = response.data.error;
+						$scope.gamesReset();
+					} else {
+						$scope.error = "";
+						if (response.data.date == $scope.outputDate()) {
+							$scope.games = response.data.games;
+						}
+					}
 				},
 				function(response){
-					//$scope.mainScope.sportData = null;
+					$scope.gamesReset();
 					if (response.status === 404) {
-						///show error
+						$scope.error = "Could not connect.";
 					}
 				}
 			);
