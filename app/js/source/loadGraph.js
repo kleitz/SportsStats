@@ -805,7 +805,7 @@ function dispGame() {
 	}
 	stopLoader(gId);
 	colorTest(gId);
-	displayTitleScore(gId);
+	//displayTitleScore(gId);
 	addSplitButtons(gId);
 	setMainGraph(gId);
 	addTeamStats(gId);
@@ -1104,7 +1104,7 @@ function getPlayText(gId,play) {
 }
 
 //display headline score and teams
-function displayTitleScore(gId) {
+/*function displayTitleScore(gId) {
 	var bS = d3.select("div#"+gId)
 		.append("div")
 		.classed("boxScore",true)
@@ -1211,7 +1211,7 @@ function displayTitleScore(gId) {
 			});
 	});
 	aH.shift();
-}
+}*/
 
 function addPlayerStats(gId) {
 	var playerStatsSvg = d3.select("div#"+gId)

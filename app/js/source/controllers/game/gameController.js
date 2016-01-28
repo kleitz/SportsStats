@@ -24,6 +24,7 @@
 			})
 			.then(function(response){
 					$scope.mainScope.sportData = response.data;
+					$scope.sport = response.data;
 					getGames();
 				},
 				function(response){
@@ -40,12 +41,11 @@
 					url: apiUrl,
 					transformResponse: function(data, headersGetter) {
 						try {
-							var jsonObject = JSON.parse(data); // verify that json is valid
+							var jsonObject = JSON.parse(data);
 							return jsonObject;
 						}
 						catch (e) {
 							console.error("Invalid data: "+e);
-							console.log(headersGetter);
 							return {error: "Invalid data"};
 						}
 					}
@@ -58,6 +58,7 @@
 								response.data.id = sport+id;
 							}
 							$scope.mainScope.gameData = response.data;
+							$scope.game = response.data;
 							$scope.mainScope.title = 
 								response.data.a.short + ":" +
 								response.data.aScore + " " +

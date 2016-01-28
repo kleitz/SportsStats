@@ -4,18 +4,18 @@
 	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 		$routeProvider    
 		.when('/:sport/game/:id', {
-			templateUrl: '/views/game.html',
+			templateUrl: '/views/game/game.html',
 			controller: 'gameController',
 			controllerAs: 'game',
 			caseInsensitiveMatch: true
 		})
 		.when('/:id', {
-			templateUrl: '/views/game.html',
+			templateUrl: '/views/game/game.html',
 			controller: 'gameController',
 			controllerAs: 'game'
 		})
 		.otherwise({
-			templateUrl: '/views/game.html',
+			templateUrl: '/views/game/game.html',
 			controller: 'gameController',
 			controllerAs: 'game'
 		});
