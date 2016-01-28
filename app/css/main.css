@@ -25,7 +25,7 @@ td {
 	font: inherit;
 	padding:2px;
 }
-td.thead, .bold, .selectText a{
+td.thead, .bold, a.blockLink{
 	font-weight:bold;
 }
 td.thead {
@@ -116,7 +116,7 @@ div.popbgw {
 	position:absolute;
 	bottom:0px;
 }
-.pointer, .selectText {
+.pointer, a.blockLink {
 	cursor:pointer;
 }
 
@@ -165,7 +165,7 @@ svg {
 .teamStat, .teamStatMin {
 	cursor:pointer;
 }
-.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover, .selectText:hover {
+.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover, a.blockLink:hover {
 	background-color: #ebf3ff;
 }
 .teamStat.active, .teamStatMin.active {
@@ -375,4 +375,8 @@ div.headlineMessage {
 div.headlineMessageWarning {
 	background-color: #FD9;
 	color: #F70;
+}
+a.blockLink {
+	display:block;
+	text-decoration: none;
 }

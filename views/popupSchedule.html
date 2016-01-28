@@ -16,7 +16,7 @@
 		<div ng-show="message" ng-bind="message"></div>
 		<div ng-show="games.length">
 			<div ng-repeat="game in games | filter:scheduleFilter"  ng-class="{selectText: game.status == 'f' || game.status == 'l'}">
-				<a href="#/{{game.id.substring(0,3)}}/game/{{game.id.substring(3)}}" ng-click="close()" ng-show="game.status == 'f' || game.status == 'l'">
+				<a href="#/{{game.id.substring(0,3)}}/game/{{game.id.substring(3)}}" ng-click="close()" ng-show="game.status == 'f' || game.status == 'l'" class="blockLink">
 					{{game.away}} vs. {{game.home}}
 				</a>
 				<span ng-hide="game.status == 'f' || game.status == 'l'">
