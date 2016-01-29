@@ -5,11 +5,13 @@
 		var sport,id;
 		$scope.mainScope.sportData = null;
 		$scope.mainScope.gameData = null;
+		$scope.game = null;
+		$scope.sport = null;
+		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 		if (!$routeParams.id) {
 			$scope.mainScope.title = "";
 		} else {
 			if (!$routeParams.sport && $routeParams.id) {
-				console.log($routeParams);
 				sport = $routeParams.id.substring(0,3);
 				id = $routeParams.id.substring(3,$routeParams.id.length);
 			} else {
@@ -54,11 +56,12 @@
 						if (response.data.error) {
 							$scope.mainScope.messageSet(response.data.error,true)
 						} else {
-							if (response.data.id === null) {
+							if (!response.data.id) {
 								response.data.id = sport+id;
 							}
 							$scope.mainScope.gameData = response.data;
 							$scope.game = response.data;
+							$scope.compareStat = $scope.sport.p[0];
 							$scope.mainScope.title = 
 								response.data.a.short + ":" +
 								response.data.aScore + " " +

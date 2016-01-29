@@ -25,7 +25,6 @@ describe('popupScheduleCtrl', function() {
 	beforeEach(inject(function($injector) {
 
 		scope = $injector.get('$rootScope');
-		scope.date = new Date(2016,0,31);
 
 		var $controller = $injector.get('$controller');
 		ctrl = $controller('popupScheduleCtrl', {$scope: scope});
