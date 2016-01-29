@@ -61,7 +61,7 @@
 							}
 							$scope.mainScope.gameData = response.data;
 							$scope.game = response.data;
-							$scope.compareStat = $scope.sport.p[0];
+							$scope.compareStat = $scope.sport.pl[0];
 							$scope.mainScope.title = 
 								response.data.a.short + ":" +
 								response.data.aScore + " " +
@@ -78,6 +78,10 @@
 					}
 				);
 			}
+		}
+
+		$scope.setCompareStat = function (statType) {
+			$scope.compareStat = statType;
 		}
 	}]);
 })();
