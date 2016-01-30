@@ -6,7 +6,7 @@
 		</tr>
 		<tr id="" ng-repeat="team in aH">
 			<td>{{game[team.s].teamName}}</td>
-			<td class="teamStatMin " ng-class="{active : compareStat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)">{{ game.plays | gameStatValue:{team:team.s,statType:statType} }}</td>
+			<td class="teamStatMin " ng-class="{active : compareStat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)" ng-click="setCompareStat(statType)">{{ reduceData() }}</td>
 		</tr>
 	</table>
 </div>

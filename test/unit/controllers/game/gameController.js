@@ -10,7 +10,7 @@ describe('gameController', function() {
 	var sportUrl = /^\.\/data\/[a-z]{3}\.json$/i;
 	var sportData = {
 		sport:'ncb',
-		p: ['a']
+		pl: ['a']
 	};
 	var gameDataError = {error:"test error"};
 	var gameData = {
@@ -34,6 +34,7 @@ describe('gameController', function() {
 	});
 
 	beforeEach(module('ssCtrls'));
+	beforeEach(module('ssServices'));
 
 	beforeEach(inject(function($injector) {
 

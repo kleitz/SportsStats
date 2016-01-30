@@ -1,7 +1,7 @@
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("gameController",["$scope","$routeParams","$http",function($scope,$routeParams,$http){
+	.controller("gameController",["$scope","$routeParams","$http","ReduceData",function($scope,$routeParams,$http,ReduceData){
 		var sport,id;
 		$scope.mainScope.sportData = null;
 		$scope.mainScope.gameData = null;
@@ -61,7 +61,7 @@
 							}
 							$scope.mainScope.gameData = response.data;
 							$scope.game = response.data;
-							$scope.compareStat = $scope.sport.pl[0];
+							$scope.setCompareStat($scope.sport.pl[0]);
 							$scope.mainScope.title = 
 								response.data.a.short + ":" +
 								response.data.aScore + " " +
@@ -82,6 +82,10 @@
 
 		$scope.setCompareStat = function (statType) {
 			$scope.compareStat = statType;
+		}
+
+		$scope.reduceData = function () {
+			return ReduceData();
 		}
 	}]);
 })();
