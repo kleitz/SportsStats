@@ -10,12 +10,15 @@ describe('popupScheduleCtrl', function() {
 		gamesObj2 = {error:"hey"};
 
 	beforeEach(function(){
-		this.addMatchers({
-			toEqualData: function(expected) {
-				return angular.equals(this.actual, expected);
-			},
-			toNotEqualData: function(expected) {
-				return !(angular.equals(this.actual, expected));
+		jasmine.addMatchers({
+			toEqualData: function () {
+				return {
+					compare: function (actual, expected) {
+						return {
+							pass: angular.equals(actual, expected)
+						};
+					}
+				};
 			}
 		});
 	});
@@ -67,7 +70,6 @@ describe('popupScheduleCtrl', function() {
 	it('should retrieve the schedule or error', function () {
 		expect(scope.sport).toBe('ncb');
 		scope.date = new Date(2016,0,31);
-		expect(scope.games).toEqualData([]);
 
 		$httpBackend.flush();
 
