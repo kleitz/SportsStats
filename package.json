@@ -18,7 +18,7 @@
     "karma-jasmine-jquery": "^0.1.1"
   },
   "scripts": {
-    "pretest": "npm install;gulp testJs",
+    "pretest": "npm install;gulp testSetup",
     "test": "node node_modules/karma/bin/karma start test/karma.conf.js",
     "test-single-run": "node node_modules/karma/bin/karma start test/karma.conf.js  --single-run"
   }

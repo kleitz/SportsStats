@@ -14,7 +14,7 @@ gulp.task('js', function () {
 		.pipe(gulp.dest('app/js/'))
 })
 
-gulp.task('testJs', function () {
+gulp.task('testSetup', function () {
 	gulp.src(['app/js/source/**/module.js', 
 			'app/js/source/controllers/**/*.js',
 			'app/js/source/directives/**/*.js',
@@ -25,9 +25,11 @@ gulp.task('testJs', function () {
 		//.pipe(ngAnnotate())
 		//.pipe(uglify())
 		//.pipe(sourcemaps.write())
-		.pipe(gulp.dest('test/unit/'))
+		.pipe(gulp.dest('test/unit/'));
+	gulp.src(['data/ncb.json','data/nba.json'])
+		.pipe(gulp.dest('test/unit/data/sport'));
 })
 
 gulp.task('watch', ['js'], function () {
-	gulp.watch('app/js/source/**/*.js', ['js','testJs'])
+	gulp.watch('app/js/source/**/*.js', ['js','testSetup'])
 })
