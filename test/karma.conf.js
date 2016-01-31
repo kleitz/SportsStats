@@ -11,9 +11,9 @@ module.exports = function(config){
 			'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
 			'test/unit/**/*.js',
 
-			//test data
+			//test and static data
 			{
-				pattern: 'test/**/*.json',
+				pattern: 'data/**/*.json',
 				watched: true,
 				served: true,
 				included: false

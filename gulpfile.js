@@ -26,10 +26,9 @@ gulp.task('testSetup', function () {
 		//.pipe(uglify())
 		//.pipe(sourcemaps.write())
 		.pipe(gulp.dest('test/unit/'));
-	gulp.src(['data/ncb.json','data/nba.json'])
-		.pipe(gulp.dest('test/unit/data/sport'));
 })
 
-gulp.task('watch', ['js'], function () {
+gulp.task('watch', ['js','testSetup'], function () {
 	gulp.watch('app/js/source/**/*.js', ['js','testSetup'])
 })
+

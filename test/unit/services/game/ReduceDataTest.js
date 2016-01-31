@@ -24,10 +24,10 @@ describe('ReduceData', function() {
 
 		ReduceData = $injector.get('ReduceData');
 
-		jasmine.getJSONFixtures().fixturesPath='base/test/unit/data';
+		jasmine.getJSONFixtures().fixturesPath='base/data';
 
-		testData = getJSONFixture('game/20160126-Xav-Prov.json'); 
-		ncbData = getJSONFixture('sport/ncb.json');
+		testData = getJSONFixture('test/game/20160126-Xav-Prov.json'); 
+		ncbData = getJSONFixture('ncb.json');
 	}));
 
 	it('should grab the test data', function (){
