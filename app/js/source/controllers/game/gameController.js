@@ -1,13 +1,15 @@
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("gameController",["$scope","$routeParams","$http","ReduceData",function($scope,$routeParams,$http,ReduceData){
+	.controller("gameController",["$scope","$routeParams","$http","ReduceData", "IsStatType",function($scope,$routeParams,$http,ReduceData,IsStatType){
 		var sport,id;
 		$scope.mainScope.sportData = null;
 		$scope.mainScope.gameData = null;
 		$scope.game = null;
 		$scope.sport = null;
+		$scope.comparePlays = {};
 		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
+		$scope.teamStatsTable = {"a":{},"h":{}};
 		if (!$routeParams.id) {
 			$scope.mainScope.title = "";
 		} else {
@@ -68,6 +70,8 @@
 								response.data.h.short + ":" +
 								response.data.hScore;
 							$scope.mainScope.messageReset();
+
+							setTeamStats();
 						}
 					},
 					function(response){
@@ -82,10 +86,33 @@
 
 		$scope.setCompareStat = function (statType) {
 			$scope.compareStat = statType;
+			$scope.aH.forEach(function(team,teamI){
+				$scope.comparePlays[team.s] = $scope.filterPlays($scope.game.plays, statType, team)
+			});
 		}
 
-		$scope.reduceData = function () {
-			return ReduceData();
+		$scope.filterPlays = function (plays, statType, team) {
+			if (!(plays && statType && team)) {
+				return [];
+			}
+			return plays.filter(function(d,i){
+				var teamS = ($scope.compareStat.dpp) ?
+					$scope.aH[1-teamI].s :
+					team.s;
+				return IsStatType(d,{statType: statType}) && d.e === teamS;
+			})
+		}
+
+		$scope.reduceData = function (plays,options) {
+			return ReduceData(plays,options);
+		}
+
+		var setTeamStats = function () {
+			$scope.aH.forEach(function(team,teamI){
+				$scope.sport.pl.forEach(function(statType){
+					$scope.teamStatsTable[team.s][statType.a] = ReduceData($scope.filterPlays($scope.game.plays,statType,team), {statType: statType});
+				});
+			});
 		}
 	}]);
 })();
