@@ -9,6 +9,7 @@ module.exports = function(config){
 			'bower_components/angular-mocks/angular-mocks.js',
 			'bower_components/jquery/dist/jquery.js',
 			'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
+			'bower_components/d3/d3.js',
 			'test/unit/**/*.js',
 
 			//test and static data
