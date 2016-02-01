@@ -14,7 +14,7 @@
 
 					//New possessions are defined by play.x
 					if (statT.c === 'pos') {
-						return play.x;
+						return !!play.x;
 					} else {
 
 						//initial search using regexp to test if play is the type we want
