@@ -1,28 +1,44 @@
 'use strict';
 
 describe('ReduceData', function() {
-	var ReduceData,testData,ncbData;
-	var ncbExpectedTotalResults = [
-		143,
-		164,
-		129,
-		55,
-		35,
-		80,
-		19,
-		6,
-		34,
-		15,
-		38,
-		7,
-		2400
-	];
+	var ReduceData,IsStatType,testData,ncbData;
+	var ncbExpectedTotalResults = {
+		"P" : 143,
+		"SHT" : 164,
+		"FG" : 129,
+		"3s" : 55,
+		"FT" : 35,
+		"R" : 80,
+		"A" : 29,
+		"B" : 6,
+		"TNO" : 34,
+		"S" : 15,
+		"PF" : 38,
+		"TO" : 15,
+		"TOP" : 2400
+	};
+	var ncbExpectedPrimaryResults = {
+		"P" : 143,
+		"SHT" : 77,
+		"FG" : 52,
+		"3s" : 14,
+		"FT" : 25,
+		"R" : 49,
+		"A" : 29,
+		"B" : 6,
+		"TNO" : 34,
+		"S" : 15,
+		"PF" : 19,
+		"TO" : 15,
+		"TOP" : 2400
+	};
 
 	beforeEach(module('ssServices'));
 
 	beforeEach(inject(function($injector) {
 
 		ReduceData = $injector.get('ReduceData');
+		IsStatType = $injector.get('IsStatType');
 
 		jasmine.getJSONFixtures().fixturesPath='base/data';
 
@@ -41,7 +57,7 @@ describe('ReduceData', function() {
 	it('should return the reduced data number ', function(){
 
 		//test if service exists
-		/*expect(ReduceData).toBeDefined();
+		expect(ReduceData).toBeDefined();
 
 		//test if no attribudes returneds null
 		expect(ReduceData()).toBeNull();
@@ -54,15 +70,31 @@ describe('ReduceData', function() {
 
 		//test if it can reduce ncb play types
 		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
+			var st = ncbData.pl[statTypesI];
 			expect(
 				ReduceData(
-					testData.plays,
-					{statType: ncbData.pl[statTypesI]}
-				)
+					testData.plays.filter(function (d,i) {
+						return IsStatType(d,{statType:st});
+					}),
+					{statType: st}
+				)+' '+st.l
 			)
-			.toBe(ncbExpectedTotalResults[statTypesI]);
-		}*/
+			.toBe(ncbExpectedTotalResults[st.a]+' '+st.l);
+		}
 
-		expect('reduce data test').toBe('running');
+		//test if it can reduce ncb PRIMARY play types
+		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
+			var st = ncbData.pl[statTypesI];
+			var closingString = ' '+st.l+' primary';
+			expect(
+				ReduceData(
+					testData.plays.filter(function (d,i) {
+						return IsStatType(d,{statType:st});
+					}),
+					{statType: st,primary:true}
+				)+closingString
+			)
+			.toBe(ncbExpectedPrimaryResults[st.a]+closingString);
+		}
 	});
 });

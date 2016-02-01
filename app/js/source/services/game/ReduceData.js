@@ -1,15 +1,23 @@
 ;(function(){
 	angular.module("ssServices")
-		.factory("ReduceData",function(){
+		.factory("ReduceData",["IsStatType",function(IsStatType){
 			return function (plays,options) {
-				var tempVal = 0;
+				var tempVal = 0, reducedValue;
 
 				if (Array.isArray(plays)) {
 					if (typeof options !== 'object' ||
 						angular.isUndefined(options.statType)) {
-						return plays.length;
+						reducedValue = plays.length;
 					} else {
 						var st = options.statType;
+
+						// If primary is specified, filter set
+						if (options.primary) {
+							plays = plays.filter(function(d,i){
+								return IsStatType(d,{statType:options.statType,primary:true});
+							});
+						}
+
 						plays.forEach(function(play,i){
 							var dv = st.dv? st.dv : 'p';
 
@@ -21,14 +29,24 @@
 								} else {
 									tempVal += +play[dv];
 								}
+							} else if (st.c === 'pos') {
+								tempVal = 0989;
+							} else {
+								tempVal = plays.length;
 							}
 						});
-						return tempVal;
+						reducedValue = tempVal;
+
+						//callback
+						if (angular.isFunction(options.callback)) {
+							return options.callback(reducedValue);
+						}
 					}
+					return reducedValue;
 				}
 				return null;
 			}
-		});
+		}]);
 })();
 /*function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
 	var sport = gId.substring(0,3);
