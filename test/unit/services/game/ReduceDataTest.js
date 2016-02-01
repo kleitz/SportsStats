@@ -41,7 +41,7 @@ describe('ReduceData', function() {
 	it('should return the reduced data number ', function(){
 
 		//test if service exists
-		expect(ReduceData).toBeDefined();
+		/*expect(ReduceData).toBeDefined();
 
 		//test if no attribudes returneds null
 		expect(ReduceData()).toBeNull();
@@ -55,10 +55,14 @@ describe('ReduceData', function() {
 		//test if it can reduce ncb play types
 		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
 			expect(
-				ReduceData(testData.plays),
-				ncbData.pl[statTypesI]
+				ReduceData(
+					testData.plays,
+					{statType: ncbData.pl[statTypesI]}
+				)
 			)
 			.toBe(ncbExpectedTotalResults[statTypesI]);
-		}
+		}*/
+
+		expect('reduce data test').toBe('running');
 	});
 });
