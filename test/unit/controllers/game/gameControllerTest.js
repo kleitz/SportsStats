@@ -148,7 +148,8 @@ describe('gameController', function() {
 		$httpBackend.flush();
 
 		expect(scope.mainScope.message).toBe('');
-		gameData.id = testSport+testId;
+		gameData.id = testId;
+		gameData.sport = testSport;
 		expect(scope.game).toEqualData(gameData);
 		expect(scope.mainScope.gameData).toEqualData(gameData);
 	});

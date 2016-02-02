@@ -21,7 +21,7 @@ var sports = {};
 					.select("div.gameBox");
 				gameBox.text("");
 				if (scope.game != null && scope.sport != null) {
-					gameBox.attr("id",scope.game.id);
+					gameBox.attr("id",scope.game.sport+scope.game.id);
 					dispGame();
 				} else {
 					gameBox.attr("id","");
@@ -798,7 +798,7 @@ function loadGame (gId) {
 }
 
 function dispGame() {
-	var gId = scope.game.id;
+	var gId = scope.game.sport+scope.game.id;
 	scope.game.totTime = 0;
 	for (var boxI=0; boxI<scope.game.boxScore.length; boxI++) {
 		scope.game.totTime += scope.game.boxScore[boxI].t;

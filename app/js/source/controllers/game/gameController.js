@@ -1,7 +1,7 @@
 ;(function(){
 	"use strict";
 	angular.module("ssCtrls")
-	.controller("gameController",["$scope","$routeParams","$http","ReduceData", "IsStatType",function($scope,$routeParams,$http,ReduceData,IsStatType){
+	.controller("gameController",["$scope","$routeParams","$http","ReduceData", "IsStatType","GameData","SportData",function($scope,$routeParams,$http,ReduceData,IsStatType,GameData,SportData){
 		var sport,id;
 		$scope.mainScope.sportData = null;
 		$scope.mainScope.gameData = null;
@@ -10,9 +10,13 @@
 		$scope.comparePlays = {};
 		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 		$scope.teamStatsTable = {"a":{},"h":{}};
+
+		//setup
 		if (!$routeParams.id) {
 			$scope.mainScope.title = "";
 		} else {
+
+			//determine variables from the route
 			if (!$routeParams.sport && $routeParams.id) {
 				sport = $routeParams.id.substring(0,3);
 				id = $routeParams.id.substring(3,$routeParams.id.length);
@@ -20,65 +24,27 @@
 				sport = $routeParams.sport;
 				id = $routeParams.id;
 			}
-			$scope.mainScope.messageReset();
+
+			//set loading message
 			$scope.mainScope.messageSet("Loading . . .");
-			$http({
-				method: "GET",
-				url: "./data/"+sport+".json"
-			})
-			.then(function(response){
-					$scope.mainScope.sportData = response.data;
-					$scope.sport = response.data;
-					getGames();
-				},
-				function(response){
-					$scope.mainScope.sportData = null;
-					if (response.status === 404) {
-						$scope.mainScope.messageSet("Chosen sport not supported.",true);
-					}
-				}
-			);
-			var getGames = function () {
-				var apiUrl = "./app/api/getGameData.php?gameId="+sport+id;
+
+			//Check if sport is already loaded
+			//this should be moved to a provider
+			if (angular.isDefined(SportData.getSport(sport)))  {
+				setSport(SportData.getSport(sport));
+			} else {
 				$http({
 					method: "GET",
-					url: apiUrl,
-					transformResponse: function(data, headersGetter) {
-						try {
-							var jsonObject = JSON.parse(data);
-							return jsonObject;
-						}
-						catch (e) {
-							console.error("Invalid data: "+e);
-							return {error: "Invalid data"};
-						}
-					}
+					url: "./data/"+sport+".json"
 				})
 				.then(function(response){
-						if (response.data.error) {
-							$scope.mainScope.messageSet(response.data.error,true)
-						} else {
-							if (!response.data.id) {
-								response.data.id = sport+id;
-							}
-							$scope.mainScope.gameData = response.data;
-							$scope.game = response.data;
-							$scope.setCompareStat($scope.sport.pl[0]);
-							$scope.mainScope.title = 
-								response.data.a.short + ":" +
-								response.data.aScore + " " +
-								response.data.h.short + ":" +
-								response.data.hScore;
-							$scope.mainScope.messageReset();
-
-							setTeamStats();
-						}
+						setSport(response.data, true);
 					},
 					function(response){
-						$scope.mainScope.gameData = null;
-						$scope.mainScope.title = "";
-						$scope.mainScope.messageSet("Error loading game, please try again.",true);
-						///show error
+						$scope.mainScope.sportData = null;
+						if (response.status === 404) {
+							$scope.mainScope.messageSet("Chosen sport not supported.",true);
+						}
 					}
 				);
 			}
@@ -113,6 +79,66 @@
 					$scope.teamStatsTable[team.s][statType.a] = ReduceData($scope.filterPlays($scope.game.plays,statType,team), {statType: statType});
 				});
 			});
+		}
+
+		//for setting sport to scope and SportData
+		var setSport = function (sport, isNew) {
+			$scope.mainScope.sportData = sport;
+			$scope.sport = sport;
+			getGames();
+			if (isNew) {
+				SportData.setSport(sport);
+			}
+		}
+		
+
+		//retrieving game data and setting some variables
+		//this should be moved to a provider
+		var getGames = function () {
+			var apiUrl = "./app/api/getGameData.php?gameId="+sport+id;
+			$http({
+				method: "GET",
+				url: apiUrl,
+				transformResponse: function(data, headersGetter) {
+					try {
+						var jsonObject = JSON.parse(data);
+						return jsonObject;
+					}
+					catch (e) {
+						console.error("Invalid data: "+e);
+						return {error: "Invalid data"};
+					}
+				}
+			})
+			.then(function(response){
+					if (response.data.error) {
+						$scope.mainScope.messageSet(response.data.error,true)
+					} else {
+						if (!response.data.id) {
+							response.data.id = id;
+							response.data.sport = sport;
+						}
+						$scope.mainScope.gameData = response.data;
+						$scope.game = response.data;
+						GameData.setGame($scope.game);
+						$scope.setCompareStat($scope.sport.pl[0]);
+						$scope.mainScope.title = 
+							response.data.a.short + ":" +
+							response.data.aScore + " " +
+							response.data.h.short + ":" +
+							response.data.hScore;
+						$scope.mainScope.messageReset();
+
+						setTeamStats();
+					}
+				},
+				function(response){
+					$scope.mainScope.gameData = null;
+					$scope.mainScope.title = "";
+					$scope.mainScope.messageSet("Error loading game, please try again.",true);
+					///show error
+				}
+			);
 		}
 	}]);
 })();
