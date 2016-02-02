@@ -1,6 +1,54 @@
 ;(function(){
+	"use strict"
 	angular.module("ssServices")
-		.factory("ReduceData",["IsStatType",function(IsStatType){
+		.factory("ReduceData",["IsStatType", "GameData", "SportData", "GetPlayTime", "GetNextPossession", function(IsStatType, GameData, SportData, GetPlayTime, GetNextPossession){
+			var reduceTime = function (plays, options) {
+				var tempVal = 0;
+
+				//this was a previous play direction value
+				//It doesn't make sense to me now, so I may want to fix it
+				//True is forward. Basketball is false. Football is true.
+				//todo
+				var playDir = !SportData.pd;
+				if (angular.isDefined(options.splitIndex)) {
+					var finTime = options.splitIndex*options.sport.s;
+					var startTime = (options.splitIndex+1)*options.sport.s;
+					var pId = scope.game.bisectTime[
+						//pd is play direction, which is dependant on the sport
+						(game.sport.pd?'right':'left')](scope.game.plays, scope.game.totTime - ((playDir)?startTime:finTime),0);
+					var prevPos = getNextPos(gId,pId,false);
+					var nextPos = (scope.game.plays[pId].x)? scope.game.plays[pId]: getNextPos(gId,pId,true);
+					if (((playDir)?prevPos.e:nextPos.e) == teamS &&
+							((playDir && startTime != scope.game.totTime) ||
+							(!playDir && finTime != 0))) {
+						var outsideTime = (playDir)?startTime:finTime;
+						var insideTime = (playDir)?
+								((nextPos.t>finTime)?nextPos.t:finTime):
+								((prevPos.t<startTime)?prevPos.t:startTime);
+						if (playDir || outsideTime != finTime) {
+							tempVal += Math.abs(outsideTime-insideTime);
+						}
+					}
+				}
+				plays.forEach(function(play,playI) {
+					if (angular.isUndefined(options.splitIndex)) {
+						tempVal += GetPlayTime(play,playDir);
+					} else {
+						if (playI === ((playDir)?d.length-1:0) && 
+								GetPlayTime(play,playDir) != play &&
+								((!playDir && GetNextPossession(play,playDir).t > startTime) || 
+								(playDir && GetNextPossession(play,playDir).t < finTime))) {
+							var funct = (playDir)?Math.floor:Math.ceil;
+							tempVal += Math.abs(play.t - funct(play.t/splitTime)*splitTime);
+						} else {
+							tempVal += getPlayTime(gId,p.id,playDir);
+						}
+					}
+				});
+				return tempVal;
+			}
+
+
 			return function (plays,options) {
 				var tempVal = 0, reducedValue;
 
@@ -18,24 +66,26 @@
 							});
 						}
 
-						plays.forEach(function(play,i){
-							var dv = st.dv? st.dv : 'p';
+						if (st.c === 'pos' && !options.posCount) {
+							reducedValue = reduceTime(plays,options);
+						} else {
+							plays.forEach(function(play,i){
+								var dv = st.dv? st.dv : 'p';
 
-							///if summing the data points, eg score
-							if (st.sum) {
-								//if string position of value to sum is defined
-								if(angular.isDefined(st.mp)){
-									tempVal += +play[dv][st.mp];
+								///if summing the data points, eg score
+								if (st.sum) {
+									//if string position of value to sum is defined
+									if(angular.isDefined(st.mp)){
+										tempVal += +play[dv][st.mp];
+									} else {
+										tempVal += +play[dv];
+									}
 								} else {
-									tempVal += +play[dv];
+									tempVal = plays.length;
 								}
-							} else if (st.c === 'pos') {
-								tempVal = 0989;
-							} else {
-								tempVal = plays.length;
-							}
-						});
-						reducedValue = tempVal;
+							});
+							reducedValue = tempVal;
+						}
 
 						//callback
 						if (angular.isFunction(options.callback)) {
@@ -46,6 +96,9 @@
 				}
 				return null;
 			}
+
+
+
 		}]);
 })();
 /*function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {

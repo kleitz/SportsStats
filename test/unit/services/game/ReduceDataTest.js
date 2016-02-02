@@ -1,7 +1,7 @@
 'use strict';
 
 describe('ReduceData', function() {
-	var ReduceData,IsStatType,testData,ncbData;
+	var ReduceData,IsStatType,testData,ncbData,GameData;
 	var ncbExpectedTotalResults = {
 		"P" : 143,
 		"SHT" : 164,
@@ -39,10 +39,12 @@ describe('ReduceData', function() {
 
 		ReduceData = $injector.get('ReduceData');
 		IsStatType = $injector.get('IsStatType');
+		GameData = $injector.get('GameData');
 
 		jasmine.getJSONFixtures().fixturesPath='base/data';
 
 		testData = getJSONFixture('test/game/20160126-Xav-Prov.json'); 
+		GameData.setGame(testData);
 		ncbData = getJSONFixture('ncb.json');
 	}));
 
@@ -71,12 +73,17 @@ describe('ReduceData', function() {
 		//test if it can reduce ncb play types
 		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
 			var st = ncbData.pl[statTypesI];
+			var object = {statType: st};
+			if (st.a === 'TOP') {
+				object.game = testData;
+				object.sport = ncbData;
+			}
 			expect(
 				ReduceData(
 					testData.plays.filter(function (d,i) {
 						return IsStatType(d,{statType:st});
 					}),
-					{statType: st}
+					object
 				)+' '+st.l
 			)
 			.toBe(ncbExpectedTotalResults[st.a]+' '+st.l);
@@ -86,12 +93,17 @@ describe('ReduceData', function() {
 		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
 			var st = ncbData.pl[statTypesI];
 			var closingString = ' '+st.l+' primary';
+			var object = {statType: st,primary:true};
+			if (st.a === 'TOP') {
+				object.game = testData;
+				object.sport = ncbData;
+			}
 			expect(
 				ReduceData(
 					testData.plays.filter(function (d,i) {
 						return IsStatType(d,{statType:st});
-					}),
-					{statType: st,primary:true}
+					}), object
+					
 				)+closingString
 			)
 			.toBe(ncbExpectedPrimaryResults[st.a]+closingString);

@@ -1,4 +1,5 @@
 ;(function(){
+	"use strict";
 	angular.module("ssCtrls")
 	.controller("teamStatsTableCtrl",["$scope",function($scope){
 		$scope.hover="";

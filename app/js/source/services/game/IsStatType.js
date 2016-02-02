@@ -1,4 +1,5 @@
 ;(function(){
+	"use strict"
 	angular.module("ssServices")
 		.factory("IsStatType",function(){
 			return function (play,options) {
