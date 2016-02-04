@@ -4,12 +4,12 @@
 describe('gameController', function() {
 	var iteration = 1, scope, ctrl, $httpBackend, $routeParams,
 		testId = '400840300',
-		testSport = 'ncb',
+		testSport = 'NCB',
 		testDataId = 'testId';
 	var gameUrl = /^\.\/app\/api\/getGameData\.php\?gameId\=[a-z]+\d+$/i;
 	var sportUrl = /^\.\/data\/[a-z]{3}\.json$/i;
 	var sportData = {
-		sport:'ncb',
+		sport:'NCB',
 		pl: ['a']
 	};
 	var gameDataError = {error:"test error"};

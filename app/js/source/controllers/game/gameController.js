@@ -9,7 +9,6 @@
 		$scope.sport = null;
 		$scope.comparePlays = {};
 		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
-		$scope.teamStatsTable = {"a":{},"h":{}};
 
 		//setup
 		if (!$routeParams.id) {
@@ -72,15 +71,7 @@
 		$scope.reduceData = function (plays,options) {
 			return ReduceData(plays,options);
 		}
-
-		var setTeamStats = function () {
-			$scope.aH.forEach(function(team,teamI){
-				$scope.sport.pl.forEach(function(statType){
-					$scope.teamStatsTable[team.s][statType.a] = ReduceData($scope.filterPlays($scope.game.plays,statType,team), {statType: statType});
-				});
-			});
-		}
-
+		
 		//for setting sport to scope and SportData
 		var setSport = function (sport, isNew) {
 			$scope.mainScope.sportData = sport;
@@ -116,7 +107,7 @@
 					} else {
 						if (!response.data.id) {
 							response.data.id = id;
-							response.data.sport = sport;
+							response.data.sport = sport.toUpperCase();
 						}
 						$scope.mainScope.gameData = response.data;
 						$scope.game = response.data;
@@ -128,8 +119,6 @@
 							response.data.h.short + ":" +
 							response.data.hScore;
 						$scope.mainScope.messageReset();
-
-						setTeamStats();
 					}
 				},
 				function(response){
