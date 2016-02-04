@@ -301,7 +301,8 @@
 			"l":"Time of Possession",
 			"ls":true,
 			"a":"TOP",
-			"l2":"Possession"
+			"l2":"Possession",
+			"team":"s"
 		}
 	],
 	"pt":{

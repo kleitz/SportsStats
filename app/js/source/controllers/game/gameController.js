@@ -63,9 +63,9 @@
 			}
 			return plays.filter(function(d,i){
 				var teamS = ($scope.compareStat.dpp) ?
-					$scope.aH[1-teamI].s :
-					team.s;
-				return IsStatType(d,{statType: statType}) && d.e === teamS;
+					$scope.aH[1-teamI] :
+					team;
+				return IsStatType(d,{statType: statType, team: teamS});
 			})
 		}
 

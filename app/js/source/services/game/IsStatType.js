@@ -8,14 +8,14 @@
 				if (typeof options === 'object' &&
 					angular.isDefined(options.statType) &&
 					typeof play === 'object') {
-					var statT = options.statType, response, compRegExp;
+					var statT = options.statType, response, compRegExp, team;
 
 					//data value is either in play ('p') or defined
 					var dataValue = (statT.dv) ? statT.dv : 'p';
 
 					//New possessions are defined by play.x
 					if (statT.c === 'pos') {
-						return !!play.x;
+						response = !!play.x;
 					} else {
 
 						//initial search using regexp to test if play is the type we want
@@ -39,16 +39,23 @@
 
 							//regexp for the primary data value, at its 'primary poisition' ('pp')
 							var primRegExp = new RegExp(statT.p,"i");
-							return primRegExp.test(play[dataValue][statT.pp]);
+							response = primRegExp.test(play[dataValue][statT.pp]);
 
 						} else {
 
 							//return whether or not the key for the data value is defined. kind of an "all else, just say whether it exists"
-							return (angular.isDefined(play[dataValue]));
+							response = (angular.isDefined(play[dataValue]));
 						}
-					} else {
-						return response;
 					}
+					
+					if (angular.isDefined(options.team)) {
+						team = (angular.isDefined(statT.team)) ? statT.team : "e";
+
+						response = play[team] == options.team.s && response;
+					}
+
+					return response;
+
 				} else {
 					return false;
 				}
