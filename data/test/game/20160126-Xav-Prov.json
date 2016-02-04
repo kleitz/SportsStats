@@ -404,4 +404,6 @@
 			"t":1200
 		}
 	],
-	"final":true}
+	"final":true,
+	"totTime":2400
+}
