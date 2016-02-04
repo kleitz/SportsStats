@@ -2,47 +2,84 @@
 	"use strict"
 	angular.module("ssServices")
 		.factory("ReduceData",["IsStatType", "GameData", "SportData", "GetPlayTime", "GetNextPossession", function(IsStatType, GameData, SportData, GetPlayTime, GetNextPossession){
+
+			//this function is for time of possession only
 			var reduceTime = function (plays, options) {
 				var tempVal = 0;
+				var game = GameData.getGame();
+				var sport = SportData.getSport(game.sport);
+
+				var bisectTime = d3.bisector(function(p) {
+					//Time counts down, bisector requires data scale positively
+					return game.totTime - p.t;
+				})
 
 				//this was a previous play direction value
 				//It doesn't make sense to me now, so I may want to fix it
 				//True is forward. Basketball is false. Football is true.
 				//todo
 				var playDir = !SportData.pd;
+				var teamS = plays[0].s;
+
+				//beginning of the split (eg 2100)
+				var startTime = game.totTime - options.splitIndex * sport.s;
+				//end  of the split (eg 1800)
+				var finTime = game.totTime - (options.splitIndex+1) * sport.s;
+
+				//for my time histogram "split graph"
+				//this adds partial plays so each split equals 300s 
+				//or whatever the split is
 				if (angular.isDefined(options.splitIndex)) {
-					var finTime = options.splitIndex*options.sport.s;
-					var startTime = (options.splitIndex+1)*options.sport.s;
-					var pId = scope.game.bisectTime[
-						//pd is play direction, which is dependant on the sport
-						(game.sport.pd?'right':'left')](scope.game.plays, scope.game.totTime - ((playDir)?startTime:finTime),0);
-					var prevPos = getNextPos(gId,pId,false);
-					var nextPos = (scope.game.plays[pId].x)? scope.game.plays[pId]: getNextPos(gId,pId,true);
-					if (((playDir)?prevPos.e:nextPos.e) == teamS &&
-							((playDir && startTime != scope.game.totTime) ||
-							(!playDir && finTime != 0))) {
-						var outsideTime = (playDir)?startTime:finTime;
-						var insideTime = (playDir)?
-								((nextPos.t>finTime)?nextPos.t:finTime):
-								((prevPos.t<startTime)?prevPos.t:startTime);
-						if (playDir || outsideTime != finTime) {
-							tempVal += Math.abs(outsideTime-insideTime);
-						}
+
+					//get last play in the previous split
+					var pId = bisectTime.right(game.plays, game.totTime-startTime);
+
+					var play = game.plays[pId];
+
+					//Find the nearest new possetion to the split point
+					//for example a new posession (.x=1) at 2111 and 2087,
+					//	when the split point is 2100
+					var prevPos = GetNextPossession(play,true);
+					//if the bisected play is new, keep that as the next play
+					var nextPos = (play.x)? play: GetNextPossession(play,false);
+
+					//if the earlier of the two possessions (ie the one outside
+					//	the split) is the correct team, we need to add *part*
+					//	of it to the total
+					//and it's not the first split (ie beginning of the game)
+					//	this is because there'd be no overlap then
+					if (prevPos.s == teamS &&
+							startTime != game.totTime) {
+						//the time of the first possession of the split for
+						// either team
+						var insideTime = (nextPos.t>finTime)?nextPos.t:finTime;
+						
+						//add difference of the two times
+						tempVal += Math.abs(startTime-insideTime);
 					}
 				}
+				//cycle plays, adding time
 				plays.forEach(function(play,playI) {
-					if (angular.isUndefined(options.splitIndex)) {
-						tempVal += GetPlayTime(play,playDir);
-					} else {
-						if (playI === ((playDir)?d.length-1:0) && 
-								GetPlayTime(play,playDir) != play &&
-								((!playDir && GetNextPossession(play,playDir).t > startTime) || 
-								(playDir && GetNextPossession(play,playDir).t < finTime))) {
-							var funct = (playDir)?Math.floor:Math.ceil;
-							tempVal += Math.abs(play.t - funct(play.t/splitTime)*splitTime);
+					//if working with the split time graph
+					if (angular.isDefined(options.splitIndex)) {
+						//if play is the last play of the array AND
+						//	it follows into the next possession (ie the
+						//	the next pos by anyone is in the next split)
+						if (playI === plays.length-1 && 
+								(GetNextPossession(play, false).t < finTime)) {
+							//add the time UP TO the end of the split
+							tempVal += play.t-finTime;
 						} else {
-							tempVal += getPlayTime(gId,p.id,playDir);
+							//add play time
+							tempVal += GetPlayTime(play);
 						}
+					} else if (options.posCount){
+						//sometimes I need to get just the number of
+						//	possessions, such as the shot clock histogram
+						tempVal++;
+					} else {
+						//add play time
+						tempVal += GetPlayTime(play);
 					}
 				});
 				return tempVal;
@@ -101,90 +138,3 @@
 
 		}]);
 })();
-/*function reduceData(gId,pType,data,gIndex,teamS,gType,func,isSec) {
-	var sport = gId.substring(0,3);
-	var comp = scope.sport.po[pType].c;
-	var prim = scope.sport.po[pType].p;
-	var defPosP = scope.sport.po[pType].dpp; //primary is defense, mainly for per possession calculation
-	var defPosS = scope.sport.po[pType].dps;
-	var primSum = scope.sport.po[pType].sum;
-	var primPos = scope.sport.po[pType].pp;
-	var mPos = scope.sport.po[pType].mp;
-	var primVal = scope.sport.po[pType].pv;
-	var primValPos = scope.sport.po[pType].pvp;
-	var noSec = scope.sport.po[pType].ns;
-	var playDir = scope.sport.pd;
-	var splitTime = scope.sport.s;
-	var dataValue = (scope.sport.po[pType].dv)?scope.sport.po[pType].dv:'p';
-	var dataAr = [];
-	if (isSec) {
-		var secData = data.filter(function(p){return !(isData(gId,p.id,pType,isSec))});
-		dataAr.push(secData);
-	} else {
-		dataAr.push(data);
-	}
-	var value = 0;
-	if (isDef(primVal)) {
-		dataValue = primVal;
-		mPos = primValPos;
-	}
-	dataAr.forEach(function(d,i){
-		var tempVal = 0;
-		if (primSum) {
-			d.forEach(function(p) {
-				if(!isDef(mPos)){
-					tempVal += +p[dataValue];
-				} else {
-					tempVal += +p[dataValue][mPos];
-				}
-			});
-		} else if (comp=="pos" && (gType!="split" || scope.sport.split.top)) {
-			//calculating time of possession
-			if (gType != 'tot' && !isSec) {
-				var finTime = gIndex*splitTime;
-				var startTime = (gIndex+1)*splitTime;
-				var pId = scope.game.bisectTime[
-					(playDir?'right':'left')](scope.game.plays, scope.game.totTime - ((playDir)?startTime:finTime),0);
-				var prevPos = getNextPos(gId,pId,false);
-				var nextPos = (scope.game.plays[pId].x)? scope.game.plays[pId]: getNextPos(gId,pId,true);
-				if (((playDir)?prevPos.e:nextPos.e) == teamS &&
-						((playDir && startTime != scope.game.totTime) ||
-						(!playDir && finTime != 0))) {
-					var outsideTime = (playDir)?startTime:finTime;
-					var insideTime = (playDir)?
-							((nextPos.t>finTime)?nextPos.t:finTime):
-							((prevPos.t<startTime)?prevPos.t:startTime);
-					if (playDir || outsideTime != finTime) {
-						tempVal += Math.abs(outsideTime-insideTime);
-					}
-				}
-			}
-			d.forEach(function(p,pI) {
-				if (gType == 'tot') {
-					tempVal += getPlayTime(gId,p.id,playDir);
-				} else {
-					if (pI == ((playDir)?d.length-1:0) && 
-							getNextPos(gId,p.id,playDir) != p &&
-							((!playDir && getNextPos(gId,p.id,playDir).t > startTime) || 
-							(playDir && getNextPos(gId,p.id,playDir).t < finTime))) {
-						var funct = (playDir)?Math.floor:Math.ceil;
-						tempVal += Math.abs(p.t - funct(p.t/splitTime)*splitTime);
-					} else {
-						tempVal += getPlayTime(gId,p.id,playDir);
-					}
-				}
-			});
-		} else {
-			tempVal += d.length;
-		}
-		if (gType !== false) {
-			value = rawOrPPNum(tempVal,gId,teamS,{index:gIndex, type:gType, dp:((i)?defPosS:defPosP)});
-		} else {
-			value = tempVal;
-		}
-	});
-	if (isDef(func)) {
-		value = func(value);
-	}
-	return value;
-}*/

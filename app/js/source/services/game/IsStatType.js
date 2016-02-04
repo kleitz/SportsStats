@@ -51,7 +51,7 @@
 					if (angular.isDefined(options.team)) {
 						team = (angular.isDefined(statT.team)) ? statT.team : "e";
 
-						response = play[team] == options.team.s && response;
+						response = (play[team] === options.team.s) && response;
 					}
 
 					return response;

@@ -1,7 +1,7 @@
 'use strict';
 
 describe('ReduceData', function() {
-	var ReduceData,IsStatType,testData,ncbData,GameData;
+	var ReduceData, IsStatType, testData, ncbData, GameData, SportData;
 	var ncbExpectedTotalResults = {
 		"P" : 143,
 		"SHT" : 164,
@@ -32,6 +32,21 @@ describe('ReduceData', function() {
 		"TO" : 15,
 		"TOP" : 2400
 	};
+	var ncbExpectedHomeResults = {
+		"P" : 68,
+		"SHT" : 91,
+		"FG" : 70,
+		"3s" : 34,
+		"FT" : 21,
+		"R" : 39,
+		"A" : 16,
+		"B" : 2,
+		"TNO" : 14,
+		"S" : 8,
+		"PF" : 17,
+		"TO" : 4,
+		"TOP" : 1061
+	};
 
 	beforeEach(module('ssServices'));
 
@@ -40,12 +55,15 @@ describe('ReduceData', function() {
 		ReduceData = $injector.get('ReduceData');
 		IsStatType = $injector.get('IsStatType');
 		GameData = $injector.get('GameData');
+		SportData = $injector.get('SportData');
 
 		jasmine.getJSONFixtures().fixturesPath='base/data';
 
-		testData = getJSONFixture('test/game/20160126-Xav-Prov.json'); 
-		GameData.setGame(testData);
+		testData = getJSONFixture('test/game/20160126-Xav-Prov.json');
 		ncbData = getJSONFixture('ncb.json');
+		testData.sport = ncbData.a;
+		GameData.setGame(testData);
+		SportData.setSport(ncbData);
 	}));
 
 	it('should grab the test data', function (){
@@ -74,10 +92,6 @@ describe('ReduceData', function() {
 		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
 			var st = ncbData.pl[statTypesI];
 			var object = {statType: st};
-			if (st.a === 'TOP') {
-				object.game = testData;
-				object.sport = ncbData;
-			}
 			expect(
 				ReduceData(
 					testData.plays.filter(function (d,i) {
@@ -94,10 +108,6 @@ describe('ReduceData', function() {
 			var st = ncbData.pl[statTypesI];
 			var closingString = ' '+st.l+' primary';
 			var object = {statType: st,primary:true};
-			if (st.a === 'TOP') {
-				object.game = testData;
-				object.sport = ncbData;
-			}
 			expect(
 				ReduceData(
 					testData.plays.filter(function (d,i) {
@@ -108,5 +118,49 @@ describe('ReduceData', function() {
 			)
 			.toBe(ncbExpectedPrimaryResults[st.a]+closingString);
 		}
+
+		//test if it can reduce ncb PRIMARY play types
+		for (var statTypesI = 0; statTypesI < ncbData.pl.length; statTypesI++) {
+			var st = ncbData.pl[statTypesI];
+			var closingString = ' '+st.l+' home';
+			var object = {statType: st};
+			expect(
+				ReduceData(
+					testData.plays.filter(function (d,i) {
+						return IsStatType(d,{statType:st,team:{s:'h'}});
+					}), object
+					
+				)+closingString
+			)
+			.toBe(ncbExpectedHomeResults[st.a]+closingString);
+		}
+
+		//test split time graph of time of possession
+		var st = ncbData.pl[ncbData.pl.length-1];
+		var closingString = ' '+st.l+' split home';
+		var object = {statType: st,primary:true,splitIndex:1};
+		expect(
+			ReduceData(
+				testData.plays.filter(function (play,playI) {
+					return IsStatType(play,{statType:st,team:{s:'h'}}) && play.t<=2100 && play.t > 1800;
+				}), object
+				
+			)+closingString
+		)
+		.toBe(149+closingString);
+
+		//test split time graph of time of possession
+		var st = ncbData.pl[ncbData.pl.length-1];
+		var closingString = ' '+st.l+' split away';
+		var object = {statType: st,primary:true,splitIndex:1};
+		expect(
+			ReduceData(
+				testData.plays.filter(function (play,playI) {
+					return IsStatType(play,{statType:st,team:{s:'a'}}) && play.t<=2100 && play.t > 1800;
+				}), object
+				
+			)+closingString
+		)
+		.toBe(151+closingString);
 	});
 });
