@@ -18,7 +18,8 @@ describe('gameController', function() {
 		a:{short:"T1"},
 		aScore:21,
 		h:{short:"T2"},
-		hScore:22
+		hScore:22,
+		boxScore:[]
 	}
 
 

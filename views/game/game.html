@@ -1,10 +1,7 @@
 <div>
-	<div class="gameInputCont" ng-controller="scheduleCtrl">
-		<input type="text" placeholder="Input ESPN box score URL (play-by-play required for compatibility)" class="gameInput">
-		<input type="button" value="Browse Schedule" class="browseButton hover" ng-click="openSchedule()">
-	</div>
 	<div ng-show="game.boxScore && sport">
 		<box-score></box-score>
 		<team-stats-table></team-stats-table>
+		<team-stats-graph></team-stats-graph>
 	</div>
 </div>

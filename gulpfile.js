@@ -1,8 +1,9 @@
-var gulp = require('gulp')
-var concat = require('gulp-concat')
-var uglify = require('gulp-uglify')
-var ngAnnotate = require('gulp-ng-annotate')
-var sourcemaps = require('gulp-sourcemaps')
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var ngAnnotate = require('gulp-ng-annotate');
+var sourcemaps = require('gulp-sourcemaps');
+var sass = require('gulp-sass');
 
 gulp.task('js', function () {
 	gulp.src(['app/js/source/**/module.js', 'app/js/source/**/*.js'])
@@ -28,7 +29,13 @@ gulp.task('testSetup', function () {
 		.pipe(gulp.dest('test/unit/'));
 })
 
-gulp.task('watch', ['js','testSetup'], function () {
-	gulp.watch('app/js/source/**/*.js', ['js','testSetup'])
+gulp.task('sass', function () {
+	gulp.src(['app/css/sass/**/*.scss'])
+		.pipe(sass().on('error', sass.logError))
+		.pipe(gulp.dest('app/css/'))
 })
 
+gulp.task('watch', ['js','testSetup', 'sass'], function () {
+	gulp.watch('app/js/source/**/*.js', ['js','testSetup'])
+	gulp.watch('app/css/sass/*.scss', ['sass'])
+})

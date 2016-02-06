@@ -1,35 +1,10 @@
 /*bright blue: d6e7ff*/
-* {
-	font: 12px sans-serif;
-	box-sizing: border-box;
-}
-body,div,svg,span {
-	margin:0;
-	padding:0;
-}
-body {
-	background-color: #F9F9F9;
-}
-.center {
-	text-align:center;
-}
 .centerAl {
 	margin-left:auto;
 	margin-right:auto;
 }
-table, td {
-	border-spacing: 0px;
-	border-collapse: collapse;
-}
-td {
-	font: inherit;
-	padding:2px;
-}
-td.thead, .bold, a.blockLink{
+.bold, a.blockLink{
 	font-weight:bold;
-}
-td.thead {
-	background-color:#EEEEEE;
 }
 .left {
 	float:left;
@@ -277,7 +252,6 @@ label.ppl, input[type=button], input[type=text], input[type=date], select {
 	padding: 5px;
 	font-size: 12px;
 	display:inline-block;
-	margin:0px 5px;
 	outline:none;
 }
 label.ppl, input[type=button] {
@@ -301,9 +275,8 @@ div.gameInputCont {
 }
 input.gameInput {
 	border: solid 2px #d6e7ff;
-	padding:10px;
 	height:40px;
-	width:80%;
+	width:100%;
 }
 input.browseButton {
 	background-color: #F9F9F9;
@@ -312,8 +285,7 @@ input.browseButton {
 	font-size: 12px;
 	height:30px;
 	margin: 5px 0px;
-	width:140px;
-	float:right;
+	width:100%;
 	outline: 0;
 	cursor:pointer;
 	font-weight:bold;
@@ -364,17 +336,6 @@ div.browseSchedule {
 	flex: 1 0 100px;
 	width:100%;
 	overflow:auto;
-}
-div.headlineMessage {
-	font-weight: bold;
-	padding: 10px;
-	text-align: center;
-	background-color: #FCFCFC;
-	color: #AAA;
-}
-div.headlineMessageWarning {
-	background-color: #FD9;
-	color: #F70;
 }
 a.blockLink {
 	display:block;

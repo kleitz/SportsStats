@@ -2,8 +2,10 @@
 <html lang="en" ng-app="ssApp" ng-controller="ssCtrl">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap-css-only/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="./app/css/main.css">
+		<link rel="stylesheet" type="text/css" href="./app/css/main2.css">
 		<title ng-bind="mainScope.title | pageTitle">Act Opener</title>
 		<script>
 			document.write('<base href="' + document.location + '" />');
@@ -16,18 +18,28 @@
 	</head>
 	<body>
 		<div id="mainCont" class="scroll fullsize">
-			<div class="footer fullWidth">
+			<div class="ss-footer container-fluid">
 				Compatibility: NCAA Men's Basketball, NBA
 			</div>
-			<div class="contentContainer">
-				<div class="headlineMessage" ng-class="{headlineMessageWarning : mainScope.messageWarning}" ng-bind="mainScope.message" ng-show="mainScope.message"></div>
+			<div class="container ss-main-container">
+				<div class="gameInputCont row" ng-controller="scheduleCtrl">
+					<div class="col-xs-12 col-sm-9">
+						<input type="text" placeholder="Input ESPN box score URL (play-by-play required for compatibility)" class="gameInput">
+					</div>
+					<div class="col-xs-12 col-sm-3">
+						<input type="button" value="Browse Schedule" class="browseButton hover" ng-click="openSchedule()">
+					</div>
+				</div>
+				<div class="headline-message text-center" ng-class="{'headline-message-warning' : mainScope.messageWarning}" ng-bind="mainScope.message" ng-show="mainScope.message"></div>
 				<div class="" ng-view></div>
+			</div>
+			<div class="contentContainer">
 				<div ss-d3-old="mainScope.gameData" ss-d3-old-sport="mainScope.sportData">
 					<div class="gameBox notLoaded" id="">
 					</div>
 				</div>
 			</div>
-			<div id="footer" class="footer">
+			<div id="footer" class="ss-footer container-fluid">
 				<a href="bugs.html">List of currently known bugs.</a>
 			</div>
 		</div>

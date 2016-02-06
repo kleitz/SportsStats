@@ -119,6 +119,7 @@
 							response.data.h.short + ":" +
 							response.data.hScore;
 						$scope.mainScope.messageReset();
+						getBoxScoreOt();
 					}
 				},
 				function(response){
@@ -128,6 +129,19 @@
 					///show error
 				}
 			);
+		}
+
+		var getBoxScoreOt = function () {
+			if ($scope.game.boxScore.length > 6) {
+				$scope.game.boxScoreOT = {};
+				$scope.aH.forEach(function(team){
+					$scope.game.boxScoreOT[team.s] = $scope.game.boxScore.reduce(function(prevVal, period) {
+						if (period.ot) 
+							return prevVal + period[team.s];
+						return prevVal;
+					},0)
+				})
+			}
 		}
 	}]);
 })();

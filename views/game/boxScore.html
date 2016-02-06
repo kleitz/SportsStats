@@ -1,50 +1,65 @@
-<div class="boxScore">
-	<div class="left mTLCont">
-		<div class="left tRight mainTeamLabel" style="border-color: #{{game.a.primary}};">
-			<div class="larTitle away bottomText fullWidth">
-				{{game.a.teamName}}
-			</div>
-		</div>
-	</div>
-	<div class="right mTLCont">
-		<div class="right tLeft mainTeamLabel" style="border-color: #{{game.h.primary}};">
-			<div class="larTitle home bottomText fullWidth">
-				{{game.h.teamName}}
-			</div>
-		</div>
-	</div>
-	<div class="bSCont">
-		<div class="bSDateLoc fullWidth center">
+<div class="row secton">
+	<div class="col-xs-12 center">
 			{{game.gameDate}}<br>{{game.venue.venueName}}, {{game.venue.city}}, {{game.venue.state}}
+	</div>
+</div>
+<div class="row secton">
+	<div class="hidden-xs col-sm-4 pm-zero">
+		<div class="row pm-zero">
+			<div class="col-sm-10 text-right pm-zero">
+				<h4 class="visible-sm ss-title-underline" style="border-bottom-color: #{{game.a.primary}}">{{game.a.teamName}}</h4>
+				<h2 class="hidden-sm ss-title-underline" style="border-bottom-color: #{{game.a.primary}}">{{game.a.teamName}}</h2>
+			</div>
+			<div class="col-sm-2 pm-zero">
+				<h4 class="visible-sm">&nbsp;{{game.aScore}}</h4>
+				<h2 class="hidden-sm">&nbsp;{{game.aScore}}</h2>
+			</div>
 		</div>
-		<div class="fullWidth">
-			<div class="left tLeft mainScore">
-				<div class="larTitle away bottomText fullWidth scoreNum">
-					{{game.aScore}}
-				</div>
+	</div>
+	<div class="col-xs-12 col-sm-4">
+		<table class="box-score-table full-width-xs auto-width-sm center-element">
+			<tr>
+				<td class="text-left thead two-third-width-xs auto-width-sm">{{game.plays[game.plays.length-1].t | printedTime:this}}</td>
+				<td 
+				class="text-left thead" 
+				ng-repeat="period in game.boxScore"
+				ng-class="{'hidden-sm hidden-xs' : game.boxScoreOT && period.ot && period.period !== game.boxScore.length}">
+					{{(period.period > sport.q.n)?period.l:period.period}}
+				</td>
+				<td class="text-right thead">Total</td>
+			</tr>
+			<tr ng-repeat="team in aH">
+				<td class="bold pm-zero">
+					<div class="box-score-table-team" style="border-left-color: #{{game[team.s].primary}}">
+						<span class="visible-xs">{{game[team.s].teamName}}</span>
+						<span class="hidden-xs">{{game[team.s].short}}</span>
+					</div>
+				</td>
+				<td 
+				class="text-left" 
+				ng-repeat="period in game.boxScore"
+				ng-class="{'hidden-sm hidden-xs' : period.ot && game.boxScoreOT}">
+					{{period[team.s]}}
+				</td>
+				<td 
+				class="text-left" 
+				ng-class="{'visible-sm visible-xs' : game.boxScoreOT}">
+					{{game.boxScoreOT[team.s]}}
+				</td>
+				<td class="text-right bold">{{game[team.s+"Score"]}}</td>
+			</tr>
+		</table>
+	</div>
+	<div class="hidden-xs col-sm-4 pm-zero">
+		<div class="row pm-zero">
+			<div class="col-sm-2 text-right pm-zero">
+				<h4 class="visible-sm">{{game.hScore}}&nbsp;</h4>
+				<h2 class="hidden-sm">{{game.hScore}}&nbsp;</h2>
 			</div>
-			<div class="right tRight mainScore">
-				<div class="larTitle home bottomText fullWidth scoreNum">
-					{{game.hScore}}
-				</div>
+			<div class="col-sm-10 pm-zero">
+				<h4 class="visible-sm ss-title-underline" style="border-bottom-color: #{{game.h.primary}}">{{game.h.teamName}}</h4>
+				<h2 class="hidden-sm ss-title-underline" style="border-bottom-color: #{{game.h.primary}}">{{game.h.teamName}}</h2>
 			</div>
-			<table class="bSTable">
-				<tr>
-					<td class="bold thead">{{game.plays[game.plays.length-1].t | printedTime:this}}</td>
-					<td class="center thead" ng-repeat="period in game.boxScore">{{(period.period > sport.q.n)?period.l:period.period}}</td>
-					<td class="center bold thead">T</td>
-				</tr>
-				<tr>
-					<td class="bold">{{game.a.short}}</td>
-					<td class="center" ng-repeat="period in game.boxScore">{{period.a}}</td>
-					<td class="center bold">{{game.aScore}}</td>
-				</tr>
-				<tr>
-					<td class="bold">{{game.h.short}}</td>
-					<td class="center" ng-repeat="period in game.boxScore">{{period.h}}</td>
-					<td class="center bold">{{game.hScore}}</td>
-				</tr>
-			</table>
 		</div>
 	</div>
 </div>
