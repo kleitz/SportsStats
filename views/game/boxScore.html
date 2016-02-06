@@ -21,7 +21,7 @@
 			<tr>
 				<td class="text-left thead two-third-width-xs auto-width-sm">{{game.plays[game.plays.length-1].t | printedTime:this}}</td>
 				<td 
-				class="text-left thead" 
+				class="text-right thead" 
 				ng-repeat="period in game.boxScore"
 				ng-class="{'hidden-sm hidden-xs' : game.boxScoreOT && period.ot && period.period !== game.boxScore.length}">
 					{{(period.period > sport.q.n)?period.l:period.period}}
@@ -36,13 +36,13 @@
 					</div>
 				</td>
 				<td 
-				class="text-left" 
+				class="text-right" 
 				ng-repeat="period in game.boxScore"
 				ng-class="{'hidden-sm hidden-xs' : period.ot && game.boxScoreOT}">
 					{{period[team.s]}}
 				</td>
 				<td 
-				class="text-left" 
+				class="text-right" 
 				ng-class="{'visible-sm visible-xs' : game.boxScoreOT}">
 					{{game.boxScoreOT[team.s]}}
 				</td>
