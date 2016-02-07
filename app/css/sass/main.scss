@@ -1,7 +1,10 @@
+//font
 $font-stack:	Helvetica, sans-serif;
+$def-font-size: 12px;
 
 //Text colors
 $primary-font-color:	#000;
+$dark-grey-font-color:	#444;
 $med-grey-font-color:	#AAAAAA;
 $warning-font-color:	#F70;
 
@@ -12,6 +15,11 @@ $warning-bg-color: #FD9;
 
 //border colors
 $med-grey: #EEEEEE;
+$light-blue: #ebf3ff;
+$blue: #d6e7ff;
+
+//border
+$blueBorder: 2px solid $blue;
 
 * {
 	box-sizing: border-box;
@@ -21,19 +29,24 @@ $med-grey: #EEEEEE;
 	margin:0;
 	padding:0;
 }
-.secton {
-	margin-bottom: 5px;
+
+.pointer {
+	cursor:pointer;
 }
 
 body {
 	@extend .pm-zero;
 	background-color: $light-grey;
-	font: 12px $font-stack;
+	font: $def-font-size $font-stack;
 	color: $primary-font-color;
 }
 
 div,svg,span {
 	@extend .pm-zero;
+}
+
+.section {
+	margin: 5px 0px 5px;
 }
 
 table {
@@ -94,4 +107,49 @@ div.headline-message {
 div.headline-message-warning {
 	background-color: $warning-bg-color;
 	color: $warning-font-color;
+}
+
+
+//forms
+input.border {
+	border: $blueBorder;
+}
+label.ppl, input[type=button], input[type=text], input[type=date], select, button {
+	@extend input.border;
+	background-color: $light-grey;
+	padding: 5px;
+	font-size: $def-font-size;
+	display:inline-block;
+	outline:none;
+	color: $dark-grey-font-color;
+}
+button, input[type=button] {
+	@extend .bold;
+}
+
+input.gameInput {
+	@extend input.border;
+	@extend .full-width-xs;
+	height:40px;
+}
+
+input.browseButton {
+	@extend button;
+	@extend .full-width-xs;
+	height:30px;
+	margin: 5px 0px;
+}
+
+//hover
+
+.hov, .hover:hover {
+	background-color: $light-blue;
+}
+
+.teamStatMin {
+	@extend .pointer;
+}
+
+.active {
+	background-color: $blue;
 }

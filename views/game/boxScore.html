@@ -1,9 +1,9 @@
-<div class="row secton">
+<div class="row section">
 	<div class="col-xs-12 center">
 			{{game.gameDate}}<br>{{game.venue.venueName}}, {{game.venue.city}}, {{game.venue.state}}
 	</div>
 </div>
-<div class="row secton">
+<div class="row section">
 	<div class="hidden-xs col-sm-4 pm-zero">
 		<div class="row pm-zero">
 			<div class="col-sm-10 text-right pm-zero">
@@ -42,7 +42,7 @@
 					{{period[team.s]}}
 				</td>
 				<td 
-				class="text-right" 
+				class="text-right hidden" 
 				ng-class="{'visible-sm visible-xs' : game.boxScoreOT}">
 					{{game.boxScoreOT[team.s]}}
 				</td>

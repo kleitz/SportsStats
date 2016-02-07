@@ -31,6 +31,7 @@ gulp.task('testSetup', function () {
 
 gulp.task('sass', function () {
 	gulp.src(['app/css/sass/**/*.scss'])
+		.pipe(concat('main2.js'))
 		.pipe(sass().on('error', sass.logError))
 		.pipe(gulp.dest('app/css/'))
 })

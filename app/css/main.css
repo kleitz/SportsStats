@@ -137,13 +137,13 @@ svg {
 	border-top: 2px #DDDDDD solid;
 	overflow:none;
 }
-.teamStat, .teamStatMin {
+.teamStat {
 	cursor:pointer;
 }
-.teamStat:hover, .teamStatMin:hover, .teamStatsMin .hov, .hover:hover, input[type=button]:hover, a.blockLink:hover {
+.teamStat:hover, input[type=button]:hover, a.blockLink:hover {
 	background-color: #ebf3ff;
 }
-.teamStat.active, .teamStatMin.active {
+.teamStat.active {
 	background-color: #d6e7ff;
 }
 .tSLabel {
@@ -246,14 +246,6 @@ svg {
 input[type=radio].pp {
 	display:none;
 }
-label.ppl, input[type=button], input[type=text], input[type=date], select {
-	border: solid 2px #d6e7ff;
-	background-color: #F9F9F9;
-	padding: 5px;
-	font-size: 12px;
-	display:inline-block;
-	outline:none;
-}
 label.ppl, input[type=button] {
 	color: #444;
 	cursor: pointer;
@@ -272,23 +264,6 @@ div.opLoc {
 }
 div.gameInputCont {
 	padding:10px;
-}
-input.gameInput {
-	border: solid 2px #d6e7ff;
-	height:40px;
-	width:100%;
-}
-input.browseButton {
-	background-color: #F9F9F9;
-	border:2px solid #d6e7ff;
-	color: #444;
-	font-size: 12px;
-	height:30px;
-	margin: 5px 0px;
-	width:100%;
-	outline: 0;
-	cursor:pointer;
-	font-weight:bold;
 }
 
 .playLabelBox {
