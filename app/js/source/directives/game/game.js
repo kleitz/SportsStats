@@ -11,5 +11,11 @@
 			templateUrl: '/views/game/teamStatsTable.html',
 			controller: 'teamStatsTableCtrl'
 		};
+	})
+	.directive('teamStatsGraph', function() {
+		return {
+			templateUrl: '/views/game/teamStatsGraph.html',
+			controller: 'teamStatsGraphCtrl'
+		};
 	});
 })();
