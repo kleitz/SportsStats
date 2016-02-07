@@ -43,11 +43,8 @@
 				<a href="bugs.html">List of currently known bugs.</a>
 			</div>
 		</div>
-		<div id="popup" class="fullsize popbgk" ng-show="mainScope.popup.displayed" ng-click="close()" ng-controller="popupCtrl">
-			<div class="browseCont">
-				<div class="browseSchedule" ng-click="$event.stopPropagation();" compile-popup="mainScope.popup">
-				</div>
-			</div>
+		<div id="popup" class="fullsize popup-bg-k" ng-show="mainScope.popup.displayed" ng-click="close()" ng-controller="popupCtrl">
+			<div class="browse-cont" compile-popup="mainScope.popup"></div>
 		</div>
 	</body>
 </html>

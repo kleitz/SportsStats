@@ -37,26 +37,6 @@
 .cf:after {
 	clear:both;
 }
-div.fullsize {
-	width:100%;
-	height:100%;
-	position:fixed;
-	top:0px;
-	left:0px;
-}
-
-div#mainCont {
-	z-index: 0;
-}
-div#popup {
-	z-index:1000;
-}
-div.popbgk {
-	background-color:rgba(0,0,0,.5);
-}
-div.popbgw {
-	background-color:rgba(255,255,255,.5);
-}
 .contentContainer {
 	background-color:#FFFFFF;
 	margin:0px auto 10px;
@@ -290,27 +270,10 @@ div.footerList {
 	margin:0px auto;
 	text-align:left;
 }
-div.browseCont {
-	margin:0px auto;
-	padding:20px 0px 40px;
-	width:400px;
-	height:100%;
-	display:flex;
-	flex-flow:column;
-}
 div.popupButtons{
 	width:100%;
 	height:40px;
 	flex: 0 0 40px;
-}
-div.browseScheduleCont {
-}
-div.browseSchedule {
-	background-color: #FFFFFF;
-	border: solid 2px #d6e7ff;
-	flex: 1 0 100px;
-	width:100%;
-	overflow:auto;
 }
 a.blockLink {
 	display:block;

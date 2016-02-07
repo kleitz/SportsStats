@@ -1,27 +1,31 @@
-<div class="clearfix">
-	<div class="left">
-		<input type="date" ng-model="date">
-		<select ng-model="sport">
-			<option value="ncb">NCAAM</option>
-			<option value="nba">NBA</option>
-		</select>
+<div class="browse-schedule" ng-click="$event.stopPropagation();">
+	<div class="row">
+		<div class="col-xs-9">
+			<input type="date" ng-model="date">
+			<select ng-model="sport">
+				<option value="ncb">NCAAM</option>
+				<option value="nba">NBA</option>
+			</select>
+		</div>
+		<div class="col-xs-3 text-right">
+			<input type="button" value="Close" ng-click="close()">
+		</div>
 	</div>
-	<input type="button" value="Close" class="right" ng-click="close()">
-</div>
-<div>
 	<div>
-		<input type="text" placeholder="Filter" ng-model="scheduleFilter">
-	</div>
-	<div>
-		<div ng-show="message" ng-bind="message"></div>
-		<div ng-show="games.length">
-			<div ng-repeat="game in games | filter:scheduleFilter"  ng-class="{selectText: game.status == 'f' || game.status == 'l'}">
-				<a href="#/{{game.id.substring(0,3)}}/game/{{game.id.substring(3)}}" ng-click="close()" ng-show="game.status == 'f' || game.status == 'l'" class="blockLink">
-					{{game.away}} vs. {{game.home}}
-				</a>
-				<span ng-hide="game.status == 'f' || game.status == 'l'">
-					{{game.away}} vs. {{game.home}}
-				</span>
+		<div>
+			<input type="text" placeholder="Filter" ng-model="scheduleFilter">
+		</div>
+		<div>
+			<div ng-show="message" ng-bind="message"></div>
+			<div ng-show="games.length">
+				<div ng-repeat="game in games | filter:scheduleFilter"  ng-class="{selectText: game.status == 'f' || game.status == 'l'}">
+					<a href="#/{{game.id.substring(0,3)}}/game/{{game.id.substring(3)}}" ng-click="close()" ng-show="game.status == 'f' || game.status == 'l'" class="blockLink">
+						{{game.away}} vs. {{game.home}}
+					</a>
+					<span ng-hide="game.status == 'f' || game.status == 'l'">
+						{{game.away}} vs. {{game.home}}
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
