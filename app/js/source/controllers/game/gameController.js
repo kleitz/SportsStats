@@ -50,20 +50,27 @@
 		}
 
 		$scope.setCompareStat = function (statType) {
-			$scope.compareStat = statType;
+			$scope.game.compareStat = statType;
 			$scope.aH.forEach(function(team,teamI){
 				$scope.comparePlays[team.s] = $scope.filterPlays($scope.game.plays, statType, team)
 			});
 		}
 
 		$scope.filterPlays = function (plays, statType, team) {
+			var teamI, teamS;
 			if (!(plays && statType && team)) {
 				return [];
 			}
 			return plays.filter(function(d,i){
-				var teamS = ($scope.compareStat.dpp) ?
-					$scope.aH[1-teamI] :
-					team;
+				teamS = team;
+				if ($scope.game.compareStat.dpp) {
+					for(teamI=0;teamI<$scope.aH.length;teamI++) {
+						if ($scope.aH[teamI] !== team) {
+							teamS = $scope.aH[teamI];
+							break;
+						}
+					};
+				}
 				return IsStatType(d,{statType: statType, team: teamS});
 			})
 		}
@@ -107,7 +114,7 @@
 					} else {
 						if (!response.data.id) {
 							response.data.id = id;
-							response.data.sport = sport.toUpperCase();
+							response.data.sport = SportData.getSport(sport.toUpperCase());
 						}
 						$scope.mainScope.gameData = response.data;
 						$scope.game = response.data;

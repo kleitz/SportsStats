@@ -9,7 +9,7 @@ describe('gameController', function() {
 	var gameUrl = /^\.\/app\/api\/getGameData\.php\?gameId\=[a-z]+\d+$/i;
 	var sportUrl = /^\.\/data\/[a-z]{3}\.json$/i;
 	var sportData = {
-		sport:'NCB',
+		a:'NCB',
 		pl: ['a']
 	};
 	var gameDataError = {error:"test error"};
@@ -19,7 +19,8 @@ describe('gameController', function() {
 		aScore:21,
 		h:{short:"T2"},
 		hScore:22,
-		boxScore:[]
+		boxScore:[],
+		compareStat: sportData.pl[0]
 	}
 
 
@@ -150,7 +151,7 @@ describe('gameController', function() {
 
 		expect(scope.mainScope.message).toBe('');
 		gameData.id = testId;
-		gameData.sport = testSport;
+		gameData.sport = sportData;
 		expect(scope.game).toEqualData(gameData);
 		expect(scope.mainScope.gameData).toEqualData(gameData);
 	});
@@ -160,6 +161,7 @@ describe('gameController', function() {
 		$httpBackend.flush();
 
 		gameData.id = testDataId;
+		gameData.sport = sportData;
 		expect(scope.game).toEqualData(gameData);
 		expect(scope.mainScope.gameData).toEqualData(gameData);
 	});

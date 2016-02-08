@@ -7,7 +7,7 @@
 			var reduceTime = function (plays, options) {
 				var tempVal = 0;
 				var game = GameData.getGame();
-				var sport = SportData.getSport(game.sport);
+				var sport = game.sport;
 
 				var bisectTime = d3.bisector(function(p) {
 					//Time counts down, bisector requires data scale positively
