@@ -7,7 +7,7 @@
 		$scope.mainScope.gameData = null;
 		$scope.game = null;
 		$scope.sport = null;
-		$scope.comparePlays = {};
+		var compare = {plays:{},primary:{}};
 		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 
 		//setup
@@ -50,9 +50,10 @@
 		}
 
 		$scope.setCompareStat = function (statType) {
-			$scope.game.compareStat = statType;
+			$scope.game.compare.stat = statType;
 			$scope.aH.forEach(function(team,teamI){
-				$scope.comparePlays[team.s] = $scope.filterPlays($scope.game.plays, statType, team)
+				$scope.game.compare.plays[team.s] = $scope.filterPlays($scope.game.plays, statType, team);
+				$scope.game.compare.primary[team.s] = $scope.filterPlays($scope.game.plays, statType, team);
 			});
 		}
 
@@ -119,6 +120,7 @@
 						$scope.mainScope.gameData = response.data;
 						$scope.game = response.data;
 						GameData.setGame($scope.game);
+						$scope.game.compare = compare;
 						$scope.setCompareStat($scope.sport.pl[0]);
 						$scope.mainScope.title = 
 							response.data.a.short + ":" +

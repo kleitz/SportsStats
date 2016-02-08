@@ -20,7 +20,17 @@ describe('gameController', function() {
 		h:{short:"T2"},
 		hScore:22,
 		boxScore:[],
-		compareStat: sportData.pl[0]
+		compare: {
+			plays:{
+				a: [],
+				h: []
+			},
+			primary:{
+				a: [],
+				h: []
+			},
+			stat: sportData.pl[0]
+		}
 	}
 
 
