@@ -109,6 +109,42 @@ function loadGames(){
 			}
 		});
 }
+function inputGame(input,callback,errorCallback) {
+	var id,sport;
+	if (input.match(/^([a-z]{3})(\d+)$/)) {
+		id = input.substring(3);
+		sport = input.substring(0,3);
+	} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
+		id = getReq("gameId","?"+input.split('?')[1]);
+		sport = input.match(/\/[a-zA-Z-]+\//)[0];
+		sport = sport.substring(1,sport.length-1);
+		sport = sport.replace(/-/g,'');
+		if (isDef(graphVars.sportMapping[sport])) {
+			sport = graphVars.sportMapping[sport];
+		}
+	} else {
+		if (errorCallback) {
+			errorCallback();
+		}
+		return;
+	}
+	if (isDef(id) && isNormalInteger(id)) {
+		if (div.id.length > 0)
+			d3.selectAll("."+div.id).remove();
+		d3.select(div)
+			.attr("id",sport + id);
+		gameInput.attr("disabled","disabled");
+		location.hash = "#"+sport+id;
+		if (callback) {
+			callback();
+		}
+		//loadGames();
+	} else {
+		if (errorCallback) {
+			errorCallback();
+		}
+	}
+}
 function insertGameInput(div) {
 	if (d3.select(div).select("div.gameInputCont")[0][0]==null) {
 		var gameInputBox = d3.select(div)
@@ -134,42 +170,6 @@ function insertGameInput(div) {
 					});
 				}
 			});
-		function inputGame(input,callback,errorCallback) {
-			var id,sport;
-			if (input.match(/^([a-z]{3})(\d+)$/)) {
-				id = input.substring(3);
-				sport = input.substring(0,3);
-			} else if (input.match(/\/[a-zA-Z-]+\/.*\?.*gameId=\d+/)) {
-				id = getReq("gameId","?"+input.split('?')[1]);
-				sport = input.match(/\/[a-zA-Z-]+\//)[0];
-				sport = sport.substring(1,sport.length-1);
-				sport = sport.replace(/-/g,'');
-				if (isDef(graphVars.sportMapping[sport])) {
-					sport = graphVars.sportMapping[sport];
-				}
-			} else {
-				if (errorCallback) {
-					errorCallback();
-				}
-				return;
-			}
-			if (isDef(id) && isNormalInteger(id)) {
-				if (div.id.length > 0)
-					d3.selectAll("."+div.id).remove();
-				d3.select(div)
-					.attr("id",sport + id);
-				gameInput.attr("disabled","disabled");
-				location.hash = "#"+sport+id;
-				if (callback) {
-					callback();
-				}
-				//loadGames();
-			} else {
-				if (errorCallback) {
-					errorCallback();
-				}
-			}
-		}
 		var browseSchedule = gameInputBox.append("input")
 			.attr("type","button")
 			.attr("value","Browse Schedule")
@@ -1286,18 +1286,18 @@ function addPlayerStats(gId) {
 
 //create show/disp link
 function createShowDisp(gId,obId,title,hidden,secId) {
+	function insertTriangle() {
+		sdL.append("svg")
+			.classed("inline arrowSvg",true)
+			.attr("width",12)
+			.attr("height",10)
+			.append("g")
+			.classed("arrow"+obId+gId,true)
+			.append("path")
+			.attr("d",(!hidden)?graphVars.showHideShape.pDash:graphVars.showHideShape.plus)
+			.style("fill","#AAA");
+	}
 	if(d3.select("#"+obId+gId)[0][0]) {
-		function insertTriangle() {
-			sdL.append("svg")
-				.classed("inline arrowSvg",true)
-				.attr("width",12)
-				.attr("height",10)
-				.append("g")
-				.classed("arrow"+obId+gId,true)
-				.append("path")
-				.attr("d",(!hidden)?graphVars.showHideShape.pDash:graphVars.showHideShape.plus)
-				.style("fill","#AAA");
-		}
 		var showHideText;
 		if (secId) {
 			showHideText = ["Maximize","Minimize"];
