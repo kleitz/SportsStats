@@ -168,7 +168,8 @@
 			"l":"Time of Possession",
 			"ls":true,
 			"a":"TOP",
-			"l2":"Possession"
+			"l2":"Possession",
+			"not-plural": true
 		}
 	},
 	"pl":[
@@ -302,7 +303,8 @@
 			"ls":true,
 			"a":"TOP",
 			"l2":"Possession",
-			"team":"s"
+			"team":"s",
+			"notPlural": true
 		}
 	],
 	"pt":{

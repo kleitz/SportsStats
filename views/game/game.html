@@ -1,7 +1,11 @@
 <div>
 	<div ng-show="game.boxScore && sport">
-		<box-score></box-score>
-		<team-stats-table></team-stats-table>
-		<team-stats-graph></team-stats-graph>
+		<box-score class="clearfix"></box-score>
+		<div class="clearfix">
+			<div class="section">
+				<team-stats-table class="clearfix"></team-stats-table>
+				<team-stats-graph class="clearfix"></team-stats-graph>
+			</div>
+		</div>
 	</div>
 </div>

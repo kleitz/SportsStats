@@ -17,6 +17,8 @@ $warning-bg-color: #FD9;
 $med-grey: #EEEEEE;
 $light-blue: #ebf3ff;
 $blue: #d6e7ff;
+$med-light-blue: #38F;
+$med-blue: #4BF;
 
 //border
 $blueBorder: 2px solid $blue;
@@ -49,6 +51,9 @@ div#popup {
 	margin:0;
 	padding:0;
 }
+.td-padding {
+	padding: 2px;
+}
 
 .pointer {
 	cursor:pointer;
@@ -56,6 +61,8 @@ div#popup {
 
 body {
 	@extend .pm-zero;
+	font-size: $def-font-size;
+	line-height: 1.25;
 	background-color: $light-grey;
 	font: $def-font-size $font-stack;
 	color: $primary-font-color;
@@ -71,7 +78,12 @@ table {
 }
 td {
 	@extend table;
-	padding:2px;
+	@extend .td-padding;
+}
+
+//animation
+.med-animation {
+	transition: all 350ms ease;
 }
 
 //padding and margin
@@ -80,6 +92,11 @@ td {
 }
 .small-pad {
 	padding: $small-pad;
+}
+
+//width
+.fullwidth {
+	width:100%;
 }
 
 //usability
@@ -124,6 +141,12 @@ td {
 	border-left: 5px solid transparent;
 }
 
+.overflow-ellipsis {
+	overflow: hidden; 
+	white-space: nowrap; 
+	text-overflow: clip;
+}
+
 //headline
 div.headline-message {
 	@extend .bold;
@@ -143,9 +166,9 @@ div.popup-bg-w {
 	background-color:rgba(255,255,255,.5);
 }
 div.browse-cont {
+	@extend .fullwidth;
 	@extend .center-element;
 	padding:20px 0px 40px;
-	width: 100%;
 	max-width:400px;
 	height:100%;
 	display:flex;
@@ -154,9 +177,9 @@ div.browse-cont {
 div.browse-schedule {
 	@extend .border;
 	@extend .small-pad;
+	@extend .fullwidth;
 	background-color: $white;
 	flex: 1 0 100px;
-	width: 100%;
 	overflow:auto;
 }
 
@@ -190,6 +213,20 @@ input.browseButton {
 	margin: 5px 0px;
 }
 
+.team-stat-graph {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.team-stat-graph-row {
+	@extend .hover;
+	@extend .pointer;
+}
+
+.team-stat-graph-type {
+	padding-right:5px;
+}
+
 //hover
 
 .hov, .hover:hover {
@@ -202,4 +239,26 @@ input.browseButton {
 
 .active {
 	background-color: $blue;
+}
+
+.underline-link {
+	position: relative;
+	z-index: 1;
+}
+.underline-link + span {
+	
+}
+.underline-link::after {
+	@extend .med-animation;
+	content:'';
+	position: absolute;
+	bottom:0;
+	right:0;
+	width: 0;
+	background-color: $med-blue;
+	height: 2px;
+	z-index: -1;
+}
+.underline-link.underline-link-selected::after {
+	width: 100%;
 }
