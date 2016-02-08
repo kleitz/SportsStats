@@ -61,7 +61,7 @@ describe('ReduceData', function() {
 
 		testData = getJSONFixture('test/game/20160126-Xav-Prov.json');
 		ncbData = getJSONFixture('ncb.json');
-		testData.sport = ncbData.a;
+		testData.sport = ncbData;
 		GameData.setGame(testData);
 		SportData.setSport(ncbData);
 	}));
