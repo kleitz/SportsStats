@@ -27,6 +27,4 @@ Set up `app/api/classes/dbvars.php`
 
 `?>`
 
-Run `gulp js` to ensure javascript is concatenated
-
-Run `gulp testJs` to ensure javascript is concatenated for Karma testing. I do this to avoid errors caused by my old D3 code.
+Run `gulp all` to ensure javascript is concatenated and SASS script is compiled

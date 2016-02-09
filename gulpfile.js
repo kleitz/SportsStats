@@ -40,3 +40,5 @@ gulp.task('watch', ['js','testSetup', 'sass'], function () {
 	gulp.watch('app/js/source/**/*.js', ['js','testSetup'])
 	gulp.watch('app/css/sass/*.scss', ['sass'])
 })
+
+gulp.task('all', ['js','testSetup', 'sass']);
