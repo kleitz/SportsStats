@@ -3,7 +3,7 @@
 		<div class="row team-stat-graph-row" ng-click="setCompareStat(statType)">
 			<div class="col-xs-4 team-stat-graph-type">
 				<div class="fullwidth td-padding bold text-right">
-					<div class="overflow-ellipsis">
+					<div class="overflow-clip">
 						<span class="underline-link" ng-class="{'underline-link-selected': statType === game.compare.stat}">
 							<span>
 								{{ statType.l + ((statType.notPlural)?'':'s') }}

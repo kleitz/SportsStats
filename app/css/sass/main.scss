@@ -81,6 +81,11 @@ td {
 	@extend .td-padding;
 }
 
+//text
+.no-wrap {
+	white-space: nowrap; 
+}
+
 //animation
 .med-animation {
 	transition: all 350ms ease;
@@ -142,9 +147,17 @@ td {
 }
 
 .overflow-ellipsis {
+	@extend .no-wrap;
 	overflow: hidden; 
-	white-space: nowrap; 
+	text-overflow: ellipsis;
+}
+.overflow-clip {
+	@extend .no-wrap;
+	overflow: hidden; 
 	text-overflow: clip;
+}
+.overflow-scroll {
+	overflow-x:auto;
 }
 
 //headline
@@ -235,6 +248,7 @@ input.browseButton {
 
 .teamStatMin {
 	@extend .pointer;
+	@extend .no-wrap;
 }
 
 .active {
