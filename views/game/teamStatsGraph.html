@@ -22,61 +22,12 @@
 					{{ teamStatsTable[team.s][statType.a] | reduceDataText:statType }}
 				</div>
 			</div>
-			<div class="col-xs-6" style="background-color:#FAA">
-				<svg height="36"></svg>
+			<div class="col-xs-6">
+				<ss-svg-team-stat values="teamStatsTable" stat-type="statType" game="game"></ss-svg-team-stat>
 			</div>
 		</div>
 	</div>
 </div>
 <div class="row hidden-xs">
 	<div class="col-xs-12 text-center note-text">Click stat type to graph.</div>
-</div>
-
-<div class="teamStats cf  showDispCont" id="" realheight="289">
-	<div class="teamStat  active" id="">
-		<div class="tSLabel  tLeft right">
-			<div class="tSLabelCont right">
-				<span class="medTitle">Points</span>
-				<br>
-				<span></span>
-			</div>
-			<div class="tSDataCont left">
-				<div class="tsDataLabel away">75</div>
-				<div class="tsDataLabel home">68</div>
-			</div>
-		</div>
-		<div class="left">
-			<svg class="teamStatSVG " id="">
-				<g transform="translate(200,0) scale(-1,1)">
-					<rect class="statBar away" y="5" height="10" x="0" width="200" style="fill: rgb(0, 40, 87);"></rect>
-					<rect class="statBarSec away" y="7" height="6" x="200" width="0" style="fill: rgb(165, 172, 175);"></rect>
-					<rect class="statBar home" y="24" height="10" x="0" width="181.33333333333331" style="fill: rgb(204, 204, 204);"></rect>
-					<rect class="statBarSec home" y="26" height="6" x="181.33333333333331" width="0" style="fill: rgb(0, 0, 0);"></rect>
-				</g>
-			</svg>
-		</div>
-	</div>
-	<div class="teamStat " id="">
-		<div class="tSLabel  left">
-			<div class="tSLabelCont left">
-				<span class="medTitle">Shots</span>
-				<br>
-				<span>Made / Missed</span>
-			</div>
-			<div class="tSDataCont right">
-				<div class="tsDataLabel away">38/73</div>
-				<div class="tsDataLabel home">39/91</div>
-			</div>
-		</div>
-		<div class="right">
-			<svg class="teamStatSVG " id="">
-				<g transform="">
-					<rect class="statBar away" y="5" height="10" x="0" width="153.68421052631578" style="fill: rgb(0, 40, 87);"></rect>
-					<rect class="statBarSec away" y="7" height="6" x="80" width="71.68421052631578" style="fill: rgb(165, 172, 175);"></rect>
-					<rect class="statBar home" y="24" height="10" x="0" width="191.57894736842104" style="fill: rgb(204, 204, 204);"></rect>
-					<rect class="statBarSec home" y="26" height="6" x="82.10526315789474" width="107.47368421052633" style="fill: rgb(0, 0, 0);"></rect>
-				</g>
-			</svg>
-		</div>
-	</div>
 </div>
