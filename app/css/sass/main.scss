@@ -15,8 +15,10 @@ $warning-bg-color: #FD9;
 
 //border colors
 $med-grey: #EEEEEE;
+$med-grey-alpha: rgba(0,0,0,.066);
 $light-blue: #ebf3ff;
 $blue: #d6e7ff;
+$blue-alpha: rgba(118, 175, 254,.3);
 $med-light-blue: #38F;
 $med-blue: #4BF;
 
@@ -25,6 +27,20 @@ $blueBorder: 2px solid $blue;
 
 //margin and padding
 $small-pad: 5px;
+
+//mixins
+@mixin flex ($option) {
+	flex: $option;
+	-webkit-flex: $option;
+	-ms-flex: $option;
+	-moz-flex: $option;
+}
+@mixin flex-flow ($option) {
+	flex-flow: $option;
+	-webkit-flex-flow: $option;
+	-ms-flex-flow: $option;
+	-moz-flex-flow: $option;
+}
 
 * {
 	box-sizing: border-box;
@@ -122,6 +138,11 @@ td {
 	background-color:$med-grey;
 }
 
+.thead-alpha {
+	@extend .bold;
+	background-color:$med-grey-alpha;
+}
+
 .ss-footer {
 	text-align: center;
 	padding:5px 0px;
@@ -157,7 +178,18 @@ td {
 	text-overflow: clip;
 }
 .overflow-scroll {
-	overflow-x:auto;
+	overflow:auto;
+}
+.scroll-shadow-horizontal {
+	background:
+		linear-gradient(to right, white 50%, rgba(255,255,255,0)),
+		linear-gradient(to right, rgba(255,255,255,0), white 50%) 100% 0,
+		linear-gradient(to right, rgba(0,0,0,.2),rgba(0,0,0,0)),
+		linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,.2)) 100% 0;
+	background-repeat: no-repeat;
+	background-color: white;
+	background-size: 40px 100%, 40px 100%, 20px 100%, 20px 100%;
+	background-attachment: local, local, scroll, scroll;
 }
 
 //headline
@@ -185,14 +217,14 @@ div.browse-cont {
 	max-width:400px;
 	height:100%;
 	display:flex;
-	flex-flow:column;
+	@include flex-flow(column);
 }
 div.browse-schedule {
 	@extend .border;
 	@extend .small-pad;
 	@extend .fullwidth;
 	background-color: $white;
-	flex: 1 0 100px;
+	@include flex(1 0 100px);
 	overflow:auto;
 }
 
@@ -253,6 +285,10 @@ input.browseButton {
 
 .active {
 	background-color: $blue;
+}
+
+.active-alpha {
+	background-color: $blue-alpha;
 }
 
 .underline-link {

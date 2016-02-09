@@ -4,25 +4,32 @@
 			Team
 		</div>
 		<div class="fullwidth overflow-clip td-padding" ng-repeat="team in aH">
-			{{ game[team.s].teamName }}
+			<span class="hidden-xxs">
+				{{ game[team.s].teamName }}
+			</span>
+			<span class="visible-xxs hidden">
+				{{ game[team.s].short }}
+			</span>
 		</div>
 	</div>
-	<div class="col-xs-10 pm-zero overflow-scroll">
-		<table class="playerStatsT" style="width:100%;">
-			<tr>
-				<td class="thead teamStatMin" ng-class="{active : game.compare.stat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)">{{statType.a}}</td>
-			</tr>
-			<tr ng-repeat="team in aH">
-				<td 
-				class="teamStatMin text-right" 
-				ng-class="{active : game.compare.stat == statType, hov : hover == statType}" 
-				ng-repeat="statType in sport.pl" 
-				ng-mouseenter="onOver(statType)" 
-				ng-mouseleave="onOff(statType)" 
-				ng-click="setCompareStat(statType)">
-					{{ teamStatsTable[team.s][statType.a] | reduceDataText:statType }}
-				</td>
-			</tr>
-		</table>
+	<div class="col-xs-10 pm-zero">
+		<div class=" overflow-scroll scroll-shadow-horizontal">
+			<table class="playerStatsT" style="width:100%;">
+				<tr>
+					<td class="thead-alpha teamStatMin text-right" ng-class="{'active-alpha' : game.compare.stat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)">{{statType.a}}</td>
+				</tr>
+				<tr ng-repeat="team in aH">
+					<td 
+					class="teamStatMin text-right" 
+					ng-class="{'active-alpha' : game.compare.stat == statType, hov : hover == statType}" 
+					ng-repeat="statType in sport.pl" 
+					ng-mouseenter="onOver(statType)" 
+					ng-mouseleave="onOff(statType)" 
+					ng-click="setCompareStat(statType)">
+						{{ teamStatsTable[team.s][statType.a] | reduceDataText:statType }}
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </div>
