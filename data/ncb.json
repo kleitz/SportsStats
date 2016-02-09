@@ -240,7 +240,7 @@
 			"dpp":true
 		},
 		{
-			"c":"1|2|3",
+			"c":"2|3",
 			"mp":0,
 			"pp":3,
 			"p":"a",
@@ -300,7 +300,7 @@
 		{
 			"c":"pos",
 			"l":"Time of Possession",
-			"ls":true,
+			"ns":true,
 			"a":"TOP",
 			"l2":"Possession",
 			"team":"s",

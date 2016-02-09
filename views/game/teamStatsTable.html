@@ -1,19 +1,19 @@
-<div class="teamStatsMin row" id="">
+<div class="teamStatsMin row">
 	<table class="playerStatsT">
 		<tr>
 			<td class="thead">Team</td>
-			<td class="thead teamStatMin" ng-class="{active : game.compareStat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)">{{statType.a}}</td>
+			<td class="thead teamStatMin" ng-class="{active : game.compare.stat == statType, hov : hover == statType}" ng-repeat="statType in sport.pl" ng-mouseenter="onOver(statType)" ng-mouseleave="onOff(statType)">{{statType.a}}</td>
 		</tr>
-		<tr id="" ng-repeat="team in aH">
+		<tr ng-repeat="team in aH">
 			<td>{{game[team.s].teamName}}</td>
 			<td 
 			class="teamStatMin " 
-			ng-class="{active : game.compareStat == statType, hov : hover == statType}" 
+			ng-class="{active : game.compare.stat == statType, hov : hover == statType}" 
 			ng-repeat="statType in sport.pl" 
 			ng-mouseenter="onOver(statType)" 
 			ng-mouseleave="onOff(statType)" 
 			ng-click="setCompareStat(statType)">
-				{{ teamStatsTable[team.s][statType.a] }}
+				{{ teamStatsTable[team.s][statType.a] | reduceDataText:statType }}
 			</td>
 		</tr>
 	</table>

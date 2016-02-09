@@ -1,11 +1,10 @@
-<div>
 <div class="row">
-	<div class="col-xs-12 col-sm-6 team-stat-graph" ng-class="{'hidden-xs': statType !== game.compareStat}" ng-repeat="statType in sport.pl">
+	<div class="col-xs-12 col-sm-6 team-stat-graph" ng-class="{'hidden-xs': statType !== game.compare.stat}" ng-repeat="statType in sport.pl">
 		<div class="row team-stat-graph-row" ng-click="setCompareStat(statType)">
 			<div class="col-xs-4 team-stat-graph-type">
 				<div class="fullwidth td-padding bold text-right">
 					<div class="overflow-ellipsis">
-						<span class="underline-link" ng-class="{'underline-link-selected': statType === game.compareStat}">
+						<span class="underline-link" ng-class="{'underline-link-selected': statType === game.compare.stat}">
 							<span>
 								{{ statType.l + ((statType.notPlural)?'':'s') }}
 							</span>
@@ -20,7 +19,7 @@
 			</div>
 			<div class="col-xs-2 pm-zero">
 				<div ng-repeat="team in aH" class="text-right td-padding">
-					{{ teamStatsTable[team.s][statType.a] }}
+					{{ teamStatsTable[team.s][statType.a] | reduceDataText:statType }}
 				</div>
 			</div>
 			<div class="col-xs-6" style="background-color:#FAA">
@@ -28,7 +27,6 @@
 			</div>
 		</div>
 	</div>
-</div>
 </div>
 
 <div class="teamStats cf  showDispCont" id="" realheight="289">

@@ -7,7 +7,7 @@
 		$scope.mainScope.gameData = null;
 		$scope.game = null;
 		$scope.sport = null;
-		var compare = {plays:{},primary:{}};
+		var compare = {plays:{}};
 		$scope.aH = [{s:"a",l:"away"},{s:"h",l:"home"}];
 
 		//setup
@@ -53,18 +53,20 @@
 			$scope.game.compare.stat = statType;
 			$scope.aH.forEach(function(team,teamI){
 				$scope.game.compare.plays[team.s] = $scope.filterPlays($scope.game.plays, statType, team);
-				$scope.game.compare.primary[team.s] = $scope.filterPlays($scope.game.plays, statType, team);
 			});
 		}
 
 		$scope.filterPlays = function (plays, statType, team) {
-			var teamI, teamS;
+			//Returns object {total:[],primary:[]}
+			//which contains a filtered array of plays
+
+			var teamI, teamS, returnedObj = {};
 			if (!(plays && statType && team)) {
 				return [];
 			}
-			return plays.filter(function(d,i){
+			returnedObj.total = plays.filter(function(d,i){
 				teamS = team;
-				if ($scope.game.compareStat.dpp) {
+				if ($scope.game.compare.stat.dpp) {
 					for(teamI=0;teamI<$scope.aH.length;teamI++) {
 						if ($scope.aH[teamI] !== team) {
 							teamS = $scope.aH[teamI];
@@ -74,6 +76,23 @@
 				}
 				return IsStatType(d,{statType: statType, team: teamS});
 			})
+			if (statType.ns) {
+				returnedObj.primary = returnedObj.total;
+			} else {
+				returnedObj.primary = plays.filter(function(d,i){
+					teamS = team;
+					if ($scope.game.compare.stat.dpp) {
+						for(teamI=0;teamI<$scope.aH.length;teamI++) {
+							if ($scope.aH[teamI] !== team) {
+								teamS = $scope.aH[teamI];
+								break;
+							}
+						};
+					}
+					return IsStatType(d,{statType: statType, team: teamS, primary: true});
+				})
+			}
+			return returnedObj;
 		}
 
 		$scope.reduceData = function (plays,options) {

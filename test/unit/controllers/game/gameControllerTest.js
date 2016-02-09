@@ -13,6 +13,7 @@ describe('gameController', function() {
 		pl: ['a']
 	};
 	var gameDataError = {error:"test error"};
+	var comparePlays = {primary:[],total:[]};
 	var gameData = {
 		plays:[],
 		a:{short:"T1"},
@@ -22,12 +23,8 @@ describe('gameController', function() {
 		boxScore:[],
 		compare: {
 			plays:{
-				a: [],
-				h: []
-			},
-			primary:{
-				a: [],
-				h: []
+				a: comparePlays,
+				h: comparePlays
 			},
 			stat: sportData.pl[0]
 		}
